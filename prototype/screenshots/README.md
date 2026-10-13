@@ -13,3 +13,5 @@ Uncaptured physical checks remain pending: 320px, landscape, actual keyboard, in
 `implementation-light.png`, `implementation-dark.png`, `implementation-light-busy.png`, and `implementation-dark-busy.png` show the production launcher/menu, page correction, reader/player and on-demand explanation in four 390×844 frames scaled to 0.7. They are real 1200×750 desktop publication renders with authored source and mock integrations. Exact version/source provenance is in `implementation-provenance.json`.
 
 The first production capture revealed a title collision; Review controls were consolidated into the bottom contextual surface. A previous broken inline-JavaScript capture was replaced and is not evidence. These images do not validate physical iPhone behavior, real model execution or live Azure.
+
+The dark/busy comparison was recaptured after isolating iframe layout viewports and waiting one frame before positioning. The replacement shows the reader/player; the incomplete earlier render is not distributed.

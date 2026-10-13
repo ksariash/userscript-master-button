@@ -10,7 +10,7 @@ npm run build:prototype
 node scripts/build-implementation-prototype.mjs
 ```
 
-All **44 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. No GitHub Actions run is asserted until its result is observed.
+All **44 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. GitHub Actions also passed the 44-test/source-build workflow on commit `855426e7eb4beab7cb79b6a47c26dc06160bac1e` ([run 38482945224](https://github.com/ksariash/userscript-master-button/actions/runs/38482945224)). It ran npm ci, tests, build and a clean generated-file diff; no model download/evaluation, live Azure or physical Safari check.
 
 ## Actual model evaluation
 
