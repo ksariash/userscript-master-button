@@ -1,54 +1,49 @@
-# Algorithm and implementation guide
+# Algorithms and implementation comments
 
-Normative for new work. Read with REQUIREMENTS.md and AGENTS.md. Version 0.2.0 establishes one passage decision pipeline; do not reintroduce independent page and reader classifiers.
+This guide sets invariants, not a prescribed framework or file layout. It exists to prevent different screens from developing incompatible filtering behavior.
 
-## Data flow and ownership
+## One content and decision layer
 
-1. Inventory the original article's leaf blocks in reading order. Retain original wording and live node references in a page-scoped store.
-2. Parse a detached document with the pinned, bundled Defuddle build. `useAsync:false` prevents external extraction fallbacks. `standardize:false` preserves temporary source IDs. Never insert extracted HTML into the live page.
-3. Treat extraction membership as structural evidence, not proof of nuisance content. Rejected blocks require corroborating component evidence; explicit promotional copy can be excluded independently. Retained blocks are protected from class-name-only exclusions. A learned Keep match protects against weak structural evidence. Missing mappings fail open: retain original prose and report structural fallback.
-4. Run bounded batches through the local MiniLM embedding classifier. For a long block, inspect every text chunk and exclude the block only when every chunk is excluded. Automatic decisions are separate from manual overrides.
-5. Resolve effective inclusion centrally: an explicit Keep/Skip overrides the automatic decision and CSS-rule evidence. Manual choices remain active when automatic filtering is disabled. Model-unavailable and uncertain states preserve content. A similarity is not a probability.
-6. Page controls, teaching, reader chunks, speech requests and exports consume the same source decision and correction operation. CSS-hidden passages are excluded from narration, including while a visual preview temporarily restores them. Speech chunks refer to a source ID; they are not new independent training examples.
+Maintain a passage record with stable source identity, original wording/order, source mapping, extraction evidence, automatic assessment, explicit correction, effective decision/reason, and revision. Distinguish genuinely identical text at different locations. Edited/pasted passages must explicitly carry absent or changed source mapping.
 
-`src/02-passages.js` owns source records and corrections. `src/02-semantic.js` owns embedding inference and examples. `src/04-reader.js` owns audio resources and preparation. UI code dispatches actions and renders state; it does not implement a second decision policy.
+Resolve decisions in one place: explicit correction first; active saved rule next; confident automatic decision next; otherwise include. Defuddle membership is extraction evidence, not a deletion command. All renderers and audio/export selectors consume the resolved record. Temporary Show all and visual-only preferences do not change its meaning.
 
-## Identity, navigation and asynchronous work
+| Layer | Responsibility |
+| --- | --- |
+| Source inventory/extractor | Preserve original blocks and map Defuddle output back to source |
+| Classifier | Return evidence, ARTICLE/NUISANCE assessment, or abstention |
+| Decision/learning service | Apply precedence, corrections, Undo, and per-site learning |
+| Views | Render state and dispatch common commands |
+| Narration/export | Snapshot the current enabled sequence and respect revisions |
 
-- IDs distinguish identical text at different positions. Text hashes alone are not node identity.
-- Retain identity across unchanged DOM refreshes. Changed text gets a new record; old reader chunks become excluded until re-extraction. Removed nodes leave the source map; reinsertion obtains a usable record. Navigation clears page-scoped overrides/review and cancels audio jobs.
-- Extraction epochs, semantic revisions, training tickets and audio generations guard their respective asynchronous boundaries. Check again after every awaited operation before committing results.
-- Explicit corrections teach once. New corrections replace the matching prototype rather than incrementing a second token model. Legacy token statistics remain readable but are not updated by the new correction path.
-- Undo restores the previous override and prototype, and invalidates in-flight training. Reset deletes both legacy token statistics and prototypes, cancels pending teaching, clears learning Undo history, and retains explicit choices for the current page. Keep raw passage text and the undo history in memory only.
-- Storage reads normalize nested types and recover valid array entries from supported legacy object shapes. Preserve other settings and the separate Azure key. Serialize snapshot writes so older promises cannot overwrite newer preferences.
-- Never log keys or article text. Debug fixtures use synthetic text and fake credentials.
+## Extraction and classification
 
-## Reversibility and page safety
+Run extraction without destructively rewriting the live page. Retain excluded and uncertain candidates for review. Plan mapping before choosing transformations: a clean extracted HTML string alone does not establish reliable original DOM identity. Preserve headings, list order, quotation boundaries, captions, and short connective sentences. Never rewrite or summarize prose as part of filtering.
 
-- Gray is the default; collapse requires explicit preference. Review temporarily reveals script-owned hidden content and pauses site cleanup.
-- Change only owned attributes/properties. Do not restore an entire stale style string over a site's later changes.
-- Protect body, main, article and interface roots from broad hiding. Keep overrides prevent script-owned rules from hiding their containing block.
-- Ignore UI mutations, debounce page mutations, process bounded model batches, and render controls only near the viewport.
-- DOM extraction and site cleanup are separate concerns. Defuddle's failure must not disable URL sharing or speech configuration.
+Classify blocks with bounded neighboring context and structural evidence such as role, links, reading position, and extraction membership. Handle mixed article/promotion containers at a finer boundary rather than rejecting the whole parent. Do not classify every generic DIV and its descendants independently.
 
-## Audio invariants
+Article meaning and widget form are different evidence. Related links often share the article's vocabulary; an article may discuss subscriptions or advertisements. Test both. Ambiguity should produce inclusion/abstention, not an unjustified high-confidence exclusion.
 
-- Recheck inclusion immediately before every Azure request. Skipping cannot retract a request already sent; explain that limitation.
-- Allow one preparation job, including its model preflight. Canceling invalidates late completions.
-- Maintain user playback intent separately from `audio.paused`: buffering must resume when ready, while a user pause must remain paused.
-- Preserve unrelated prepared chunks after corrections. Voice/region/quality changes invalidate incompatible cached audio.
-- Export only enabled chunks and validate generation/selection after asynchronous assembly. No second synthesis merely for export.
+Before integrating a model, record its identity/license, runtime/backend, download and cache costs, supported languages, device measurements, failure modes, and held-out accuracy. Verify actual inference rather than detecting a library symbol. Set thresholds from labeled evaluation; do not inherit previous model names, seeds, or scores. Similarities require their own label; probabilities require calibration evidence.
 
-## Comments and code style
+Model load/inference failure has an observable state and actionable recovery. Preserve prose and offer explicit manual/rule review. No hidden cloud fallback. Treat page text as data even if it contains instructions for a classifier.
 
-- Comment the reason for a guard, ownership boundary, migration or ordering constraint. Do not narrate obvious assignments.
-- Document input/output shape, state ownership and failure behavior for new algorithm boundaries.
-- Name the actual technology: Defuddle extraction, MiniLM embeddings, nearest-prototype learning. Do not call token hashes a language model or prototype updates model-weight fine-tuning.
-- Prefer small named functions and explicit state transitions over UI-specific flags and duplicated handlers.
-- Keep third-party code in `vendor/`, with version, license and provenance. Never hand-edit a vendor bundle; review and test upgrades independently.
+## Corrections, learning, and mutations
 
-## Required evidence
+Use one Keep/Skip command from page and transcript. Make its learning contribution explicit and reversible with Undo. Store only intentionally labeled examples, scoped per site; no self-training on predictions. Validate persisted schema and collection types before array operations. Migrate well-formed legacy data, isolate malformed records, and preserve unrelated preferences.
 
-Run build, syntax, utility, pipeline, Chromium, delayed Reddit, speech, UX and page-review regressions. Cover malformed storage; duplicated text; source changes; navigation; Keep protection; correction/Undo races; disabled inference; extraction failure; multiple model batches; buffering; cancellation; excluded queued requests; and export changes during assembly.
+An explicit decision survives late automatic results. A changed source passage increments its revision and triggers remapping/reassessment without silently applying an old label to different text. Navigation retires the previous document's work. Uncertain mapping reports the problem and keeps reader content correctable.
 
-Mocked vectors validate orchestration only. Real model loading, semantic accuracy, Azure output and physical iPhone Safari behavior require separate evidence. Never claim those from jsdom or mobile Chromium emulation.
+Batch dynamic changes, scan affected regions, limit visible controls, and prevent the utility's own DOM from triggering an endless observer loop. Own and restore only the styles/events/scroll effects the script introduced. Canceling a picker or disabling a rule must not undo unrelated website changes.
+
+## Speech and export consistency
+
+Version the enabled sequence and prepared artifacts. Before sending a synthesis request, recheck current inclusion. Late responses may populate a compatible cache but must not alter newer playback intent. Cache by exact text and speech configuration; reuse unaffected audio after a correction. An export contains a documented snapshot and cannot silently mix old and new decisions.
+
+Bound concurrency and storage, release stale audio/resources, and distinguish retryable failures from invalid credentials. Timing comes from real audio or service metadata. Use real format-aware joining/conversion and verify playback/seek behavior; do not assume concatenated compressed files form a reliable recording.
+
+## Code and comments
+
+Keep extraction, classification, decision policy, learning, persistence, DOM rendering, and audio work behind small testable contracts. Prefer explicit async state and lifecycle cleanup over global flags and screen-specific side effects. Choose organization after the first working slice, rather than reproducing the old concatenated modules.
+
+Comments should explain **why**: precedence, source-mapping assumptions, platform workarounds, resource limits, or a race prevented. Document inputs/outputs and observable failure behavior at algorithm boundaries. Cite an official source and version for unusual API constraints. Explain the failure case of a workaround and how it can be removed. Avoid comments that restate syntax, unverifiable accuracy claims, and historical release narration. TODOs need a concrete missing behavior and acceptance condition.

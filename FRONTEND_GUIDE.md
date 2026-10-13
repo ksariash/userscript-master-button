@@ -1,39 +1,57 @@
-# Compact frontend development guide
+# Frontend and visual design
 
-Normative for every interface change, alongside DESIGN_SYSTEM.md. Optimize for an iPhone webpage overlay: the article remains the primary surface.
+The intended character is a quiet reading instrument: clear type, restrained color, precise alignment, and subtle depth. Beauty must come from composition and interaction, with compact controls preserving space for the article. Study [DESIGN_REFERENCES.md](DESIGN_REFERENCES.md); the rules here are our interpretation, not copied product layouts.
 
-## Components and density
+## Visual hierarchy
 
-Use the tokens in `src/05-ui.js`: system type, one blue accent, neutral light/dark surfaces, 7px group gaps, 10px outer gutters, 12px component radii and a 19px drawer. Keep one stylesheet; replace outdated definitions instead of appending release-specific overrides.
+Use three layers: original article/transcript, a compact functional control surface, and an on-demand inspector. Keep one main task and one obvious primary action per surface. Use typography, spacing, and thin separators before adding containers. Avoid nested cards, large title blocks, oversized metrics, repeated explanatory paragraphs, and equal-weight grids of every feature.
 
-- Launcher: one 44px visible disk inside a 56px target. Distinguish intentional dragging from tapping; a second touch closes the drawer. Never anchor a drawer over its launcher.
-- Header: 48px, short 15px title, 44px Back and Close targets. No repeated branding in subviews.
-- Main tools: at most six actions in a three-column grid. Contextual site actions form compact rows.
-- Ordinary controls: at least 44px touch area. Reduce nested cards, duplicate labels and explanatory text rather than shrinking targets.
-- Teach: short expandable selection, one reason row, Skip/Keep actions, inline recoverable error, collapsed Details. Target <=360px collapsed at 390x844 with an ordinary selection.
-- Filter: site toggle, model state, Show all/Teach/Pick and Review passages. Thresholds and collapse preference belong behind Advanced filtering.
-- Reader: full-height transcript with compact anchored player. Preserve scroll and focus during corrections and asynchronous updates.
-- Page review: temporary viewport controls plus a small Done/Undo bar. Use source IDs and the same correction action as the reader. A selected passage's Why action opens the shared explanation. Buttons disappear on exit; skipped text remains gray unless the user chooses collapse. Keep marker DOM nodes stable during status updates to preserve focus. When margins or spacing cannot fit the controls, show a native passage chooser and Skip/Keep action in the small review bar; every source remains reachable.
+Apply translucency sparingly to floating navigation/player surfaces. Content and forms need dependable backgrounds and contrast. A web userscript does not inherit Apple's native Liquid Glass behavior; do not promise it or imitate it with heavy blur everywhere.
 
-## Consistent state language
+## Proposed starting tokens
 
-Use Keep, Skip, Undo, Review passages and Show all consistently. Show skipped state through both text styling and a labeled control. An unavailable model is not a ready model; an unclassified passage has no fabricated score. Similarity details stay accessible without dominating routine tasks.
+These are project starting points to validate in a prototype, not measured values copied from reference products. Keep tokens centralized and reusable; adjust the system coherently after review.
 
-Use a concise inline error at the affected action. Preserve entered keys, selections, editor drafts and disclosure state across background renders. Disable duplicate submissions while saving. A status toast supplements persistent errors; it must not dump raw exceptions over the article.
+| Element | Starting rule |
+| --- | --- |
+| UI type | System font; 15–16px ordinary labels, 13px secondary text, restrained semibold titles |
+| Reader type | User-adjustable, initially 18–20px with approximately 1.5–1.65 line height; comfortable bounded line length |
+| Inputs | At least 16px text; native selects where useful |
+| Spacing | 4px base rhythm; 8/12/16/24px steps; 16px ordinary surface inset |
+| Color | Neutral warm light/cool dark surfaces; one restrained blue accent; semantic error/status colors only when needed |
+| Corners/depth | One coherent small/medium/surface radius scale, approximately 8/12/20px; a subtle surface shadow, few borders |
+| Icons | One consistent vector icon family, approximately 18–20px; no emoji navigation |
+| Touch | At least 44×44 CSS px activation area; small visible glyphs can sit inside larger hit areas |
+| Motion | Brief, purposeful transitions; respect reduced motion; no decorative pulsing |
 
-## Accessibility and host-page behavior
+Verify contrast using rendered colors, including on bright/busy host pages. Muted does not mean unreadable. Handle increased text size and longer labels without shrinking controls.
 
-- Use actual buttons for actions, native selects for enumerations, associated labels, visible focus, meaningful accessible names and `aria-pressed`/`aria-checked` where appropriate.
-- Keep editable inputs at 16px on iPhone to avoid focus zoom. Respect safe areas, keyboard and visual viewport resizing, dark mode and reduced motion.
-- Do not rewrite website HTML or wrap paragraphs in layout-changing containers. Isolate overlay controls in Shadow DOM.
-- Preserve readable contrast when graying passages. Do not use low opacity on an entire paragraph and its controls.
-- Keep controls from overlapping each other; prefer page margins. Edge-to-edge and tightly spaced passages use the chooser fallback; controls must not cover text or links. Verify the selected source outline and chooser labels on a physical device.
-- Automatic updates must not steal focus, move transcript scroll or reopen a minimized reader.
+## Surface design
 
-## Release review
+**Idle and launcher.** One restrained floating control, remembered placement, recognizable accessible label. A small exclusion badge is secondary. Keep the hit area reachable and distinguish drag from tap. The launcher must never be hidden behind its own open surface.
 
-At 390x844, inspect default menu, Filter, Teach with a long selection, Speech, page review and Reader in light and dark mode. Check smaller widths, landscape, keyboard, zoom, long labels and dynamic insertions. Main menu should stay below 400px in ordinary use (450px maximum regression bound); Teach <=360px collapsed; Speech <=530px.
+**Action surface.** Start with a short, clearly labeled list or small toolbar for Read, Review, Share. Use a single secondary entry for settings/other tools, and show relevant site actions contextually. Aim for a normal menu below roughly 320px tall at a 390×844 viewport. This budget excludes the reader and deliberate expanded inspectors. Compactness comes from fewer simultaneous choices and progressive disclosure, not tiny text.
 
-Test both launcher taps, draggable placement, pointer hit areas, passage links, controls near viewport edges, scroll restoration, Back/Close/Done and error recovery. Capture browser screenshots in CI artifacts. Do not label Chromium screenshots as physical Safari verification.
+**Passage review.** Put a quiet marker next to each currently visible candidate in Review mode. Selecting a passage reveals its contextual Skip/Keep action and optional Why. One active passage receives emphasis; avoid a row of prominent buttons on every paragraph. Skip grays text while retaining geometry, Keep restores it, Undo remains easy, and Done removes temporary controls. Keep the marker/hit region clear of links. Full-width passages require a reachable alternate contextual action, not omitted controls.
 
-The launcher is hidden while the full-screen reader is open; the reader’s Close and Minimize controls provide navigation without covering the player. Count gray and collapsed passages consistently in the filtered-item badge, deduplicating nested blocks.
+**Reader.** Use an editorial reading column, a small navigation row, and a compact bottom player. At default text size on 390×844, target at least 70% of usable reader height for transcript; document exceptions at larger accessibility sizes. Controls must not cover its final passages. Indicate current audio with a subtle highlight. Gray excluded text remains readable and correctable. A tap to seek must not be confused with Skip.
+
+**Correction/Why.** Use a short excerpt, simple state/reason, and Skip/Keep. Long selections expand on demand. Diagnostics, model identifiers, thresholds, and scores belong in Details. Avoid the former full-screen stack of selection, reason, action cards, and score cards.
+
+**Settings and speech.** Prefer aligned rows with label/value, native controls, and concise inline help. Region and voice selection plus an adjacent demo should fit naturally. Keep the secret field distinct with replace/forget controls. Advanced model/rule options live behind disclosure. Open one child surface at a time, with consistent Back/Close/Done behavior.
+
+**Audio minimized.** A compact playback bar with pause/resume and reopen is sufficient. Secondary playback/export options can expand. Preparation status belongs near playback, not in a giant modal.
+
+## Interaction and accessibility
+
+Use semantic buttons, associated labels, clear accessible names/state, visible focus, and sensible reading order. Ensure every icon-only action has a label. State must be conveyed through text/control semantics as well as color. Keep graying separate from overlay opacity so correction controls remain legible.
+
+Preserve focus, input drafts, text selection, transcript scroll, and expanded disclosure state on async updates. Patch affected UI rather than replacing whole surfaces. Use an inline actionable error at the failed action; optional toasts must be brief and never display raw exceptions across the article.
+
+Isolate utility styling from the website. Respect safe areas, dynamic/visual viewport, browser bars, keyboard, zoom, landscape, light/dark appearance, and reduced motion. Modal scroll locks need ownership and cleanup; ordinary popovers must not immobilize the site. Minimized work must stay minimized.
+
+## Design proof
+
+Before full implementation, present an interactive prototype covering launcher/menu, page correction, reader/player, Why, and speech setup. Capture light/dark screenshots over both clean and cluttered pages. Inspect 320px width, 390×844, landscape, keyboard, large text, long excerpts, and error states.
+
+Review hierarchy, spacing rhythm, type, balance, alignment, control density, and reading space with the user. Screenshot assertions and a token list cannot prove aesthetic quality. Keep the approved visual direction consistent through implementation, and review screenshots again when real content replaces prototype data.

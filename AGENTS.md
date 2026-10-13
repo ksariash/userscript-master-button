@@ -1,25 +1,24 @@
-# Implementer guidance
+# Instructions for the fresh build
 
-Treat `REQUIREMENTS.md` as the product specification and `DESIGN_SYSTEM.md` as the binding visual/interaction standard for **every future design change**. Preserve the user's per-site preferences and existing extension storage. Keep one installable script at `dist/master-button.user.js`; build from `src/*.js` and publish matching `dist/master-button.meta.js` to the same GitHub commit/release.
+Read README, REQUIREMENTS, ALGORITHM_GUIDE, FRONTEND_GUIDE, DESIGN_REFERENCES, and ACCEPTANCE. The user's current instructions take precedence. Product requirements describe outcomes; proposed design tokens, benchmarks, and implementation approaches may be revised with evidence.
 
-Do not call a token-hash classifier a language model, claim pretrained model execution without a successful runtime load, or call embedding-based prototype learning weight fine-tuning. Distinguish model downloads (external) from inference/selected text (local). Treat loaded webpage text as untrusted; never send it to third-party relays. Fail conservatively if the model is blocked on Safari; report state, preserve article prose and request explicit review before narration.
+## Work sequence
 
-Run syntax, unit, Chromium integration, Reddit delayed-prompt and compact Speech/model-learning tests. Real iPhone Safari and live Azure verification must be labeled separately. Never claim tests not run. Update README/TESTING with material limitations and version-specific metadata/permission changes.
+1. Summarize the goals, open choices, architecture, and planned validation briefly. Research current official library/platform documentation before choosing dependencies.
+2. Make a small executable filtering experiment using Defuddle and a real local model. Separately create an interactive mobile design prototype for the launcher, passage review, and reader. Show screenshots in light and dark appearance and explain model feasibility findings.
+3. Obtain the user's review of that concrete direction before expanding into the full application, unless the current session already authorizes proceeding. Routine reversible engineering work does not need repeated approval.
+4. Build a working slice: extraction → classification → page Skip/Keep → transcript synchronization → Undo. Then integrate narration and the remaining requirements in explicit milestones.
+5. Publish maintainable source, a reproducible installable userscript, tests, installation/update instructions, and honest validation results when implementation is ready. Keep source and generated release files synchronized.
 
+## Boundaries
 
-## Non-negotiable interaction invariants (0.1.3+)
-
-Never re-render a reader transcript without preserving scrollTop and touch focus. Correction buttons do not stop or throw away unrelated prepared audio. Playback must show meaningful current-passage elapsed/duration (unknown is `—:—`, not a fabricated total). The floating launcher must have a 56 CSS px tap area; temporary passage controls must have at least 44 CSS px targets with unobtrusive icons; distinguish taps from drags on touch screens. Do not add permanent site controls. Temporary passage correction controls in explicit Review passages mode are authorized in 0.2.0.
-
-On the filter: one-tap enable/disable and temporary **Show all** preview must remain obvious. Teaching or adding rules restores hidden content while inspecting and includes previously hidden neighboring passages in context, then returns to the page's filtered state when finished/canceled. Both the webpage and transcript use explicit Keep/Skip learning. Explain *why* with the model name/source, Skip/Keep/seed similarity scores, actual thresholds and fallback reason. Scores are similarities, NOT probabilities. Provide separate adjustable thresholds for learned and built-in matches. Never train on model predictions or seeking.
-
-Browser regression `tests/ux_revision.py` is mandatory. Publish `src`, `dist`, `AGENTS.md`, `DESIGN_SYSTEM.md`, README and tests in the same GitHub commit. No chat-only releases; verify raw distribution content after publishing. Preserve `master-button:v1` settings format.
-
-Do not allow the open drawer to cover the floating launcher. Test both first and second touch events in `tests/ux_revision.py` after every menu-position or viewport change.
-
-
-## 0.2.0 implementation standards
-
-Read `ALGORITHM_GUIDE.md` for shared algorithms and comment conventions and `FRONTEND_GUIDE.md` for compact frontend rules. Both are normative. Build includes the pinned Defuddle vendor bundle. Run `npm test` and `python tests/page_review.py` in addition to previous gates. Preserve original wording and source identity; page review and transcript corrections must update one passage store.
-
-The effective decision resolver must include custom CSS exclusions in narration, preserve manual overrides when automatic filtering is off, and use Defuddle membership with corroborating structure rather than as a deletion rule. Crowded page layouts require a complete native passage chooser; never omit correction access or cover prose.
+- This reset task ends with Markdown specifications. Do not add scaffold code merely to make the repository look active.
+- Do not retrieve or reuse the rejected implementation from history unless the user explicitly requests it. Existing settings compatibility can be planned from the documented behavior without restoring old code.
+- Use the connected GitHub plugin for repository operations. Reuse its authorization; do not request a separate browser login or personal token for operations it supports. If a necessary operation is unavailable, identify the exact limitation and complete the supported work.
+- Keep one authoritative passage decision layer. UI components dispatch actions and render state; they never implement competing classifiers, learning algorithms, or export-selection policies.
+- Preserve original prose and source identity. Uncertain or unavailable classification keeps text included. Model failure must remain visible.
+- Do not call heuristics a language model, similarity a probability, or stored examples/prototypes weight fine-tuning. No fabricated scores or timings.
+- Do not count mock inference, desktop screenshots, or simulated audio as real model accuracy, physical Safari validation, or live Azure verification.
+- Keep credentials out of code, logs, webpage storage, and public artifacts. Article text stays local except explicit Azure synthesis or user sharing.
+- Retain every feature in REQUIREMENTS in a completion/deferred/blocked record. A core milestone is not full product completion.
+- Keep documentation concise and current. Record decisions and limitations where the next session can find them; avoid piles of historical plans or release-specific CSS overrides.
