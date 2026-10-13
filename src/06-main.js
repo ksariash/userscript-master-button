@@ -117,7 +117,16 @@ function installUI(){if(document.querySelector('[data-mb-host]'))return;
  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const keyboard=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);launch.style.bottom=Math.max(prefs.position.bottom,keyboard+14)+'px';});
  render();
 }
-function monitorDOM(){observer=new MutationObserver(records=>{
+function monitorDOM(){
+ if(siteName()==='reddit'){
+   const lockWatcher=new MutationObserver(()=>{if(cleanupEnabled())redditUnlockScroll();});
+   for(const root of [document.documentElement,document.body])if(root)lockWatcher.observe(root,{attributes:true,attributeFilter:['style','class','m-scroll-lock','scroll-lock']});
+   // Timed interstitials may appear long after load, and may reapply overflow locks
+   // without child-list changes. Keep the periodic safety pass site-scoped.
+   setInterval(()=>{if(document.visibilityState!=='hidden'&&cleanupEnabled())siteClean();},2500);
+   [150,600,1400,4000,9000,20000,35000,50000,65000].forEach(delay=>setTimeout(()=>{if(cleanupEnabled())siteClean();},delay));
+ }
+ observer=new MutationObserver(records=>{
   // Avoid scanning each leaf mutation during fast page transitions.
   if(!records.some(r=>![host?.contains(r.target)]&&r.target!==host&&r.target.id!=='mb-global-style'))return;
   clearTimeout(observerTimer);observerTimer=setTimeout(()=>{if(location.href!==lastLocation){lastLocation=location.href;autoMapRedirect();}updateSite();},420);
@@ -127,7 +136,10 @@ function monitorDOM(){observer=new MutationObserver(records=>{
 }
 async function boot(){
  if(document.querySelector('[data-mb-host]'))return;
- await readSettings();autoMapRedirect();if(!document.documentElement)return;
+ await readSettings();autoMapRedirect();if(!document.documentElement)return;if(siteName()==='reddit')toggleRedditCSS(cleanupEnabled());
  installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');
 }
+// Hide known Reddit interstitials before the first asynchronous settings read.
+// The persisted per-site setting is applied by boot() as soon as it resolves.
+if(siteName()==='reddit'&&document.documentElement)toggleRedditCSS(true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>void boot(),{once:true});else void boot();
