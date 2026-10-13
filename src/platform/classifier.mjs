@@ -1,8 +1,9 @@
+import { MODEL_WORKER_SOURCE } from './worker-source.mjs';
 import { MODEL_CONFIG, EXCLUSION_VALIDATED } from '../core/model-contract.mjs';
 import { SiteHead } from '../core/site-head.mjs';
 export class LocalClassifier {
-  constructor(store,{workerSource=__MODEL_WORKER__,WorkerClass=globalThis.Worker,onState=()=>{},getSite=()=>({})}={}){
-    this.store=store;this.workerSource=workerSource;this.WorkerClass=WorkerClass;this.onState=onState;this.getSite=getSite;this.status='unavailable';this.message='Local model has not been downloaded.';this.counter=0;this.pending=new Map();this.epoch=0;this.running=false;this.budget=200;this.head=new SiteHead(()=>[...this.store.examples.values()],{enabled:()=>this.getSite().learning!==false});
+  constructor(store,{workerSource=MODEL_WORKER_SOURCE,WorkerClass=globalThis.Worker,onState=()=>{},getSite=()=>({})}={}){
+    this.store=store;this.workerSource=workerSource;this.WorkerClass=WorkerClass;this.onState=onState;this.getSite=getSite;this.status='unavailable';this.message='Local model has not been downloaded.';this.counter=0;this.pending=new Map();this.epoch=0;this.running=false;this.budget=200;this.head=new SiteHead(()=>[...this.store.examples.values()],{enabled:()=>this.getSite().learning!==false});this.head.refresh();this.unsubscribe=store.subscribe(()=>this.reassess());
   }
   state(){this.onState({status:this.status,message:this.message,model:MODEL_CONFIG,exclusionValidated:EXCLUSION_VALIDATED});}
   async load(backend='wasm'){
@@ -33,7 +34,16 @@ export class LocalClassifier {
     }catch(e){if(epoch===this.epoch)this.fail(e.message);}finally{if(epoch!==this.epoch)return;this.running=false;if(this.budget<=0){this.message='Analysis paused after 200 passages. Analyze more from Model settings; all remaining text stays included.';this.state();}else if(this.status==='ready'&&this.store.automatic&&[...this.store.records.values()].some(p=>p.scope==='page'&&!p.automatic))setTimeout(()=>this.scan(),250);}
   }
   more(){this.budget=200;this.scan();}
+  reassess(){
+    if(this.reassessing||!this.head.refresh())return;this.reassessing=true;
+    try{for(const p of this.store.records.values())if(p.automatic?.features){
+      const learned=this.head.classify(p.automatic.features);if(learned.label===p.automatic.label&&learned.siteActivation===p.automatic.siteActivation)continue;
+      const assessment={...p.automatic,...learned,validatedExclusion:EXCLUSION_VALIDATED,reason:learned.label==='UNCERTAIN'?'Your remembered examples make this assessment uncertain; original text stays included.':learned.label==='ARTICLE'?'The local language model and classification head identify article content.':'The local language model and classification head identify a website interruption.'};
+      this.store.assess(p.id,assessment,{documentId:this.store.documentId,revision:p.revision,evidenceRevision:p.evidenceRevision});
+    }}finally{this.reassessing=false;}
+  }
   async proposeURL(url){if(this.status!=='ready')throw new Error('Load the local model in Model settings first.');const u=new URL(url);if(u.username||u.password)throw new Error('Remove embedded credentials first.');return this.call('url',{host:u.hostname,path:u.pathname,parameterNames:[...u.searchParams.keys()]});}
   fail(message){this.status='failed';this.message=message;this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error(message));}this.pending.clear();this.worker?.terminate();this.state();}
   stop(){this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error('Local inference canceled.'));}this.pending.clear();this.worker?.terminate();this.worker=null;if(this.url)URL.revokeObjectURL(this.url);this.status='unavailable';this.running=false;}
+  dispose(){this.stop();this.unsubscribe();}
 }

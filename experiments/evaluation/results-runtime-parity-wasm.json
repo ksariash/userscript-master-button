@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-13T22:34:28.564Z",
+  "validationClass": "Actual wasm ONNX execution in Node; no browser or physical Safari claim. Compares logits-derived features, not accuracy.",
+  "model": {
+    "id": "Xenova/nli-deberta-v3-xsmall",
+    "revision": "2a4f614a701367a02d51389039afc998faeda637",
+    "dtype": "q8",
+    "license": "Apache-2.0",
+    "weightBytes": 87246587,
+    "contextTokens": 460,
+    "labelsVersion": "function-v7-translations"
+  },
+  "runtime": "wasm",
+  "startupMs": 2103,
+  "rows": [
+    {
+      "tokens": 43,
+      "referenceTokens": 43,
+      "maxDelta": 0.07437353395790156,
+      "passed": false
+    },
+    {
+      "tokens": 43,
+      "referenceTokens": 43,
+      "maxDelta": 0.12839256130389676,
+      "passed": false
+    },
+    {
+      "tokens": 44,
+      "referenceTokens": 44,
+      "maxDelta": 0.15376517944563145,
+      "passed": false
+    },
+    {
+      "tokens": 46,
+      "referenceTokens": 46,
+      "maxDelta": 0.062237834238921985,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "processPeakRssBytes": 1397972992
+}

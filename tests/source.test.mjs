@@ -2,6 +2,10 @@ import test from 'node:test'; import assert from 'node:assert/strict'; import { 
 import { SourceInventory, PageLifecycle } from '../src/core/source.mjs';
 import { DecisionStore } from '../core/decisions.mjs'; import { PageTone } from '../src/core/page-tone.mjs';
 const page = html => new JSDOM(html, { url: 'https://example.org/story', pretendToBeVisual: true });
+test('Source list ordinals and quotation boundaries survive without rewriting their wording',()=>{
+ const dom=page('<article><ol start="3"><li><p>First words.</p><p>Continuation.</p></li><li value="8">Second words.</li></ol><ul><li>Unordered words.</li></ul><blockquote><p>Quoted original.</p></blockquote></article>'),rows=new SourceInventory(dom.window.document).scan();
+ assert.deepEqual(rows.map(p=>p.originalText),['First words.','Continuation.','Second words.','Unordered words.','Quoted original.']);assert.deepEqual(rows.map(p=>p.listMarker),['3.','','8.','•','']);assert.equal(rows.at(-1).quoted,true);dom.window.close();
+});
 test('Live inventory retains inline whitespace, duplicate identity and direct text around mixed children', () => {
   const dom = page('<main><article>Before <b>the</b> inset.<p>Story <a href="/x">link</a> <em>text</em>.</p>After.<aside><p>Promo</p></aside><p>Repeat</p><p>Repeat</p></article></main>');
   const i = new SourceInventory(dom.window.document, { documentId: 'd' }); const records = i.scan();

@@ -9,7 +9,7 @@ export class SpeechSession {
     audio.addEventListener('ended', () => { if (this.demoActive) { this.demoActive = false; this.status = 'ended'; this.emit(); } else if (this.current) this.next().catch(e => this.fail(e)); else this.emit(); });
     audio.addEventListener('timeupdate', () => this.emit()); audio.addEventListener('durationchange', () => this.emit());
     audio.addEventListener('playing', () => { this.status = this.demoActive ? 'demo' : 'playing'; this.emit(); }); audio.addEventListener('pause', () => { if (this.status === 'playing') this.status = 'paused'; this.emit(); });
-    audio.addEventListener('error', () => this.fail(new Error('The browser could not play this audio. Retry or save a prepared recording.')));
+    audio.addEventListener('error', () => { if (this.current || this.demoActive) this.fail(new Error('The browser could not play this audio. Retry or save a prepared recording.')); });
   }
   valid(s, config) {
     const p = this.store.records.get(s.passageId), current = this.getConfig();
@@ -39,7 +39,7 @@ export class SpeechSession {
   }
   async toggle() {
     if (this.closed) throw abortError(); if (this.status === 'playing') { this.wantPlay = false; this.audio.pause(); return; }
-    if (this.current && this.audio.src && this.valid(this.current, this.getConfig()) && this.status === 'paused') { this.stopDemo(); this.wantPlay = true; await this.audio.play(); this.status = 'playing'; this.emit(); return; }
+    if (this.current && this.audio.src && this.valid(this.current, this.getConfig()) && this.status === 'paused') { const epoch=this.epoch,current=this.current;this.stopDemo(); this.wantPlay = true; await this.audio.play(); if(this.closed||epoch!==this.epoch||!this.wantPlay||this.current!==current)return;this.status = 'playing'; this.emit(); return; }
     return this.play(this.current?.passageId);
   }
   prefetch(segment) {
@@ -63,7 +63,7 @@ export class SpeechSession {
     try {
       const item = await this.ensure(s, { config }); if (epoch !== this.epoch || !this.valid(s, config) || !this.wantPlay) return;
       this.audio.pause(); if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.currentTime = 0; this.audio.playbackRate = config.rate || 1;
-      await this.audio.play(); this.status = 'playing'; this.mediaSession(); this.emit(); this.prefetch(s);
+      await this.audio.play(); if (epoch !== this.epoch || !this.valid(s, config) || !this.wantPlay) return; this.status = 'playing'; this.mediaSession(); this.emit(); this.prefetch(s);
     } catch (e) { if (epoch === this.epoch && e.name !== 'AbortError') { this.fail(e); throw e; } }
   }
   skipSeconds(seconds) {
@@ -71,12 +71,13 @@ export class SpeechSession {
     if (duration) this.audio.currentTime = Math.max(0, Math.min(duration, this.audio.currentTime + seconds)); this.emit();
   }
   setRate(rate) { this.audio.playbackRate = rate; this.emit(); }
+  releaseAudio() { if(this.audio.removeAttribute){this.audio.removeAttribute('src');this.audio.load?.();}else this.audio.src='';if(this.url){this.revokeURL(this.url);this.url=null;} }
   cancel() {
-    this.stopDemo(); this.epoch++; this.wantPlay = false; this.controller.abort(); this.controller = new AbortController(); this.audio.pause(); this.current = null; this.status = 'idle'; this.preparing = false; this.emit();
+    this.stopDemo(); this.epoch++; this.wantPlay = false; this.controller.abort(); this.controller = new AbortController(); this.clearMediaSession(); this.audio.pause(); this.releaseAudio(); this.current = null; this.status = 'idle'; this.preparing = false; this.emit();
   }
   sequenceChanged() {
     this.controller.abort(); this.controller = new AbortController(); this.epoch++; this.preparing = false;
-    if (this.current && !this.valid(this.current, this.getConfig())) { this.audio.pause(); this.current = null; this.status = 'paused'; this.wantPlay = false; }
+    if (this.current && !this.valid(this.current, this.getConfig())) { this.clearMediaSession(); this.audio.pause(); this.releaseAudio(); this.current = null; this.status = 'paused'; this.wantPlay = false; }
     else if (this.current && this.wantPlay) this.prefetch(this.current);
     this.emit();
   }
@@ -95,13 +96,18 @@ export class SpeechSession {
       if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.playbackRate = config.rate || 1; this.current = null; this.demoActive = true; this.status = 'demo'; await this.audio.play(); this.emit();
     } catch (e) { if (e.name !== 'AbortError') { this.fail(e); throw e; } }
   }
-  stopDemo() { this.demoController?.abort(); this.demoController = null; if (this.demoActive) { this.demoActive = false; this.audio.pause(); this.audio.src = ''; this.status = 'idle'; } }
+  stopDemo() { this.demoController?.abort(); this.demoController = null; if (this.demoActive) { this.demoActive = false; this.audio.pause(); this.releaseAudio(); this.status = 'idle'; } }
   mediaSession() {
-    const media = globalThis.navigator?.mediaSession; if (!media) return;
+    const media = globalThis.navigator?.mediaSession; if (!media || !globalThis.MediaMetadata) return;
     try {
       if (globalThis.MediaMetadata) { this.previousMetadata ??= media.metadata; media.metadata = this.ownedMetadata = new MediaMetadata({ title: this.title || 'Master Button reading', artist: this.store.site }); }
       for (const [name, handler] of Object.entries({ play: () => this.toggle().catch(e => this.fail(e)), pause: () => { this.wantPlay = false; this.audio.pause(); }, seekbackward: d => this.skipSeconds(-(d.seekOffset || 15)), seekforward: d => this.skipSeconds(d.seekOffset || 15), previoustrack: () => this.next(-1).catch(e => this.fail(e)), nexttrack: () => this.next().catch(e => this.fail(e)) })) media.setActionHandler(name, handler);
     } catch { /* Individual system actions may be unavailable; ordinary player remains. */ }
   }
-  stop() { this.closed = true; this.cancel(); this.stopDemo(); this.unsubscribe(); if (this.url) this.revokeURL(this.url); this.cache.clear(); this.audio.src = ''; const media=globalThis.navigator?.mediaSession; if(media&&this.ownedMetadata&&media.metadata===this.ownedMetadata){for(const name of ['play','pause','seekbackward','seekforward','previoustrack','nexttrack'])try{media.setActionHandler(name,null);}catch{}media.metadata=this.previousMetadata||null;} }
+  clearMediaSession() {
+    const media=globalThis.navigator?.mediaSession;
+    if(media&&this.ownedMetadata&&media.metadata===this.ownedMetadata){for(const name of ['play','pause','seekbackward','seekforward','previoustrack','nexttrack'])try{media.setActionHandler(name,null);}catch{}media.metadata=this.previousMetadata||null;}
+    this.ownedMetadata=null;this.previousMetadata=undefined;
+  }
+  stop() { this.closed = true; this.cancel(); this.unsubscribe(); this.cache.clear(); }
 }

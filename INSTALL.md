@@ -10,7 +10,7 @@ This is an **alpha**, not a validated iPhone release. Automatic exclusions are d
 
 ## Model and learning
 
-More → Local model → Load downloads pinned DeBERTa NLI weights, about **87 MB**, plus tokenizer/runtime assets. Inference runs in a local worker; there is no model-server fallback. Default backend is one-thread WASM, with an experimental WebGPU choice. CSP, worker creation, memory, cache availability and device compatibility are not yet proven on iPhone. Failure keeps original text included and displays recovery guidance.
+More → Local model → Load downloads pinned DeBERTa NLI weights, about **87 MB**, plus tokenizer/runtime assets (**about 123 MB total**: 8,656,551-byte tokenizer JSON and 26,861,777-byte matching WASM, plus small configuration files). Inference runs in a local worker; there is no model-server fallback. Default backend is one-thread WASM, with an experimental WebGPU choice. CSP, worker creation, memory, cache availability and device compatibility are not yet proven on iPhone. Failure keeps original text included and displays recovery guidance.
 
 The classification head is trained on actual local model outputs and structural evidence. Remembered corrections can update that head with real gradient steps, scoped to the site. The base language-model weights remain frozen. Exact-wording exceptions work independently of a model download. Inspect, disable, delete or reset examples in Rules and teaching. Merely visiting a page does not persist its URL or hostname.
 

@@ -85,7 +85,7 @@ export class DecisionStore {
       if (!old) { next.set(p.id, this.record(p)); dirty = true; }
       else {
         const changed = old.originalText !== p.originalText;
-        const evidenceChanged = ['tag','role','groupHeading','sameDocumentLinkRatio','inArticle','nearbyControls','extraction'].some(key => JSON.stringify(old[key]) !== JSON.stringify(p[key]));
+        const evidenceChanged = ['tag','role','groupHeading','sameDocumentLinkRatio','inArticle','nearbyControls','extraction','listMarker','quoted'].some(key => JSON.stringify(old[key]) !== JSON.stringify(p[key]));
         next.set(p.id, { ...old, ...p, revision: old.revision + (changed ? 1 : 0),
           evidenceRevision: old.evidenceRevision + (changed || evidenceChanged ? 1 : 0), correction: changed ? null : old.correction, automatic: changed || evidenceChanged ? null : old.automatic, rule: changed ? null : old.rule });
         dirty ||= changed || evidenceChanged;

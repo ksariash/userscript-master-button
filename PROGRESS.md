@@ -1,16 +1,16 @@
 # Progress and remaining scope
 
-**Fresh implementation recovered; publishing experimental 2.0.0-alpha.1.** The user removed review gates. The complete source and generated artifact are now being uploaded through GitHub after the executor reconnect; no rejected implementation was retrieved. This is a partial alpha, not a validated full-product release.
+**Fresh implementation recovered; experimental 2.0.0-alpha.1.** The user removed review gates. The complete source and generated artifact are published through GitHub after the executor reconnect; no rejected implementation was retrieved. This is a partial alpha, not a validated full-product release.
 
 ## Evidence kept separate
 
 | Evidence class | Observed result | Limit |
 | --- | --- | --- |
-| Policy / Defuddle / mock DOM and speech integration | 38 tests passed again after recovery | No physical geometry, live service or model-accuracy claim |
+| Policy / Defuddle / mock DOM and speech integration | 44 tests passed again after recovery | No physical geometry, live service or model-accuracy claim |
 | Actual model inference | Pinned FLAN, Qwen and NLI ONNX tensors on desktop Node CPU; raw reports under experiments | Author labels; reused regression, no independent audit or pristine final holdout |
 | Current filtering quality | 85-case NLI/head regression: 1 ARTICLE error, 95% precision, 82.6% recall, 3 abstentions | Target unmet; automatic exclusions disabled |
 | Actual MP3 encoding/decoding | One encoder over authored PCM tones; desktop FFmpeg decode/seek succeeded | Not Azure speech or iPhone playback |
-| Rendered design | Original light/dark clean/busy study screenshots | Desktop publication; production preview capture pending |
+| Rendered design | Original light/dark clean/busy study screenshots | Desktop publication; production light/dark capture available |
 | Physical iPhone Safari | Not run | Device/extension/runtime/accessibility/background proof pending |
 | Live Azure | Not run | Real voices, synthesis, binary transport, native share and playback pending |
 
@@ -32,15 +32,15 @@ Implemented means present in the alpha source, not verified on iPhone. **Blocked
 | F08 | Automatic off preserves explicit choices; separate clear; Show all changes no decisions | Implemented; policy/DOM tests passed. |
 | F09 | Optional visual-only muting while included for narration, without competing classifier | Implemented explicit visual muting without changing inclusion. |
 | F10 | Why excerpt/state/reason; actual model/fallback/evidence in collapsed Details; no score dashboard | Implemented contextual Why and collapsed actual evidence; desktop study rendered. |
-| L01 | Per-site explicit-only learning; Keep exceptions; inspect/disable/delete/reset; minimal data; no history archive | Implemented explicit memories and gradient-trained head; frozen base LM, no full-LM fine-tuning. Cached reassessment pending. |
+| L01 | Per-site explicit-only learning; Keep exceptions; inspect/disable/delete/reset; minimal data; no history archive | Implemented explicit memories and gradient-trained head; frozen base LM, no full-LM fine-tuning. Cached reassessment and Undo verified with mock feature inputs. |
 | L02 | Remember per-site on/off and rules; inspect/edit/disable/delete/reset; mutation batching/SPA cancellation; no duplicate/stale overlays | Implemented validated storage, rules and navigation retirement; mutation scans need affected-region optimization. |
-| S01 | Visual selector picker intercepts links, shows all matches/count/offscreen, flags broad/fragile selectors | Implemented all-match picker; authored DOM passed; early site capture-handler audit pending. |
-| S02 | Separate reversible preview/Save; exact cancel restoration; protect root/article/utility | Implemented owned preview/cancel and Save; legacy whole-article guard improvement pending. |
+| S01 | Visual selector picker intercepts links, shows all matches/count/offscreen, flags broad/fragile selectors | Implemented all-match picker; authored DOM passed; document capture handlers covered; earlier window capture handlers remain a platform limit. |
+| S02 | Separate reversible preview/Save; exact cancel restoration; protect root/article/utility | Implemented owned preview/cancel and Save; legacy whole-article guards exclude script ballast. |
 | S03 | Restore only script-owned locks from nuisance removal; preserve native dialogs | Partial: owned utility locks restored; current site-specific ownership unverified. |
 | S04 | Necessary-only/reject-ads consent through validated native site adapters; distinguish hiding from consent | Outstanding: no live-validated necessary-only consent adapter; hiding is not consent. |
 | U01 | One subtle launcher, 44px hit area, excluded count once, tap/drag distinction, remembered position/reachability | Implemented drag/clamp/persistence; physical touch/viewport proof unverified. |
 | U02 | Read/Review/clean-share primary; compact secondary filtering/rules/URL/speech/update/site tools | Implemented compact primary menu and contextual secondary surfaces. |
-| U03 | Accessible labels/focus/state; light/dark; isolated styles; safe areas/visual viewport/browser bars/keyboard/zoom/landscape/reduced motion | Implemented isolated styles/labels/themes; physical accessibility/viewport checks unverified; touch-target audit pending. |
+| U03 | Accessible labels/focus/state; light/dark; isolated styles; safe areas/visual viewport/browser bars/keyboard/zoom/landscape/reduced motion | Implemented isolated styles/labels/themes; physical accessibility/viewport checks unverified; Follow target corrected to 44px; physical target audit pending. |
 | R01 | Prefer selection else main article; review/edit/paste; changed/absent mapping visible; no truncation | Implemented exact selection, editor/paste and explicit absent mapping; DOM tests passed. |
 | R02 | Transcript dominates; compact anchored player; seeking separate from correction; gray reviewable exclusions | Implemented transcript/player and separate correction targets; actual playback unverified. |
 | R03 | Preserve scroll, focus, selection, drafts/disclosures on async updates | Implemented incremental patching; mock DOM focus/draft/scroll/disclosure tests passed. |
@@ -48,7 +48,7 @@ Implemented means present in the alpha source, not verified on iPhone. **Blocked
 | A01 | User's Azure key in extension-controlled storage; replace/forget; accurate platform limits | Implemented GM-only key storage, replace/forget and dedicated setup entry; physical isolation unverified. |
 | A02 | Region and useful searchable live voices; adjacent demo; cache demo and no article/demo overlap | Implemented searchable live-list transport and cached cancellable demos; live Azure unverified. |
 | A03 | First usable segment playback with later preparation, bounded concurrency/cache reuse | Implemented serial synthesis, first-segment intent and bounded prefetch/cache; mock integration passed. |
-| A04 | Pause/resume, back/forward, seek, speed, buffering, retry, cancel; stale jobs cannot replace new intent | Implemented player/retry/cancel/rate; mock races passed; owned MediaSession cancellation improvement pending. |
+| A04 | Pause/resume, back/forward, seek, speed, buffering, retry, cancel; stale jobs cannot replace new intent | Implemented player/retry/cancel/rate; mock races passed; owned MediaSession cancellation mock passed. |
 | A05 | Enabled text rechecked at send; late Skip cannot retract sent text; reuse unaffected audio | Implemented just-before-send recheck and exact cache reuse; mock integration passed. |
 | A06 | Minimize/reopen without lost state; Media Session/system/locked-screen listening; prepared-recording fallback | Implemented minimized state and best-effort MediaSession; physical locked-screen and recording fallback unverified. |
 | E01 | MP3 enabled order, quality options, reuse prepared audio, real format-aware join/convert | Implemented single PCM-stream MP3 encoder and quality choices; actual tone encoded/decoded on desktop, not Azure. |
@@ -71,8 +71,8 @@ Implemented means present in the alpha source, not verified on iPhone. **Blocked
 | D02 | Validated migration preserving `master-button:v1`, unrelated preferences and separately stored key; explicit reset/reinstall notices | Implemented non-destructive validated v1 migration and separate-key import; unit tests passed; actual old filename/update unverified. |
 | D03 | No duplicate instances or remote-code/eval update mechanisms; supported extension update/recovery | Implemented instance/lifecycle guards and metadata-only update check; extension update behavior unverified. |
 | V01 | ≥150 pre-labeled blocks, 8 pages, 4 layouts, page/site-held-out split; narrative exclusions, nuisance precision/recall, abstentions, mapping and latency | Actual 169 labels/8 pages/4 layouts plus 85 new cases; author labels only, reused regression; independent audit/holdout and targets outstanding. |
-| V02 | Visual inspection and user feedback plus 320/390/landscape/keyboard/large text/long excerpt/errors/clean/busy checks | Original light/dark clean/busy desktop renders available; production renders and physical layout matrix pending. |
+| V02 | Visual inspection and user feedback plus 320/390/landscape/keyboard/large text/long excerpt/errors/clean/busy checks | Original and production light/dark clean/busy desktop renders available; physical layout matrix pending. |
 
 ## Next work
 
-Improve filtering with independent labels and a fresh holdout; retain the exclusion safety flag until targets pass. Finish cached-head reassessment, picker/whole-article safeguards, owned MediaSession cancellation and touch targets. Capture the production UI; optimize mutation work. Run the separate physical Safari, live Azure and live-site/necessary-only consent checklists. Keep this ledger current when evidence changes.
+Improve filtering with independent labels and a fresh holdout; retain the exclusion safety flag until targets pass. Cached-head reassessment, owned MediaSession cancellation and the observed touch target were fixed. Continue mutation optimization and physical picker/layout validation. Run the separate physical Safari, live Azure and live-site/necessary-only consent checklists. Keep this ledger current when evidence changes.

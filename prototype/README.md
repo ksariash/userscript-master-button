@@ -18,4 +18,8 @@ Tokens are centralized in `utility.css`: 15px ordinary UI/12–13px supporting t
 
 Screenshots are native Sites publication renders of the actual gallery, not generated artwork. The standalone cloud browser could not open the private study without a fresh login, and the local/managed preview renderer was unavailable. JSDOM validates some state transitions but does not provide visual or touch QA. Record capture sizes, scaled-frame limits, and unverified states in `screenshots/README.md`.
 
-Before production, test real content, typography/contrast, 320px, 390×844, landscape, safe areas, browser chrome, keyboard, long excerpts/labels, large text, reduced motion, source links, focus/VoiceOver, and reader final passages. The user's aesthetic review remains the deciding gate.
+Before production, test real content, typography/contrast, 320px, 390×844, landscape, safe areas, browser chrome, keyboard, long excerpts/labels, large text, reduced motion, source links, focus/VoiceOver, and reader final passages. User feedback informs iteration; implementation continues without a review gate.
+
+## Production implementation preview
+
+`implementation.html` uses the production UI/core, mock GM storage/transport and disconnected model/Azure integration. Build it with `node scripts/build-implementation-prototype.mjs`. The original `review.html` remains a separate design study. Production light/dark clean/busy captures and their exact publication provenance are under `screenshots/`; these are desktop renders, not iPhone or service checks.

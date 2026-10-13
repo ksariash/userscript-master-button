@@ -28,6 +28,8 @@ export class SourceInventory {
       if (!run || run.owner !== owner) { run = { owner, nodes: [], parts: [] }; runs.push(run); }
       run.nodes.push(node); run.parts.push(node.data);
     }
+    const firstListRun = new WeakMap();
+    for (const r of runs) { const item=r.owner.closest('li');if(item&&!firstListRun.has(item))firstListRun.set(item,r); }
     const records = runs.map((r, index) => {
       let id = this.ids.get(r.nodes[0]); if (!id) { id = `${this.documentId}:source:${++this.counter}`; this.ids.set(r.nodes[0], id); }
       const range = doc.createRange(); range.setStart(r.nodes[0], 0); range.setEnd(r.nodes.at(-1), r.nodes.at(-1).length);
@@ -42,7 +44,12 @@ export class SourceInventory {
         const types = [...group.querySelectorAll('input:not([type=hidden]),select')].slice(0,8).map(n => n.tagName === 'SELECT' ? 'selection control' : `${n.type || 'text'} input`);
         if (types.length) { nearbyControls = types; break; }
       }
-      return { id, index, originalText: text, tag: r.owner.tagName.toLowerCase(), role: sourceRole(r.owner),
+      const item=r.owner.closest('li'),list=item?.parentElement;let listMarker='';
+      if(item&&firstListRun.get(item)===r&&list?.matches('ul,ol')){
+        if(list.tagName==='UL')listMarker='•';else{const items=[...list.children].filter(n=>n.tagName==='LI');let ordinal=list.hasAttribute('start')?list.start:list.reversed?items.length:1;
+          for(const sibling of items){if(sibling.hasAttribute('value')){const value=Number.parseInt(sibling.getAttribute('value'),10);if(Number.isFinite(value))ordinal=value;}if(sibling===item){listMarker=`${ordinal}.`;break;}ordinal+=list.reversed?-1:1;}}
+      }
+      return { id, index, originalText: text, tag: r.owner.tagName.toLowerCase(), role: sourceRole(r.owner),listMarker,quoted:!!r.owner.closest('blockquote'),
         sameDocumentLinkRatio: anchors.length ? sameDocumentLinks / anchors.length : 0, inArticle, groupHeading, nearbyControls,
         linkCharacters: r.nodes.filter(n => n.parentElement.closest('a')).reduce((n, t) => n + t.data.length, 0),
         source: { node: r.owner, nodes: r.nodes, range }, sourceState: 'original',

@@ -9,12 +9,22 @@ class FakeAudio extends EventTarget {
 const config = {region:'eastus',voice:'en-US-JennyNeural',rate:1};
 const pcm = () => new ArrayBuffer(48000);
 const waitTick = () => new Promise(r=>setTimeout(r,0));
+test('Mock cancellation clears only the owned system-media session and releases its audio source',async()=>{
+ const navigatorDescriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator'),metadataDescriptor=Object.getOwnPropertyDescriptor(globalThis,'MediaMetadata'),previous={title:'Website player'},handlers=new Map(),media={metadata:previous,setActionHandler:(name,handler)=>handlers.set(name,handler)};
+ Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaSession:media}});Object.defineProperty(globalThis,'MediaMetadata',{configurable:true,value:class{constructor(data){Object.assign(this,data);}}});
+ try{const s=setup();await s.speech.play('a');assert.notEqual(media.metadata,previous);assert.equal(typeof handlers.get('play'),'function');s.speech.cancel();assert.equal(media.metadata,previous);assert.equal(handlers.get('play'),null);assert.equal(s.audio.src,'');
+ await s.speech.play('a');const other={title:'New website player'};media.metadata=other;s.speech.cancel();assert.equal(media.metadata,other);s.speech.stop();
+ }finally{navigatorDescriptor?Object.defineProperty(globalThis,'navigator',navigatorDescriptor):delete globalThis.navigator;metadataDescriptor?Object.defineProperty(globalThis,'MediaMetadata',metadataDescriptor):delete globalThis.MediaMetadata;}
+});
 const setup = request => {
   const store = new DecisionStore([{id:'a',originalText:'Original one.'},{id:'b',originalText:'Original two.'}],{documentId:'d'}), audio = new FakeAudio(), calls=[];
   const client = new AzureClient({getKey: async()=> 'k'.repeat(32),request: details=> {calls.push(details); return request ? request(details) : Promise.resolve({status:200,response:pcm()});}});
   const speech = new SpeechSession(store,client,{audio,getConfig:()=>config,makeURL:()=>`blob:test:${calls.length}`,revokeURL:()=>{}});
   return {store,audio,calls,speech,client};
 };
+test('Mock late resume cannot turn cancellation into a playing state',async()=>{
+ const s=setup();await s.speech.play('a');await s.speech.toggle();let resolve;s.audio.play=()=>new Promise(r=>resolve=r);const resumed=s.speech.toggle();s.speech.cancel();resolve();await resumed;assert.equal(s.speech.status,'idle');assert.equal(s.speech.current,null);assert.equal(s.audio.src,'');s.speech.stop();
+});
 test('Mock Azure transport rechecks inclusion after awaiting the key and never sends a skipped block', async()=>{
   let unlock; const key = new Promise(r=>unlock=r), calls=[], store=new DecisionStore([{id:'a',originalText:'Never send'}],{documentId:'d'});
   const client=new AzureClient({getKey:()=>key,request:d=> {calls.push(d);return Promise.resolve({status:200,response:pcm()});}}), audio=new FakeAudio();

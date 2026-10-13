@@ -4,7 +4,7 @@ const fixture='<!doctype html><title>Article</title><main><article><h1>Article t
 async function setup(url='https://example.org/article'){
  const dom=new JSDOM(fixture,{url,pretendToBeVisual:true,runScripts:'dangerously'});dom.window.eval(result.outputFiles[0].text);const values=new Map(),calls=[];
  const gm={getValue:async(k,d)=>values.get(k)??d,setValue:async(k,v)=>values.set(k,v),deleteValue:async k=>values.delete(k),setClipboard:async t=>{calls.push(['copy',t]);return true;},xmlHttpRequest:d=>{calls.push(['request',d]);return Promise.reject(new Error('Mock network unavailable'));}};
- const audio=dom.window.document.createElement('audio');audio.play=async()=>{};audio.pause=()=>{};
+ const audio=dom.window.document.createElement('audio');audio.play=async()=>{};audio.pause=()=>{};audio.load=()=>{};
  const instance=await dom.window.MBTest.start({document:dom.window.document,gm,workerSource:'',audioFactory:()=>audio});return{dom,instance,gm,calls,values,ui:instance.app.ui,store:instance.app.store};
 }
 const click=(ui,action)=>ui.shadow.querySelector(`[data-action="${action}"]`).click();const tick=()=>new Promise(r=>setTimeout(r,0));

@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-13T22:35:18.970Z",
+  "validationClass": "Actual cpu ONNX execution in Node; no browser or physical Safari claim. Compares logits-derived features, not accuracy.",
+  "model": {
+    "id": "Xenova/nli-deberta-v3-xsmall",
+    "revision": "2a4f614a701367a02d51389039afc998faeda637",
+    "dtype": "q8",
+    "license": "Apache-2.0",
+    "weightBytes": 87246587,
+    "contextTokens": 460,
+    "labelsVersion": "function-v7-translations"
+  },
+  "runtime": "cpu",
+  "startupMs": 880,
+  "rows": [
+    {
+      "tokens": 43,
+      "referenceTokens": 43,
+      "maxDelta": 5.551115123125783e-17,
+      "passed": true
+    },
+    {
+      "tokens": 43,
+      "referenceTokens": 43,
+      "maxDelta": 5.551115123125783e-17,
+      "passed": true
+    },
+    {
+      "tokens": 44,
+      "referenceTokens": 44,
+      "maxDelta": 5.551115123125783e-17,
+      "passed": true
+    },
+    {
+      "tokens": 46,
+      "referenceTokens": 46,
+      "maxDelta": 2.7755575615628914e-17,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "processPeakRssBytes": 820199424
+}

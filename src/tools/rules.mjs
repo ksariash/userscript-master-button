@@ -1,9 +1,10 @@
 const OWN = '[data-master-button]';
+function sourceTextLength(node) { const copy=node.cloneNode(true);for(const el of copy.querySelectorAll('script,style,noscript,template,[data-master-button]'))el.remove();return copy.textContent.trim().length; }
 export function inspectSelector(document, selector) {
   if (typeof selector !== 'string' || !selector.trim() || selector.length > 500) return { matches: [], blocked: true, warnings: ['Enter a CSS selector.'] };
   let matches; try { matches = [...document.querySelectorAll(selector)]; } catch { return { matches: [], blocked: true, warnings: ['Invalid CSS selector.'] }; }
-  const pageText = document.body.textContent.trim().length;
-  const blocked = matches.some(el => el.matches('html,body,main,article') || el.closest(OWN) || el.querySelector(OWN) || el.querySelector('main,article') || pageText > 400 && el.textContent.trim().length / pageText > .8);
+  const pageText = sourceTextLength(document.body);
+  const blocked = matches.some(el => el.matches('html,body,main,article') || el.closest(OWN) || el.querySelector(OWN) || el.querySelector('main,article') || pageText > 400 && sourceTextLength(el) / pageText > .8);
   const warnings = [];
   if (blocked) warnings.push('Protect the document, entire article, and utility. Choose a smaller element.');
   if (matches.length > 30) warnings.push('Broad rule: more than 30 matches. Refine the selector.');
@@ -36,8 +37,8 @@ export class SelectorPicker {
       if (event.type === 'click') { this.select(selectorFor(event.target, document)); this.endCapture(); }
     };
   }
-  start() { this.active = true; for (const type of ['pointerdown', 'pointerup', 'click']) this.document.addEventListener(type, this.intercept, true); }
-  endCapture() { this.active = false; for (const type of ['pointerdown', 'pointerup', 'click']) this.document.removeEventListener(type, this.intercept, true); }
+  start() { this.active = true; for (const type of ['pointerdown', 'pointerup', 'click']) this.document.defaultView.addEventListener(type, this.intercept, true); }
+  endCapture() { this.active = false; for (const type of ['pointerdown', 'pointerup', 'click']) this.document.defaultView.removeEventListener(type, this.intercept, true); }
   select(selector) { this.cancelPreview(); this.selector = selector; this.inspection = inspectSelector(this.document, selector); this.onSelect?.(this.inspection, selector); return this.inspection; }
   preview() {
     this.cancelPreview(); if (!this.inspection || this.inspection.blocked) return false;

@@ -10,7 +10,7 @@ npm run build:prototype
 node scripts/build-implementation-prototype.mjs
 ```
 
-All **38 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. No GitHub Actions run is asserted until its result is observed.
+All **44 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. No GitHub Actions run is asserted until its result is observed.
 
 ## Actual model evaluation
 
@@ -19,6 +19,14 @@ Real pinned ONNX inference ran separately on desktop CPU: FLAN-T5-small, Qwen3 0
 The current 85-case NLI/head report has **one ARTICLE false exclusion, 95% NUISANCE precision, 82.6% recall and three abstentions**. Abstentions count as nuisance misses. Targets are unmet; `baseline-head.json` keeps `validatedExclusion: false`. Automatic exclusion recall is therefore zero, and original text remains included unless explicitly corrected or matched by a saved rule. Scores are uncalibrated activations.
 
 Weights: 87,246,587 bytes, pinned revision and integrity in the evaluation/docs. Desktop feature runs took roughly nine seconds to initialize and peaked around 803–875 MB for the whole process. These are not Safari or iPhone resource measurements. See [the raw evaluation record](experiments/evaluation/README.md).
+
+## Actual browser-runtime code in Node
+
+The smaller browser worker uses Hugging Face Tokenizers 0.2.0 and ONNX Runtime Web directly. It omits unrelated model/task registries and embeds only one worker. Against Transformers.js/native CPU on four authored inputs, its native-CPU feature values matched within 5.6e-17 with equal token counts.
+
+Real one-thread WASM execution in Node differed from native CPU by up to 0.154 on those inputs. The separate 85-case WASM regression still had one ARTICLE error, 95% precision, 82.6% recall and three abstentions. It took 1,766 ms to initialize from local cached files; median block 665 ms, p95 1,470 ms, total 71,722 ms. Whole-process peak RSS was 1,389,916,160 bytes, including the evaluation process and its imported dependencies. This is actual WASM execution, **not browser or physical iPhone validation**, and not a new independent holdout. Do not transfer native performance/calibration claims to Safari or WebGPU.
+
+Reproduce with `node experiments/evaluation/runtime-parity.mjs`, `MB_RUNTIME=wasm node experiments/evaluation/runtime-parity.mjs`, and `MB_RUNTIME=wasm MB_SPLIT=fresh-held-out node experiments/evaluation/features.mjs`. The WASM parity report deliberately fails the numerical-equivalence criterion; preserve it. The production exclusion validation flag remains false.
 
 ## Actual codec verification
 

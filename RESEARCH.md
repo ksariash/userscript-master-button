@@ -17,3 +17,11 @@ Current documentation was inspected before selecting the probe dependencies. Sou
 | [Apple materials](https://developer.apple.com/design/human-interface-guidelines/materials), [toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars) | Restrained functional materials, deliberate actions, logical grouping, and legible content. Web CSS is not Apple's native material system. |
 
 Dependency licenses and exact transitive versions are recorded in `package-lock.json`. The study uses Lucide 1.56.0 vector icons (ISC); the exact glyphs come from the library, not reference-product artwork.
+
+## Implementation follow-up
+
+Official [Tokenizers.js README](https://github.com/huggingface/tokenizers.js) documents the same lightweight tokenizer used by Transformers.js. The worker now combines its pinned 0.2.0 package with the direct [ONNX session API](https://onnxruntime.ai/docs/api/js/interfaces/InferenceSession.html). It loads revision-pinned model/config/tokenizer data and bundles matching runtime JavaScript; only weights/tokenizer data and matching WASM are downloaded. The [deployment guide](https://onnxruntime.ai/docs/tutorials/web/deploy.html) requires matched JS/WASM builds. Actual Node/WASM differences are recorded rather than assumed away. Browser CSP/WebGPU/physical Safari remain unverified.
+
+Pinned data sizes: model 87,246,587 bytes; tokenizer JSON 8,656,551 bytes; matching runtime WASM 26,861,777 bytes. Initial data download is about 123 MB plus small configurations; runtime JavaScript is bundled.
+
+CI uses the current official [checkout v7](https://github.com/actions/checkout) and [setup-node v7](https://github.com/actions/setup-node) action documentation, with Node 24.19.0. CI does not evaluate the model or call Azure.
