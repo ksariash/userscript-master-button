@@ -1,0 +1,15 @@
+Master Button — dedicated Azure key setup
+
+This repository-owned plain-text document has no website JavaScript.
+Enable the installed Master Button userscript for this page.
+Open its launcher → More → Speech setup.
+Enter your own Azure Speech resource key, choose its region, and save.
+The key is written through Userscripts' extension storage in this userscript's filename scope.
+No synthesis occurs when saving a key. A voice demo, Play, or Prepare MP3 sends a request only when you choose that action.
+Never put your key in a URL, issue, repository file, screenshot, or chat message.
+
+An arbitrary webpage can observe keyboard events around an injected form.
+Master Button therefore disables new key entry on other webpages.
+This dedicated-page workflow still requires a physical Safari/Userscripts check.
+If it is unavailable on your installed extension, do not type the key on an untrusted page.
+Existing separately stored speech keys are preserved and can be imported by their exact extension key name from the same userscript filename.

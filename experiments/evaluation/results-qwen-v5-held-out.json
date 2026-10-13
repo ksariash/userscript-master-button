@@ -1,0 +1,1127 @@
+{
+  "date": "2026-10-13T19:08:37.188Z",
+  "validationClass": "actual local tensor inference on desktop Node CPU; not iPhone or browser validation",
+  "model": {
+    "id": "onnx-community/Qwen3-0.6B-ONNX",
+    "revision": "1e0a4a196ecabdf9a879664110574563d3f372d3",
+    "dtype": "q4f16",
+    "bytes": 569789750,
+    "license": "Apache-2.0",
+    "promptVersion": "block-v5"
+  },
+  "split": "held-out",
+  "labeler": "Implementation author labels frozen before benchmark inference; not independently audited",
+  "pages": [
+    {
+      "id": "chrome",
+      "url": "https://developer.chrome.com/blog/new-in-chrome-138",
+      "layout": "developer documentation",
+      "split": "held-out",
+      "htmlHash": "d1684cd4880df3eab5e3c87f2cd2bc81cf68c2e628805f7323a1bbab4635495b",
+      "labels": 24,
+      "mappingFailures": 0
+    },
+    {
+      "id": "mozilla",
+      "url": "https://developer.mozilla.org/en-US/blog/javascript-set-methods/",
+      "layout": "developer blog",
+      "split": "held-out",
+      "htmlHash": "7fcca108cf054bdeacb4e3150c6174e422687d34e062a2d6b89485ad0740f4d6",
+      "labels": 24,
+      "mappingFailures": 0
+    },
+    {
+      "id": "queue",
+      "url": "https://queue.example.org/story",
+      "layout": "technical article with code, quotations and mixed containers",
+      "split": "held-out",
+      "htmlHash": "f0eeb31a5b8bbf56500207a1ee0de51b74902a42aa42860eb45c9f52c3b8a7de",
+      "labels": 20,
+      "mappingFailures": 0
+    },
+    {
+      "id": "library",
+      "url": "https://library.example.org/story",
+      "layout": "personal essay with inline recommendations",
+      "split": "held-out",
+      "htmlHash": "9e2a9fe2d4f9015b34c26062661cf556d002155e0135bb063bb16f0743dad42f",
+      "labels": 20,
+      "mappingFailures": 0
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "chrome:97",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 433,
+      "textHash": "2f03713b0439b566c1495a915b6f7c7fda4568436d1b380d9b2c861fba067726",
+      "latencyMs": 6067,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:104",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 433,
+      "textHash": "8db6073cdd00c1e4d73060a7aa1af0d2fbf34460e20e6522df725d3c4b0722be",
+      "latencyMs": 5956,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:106",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 456,
+      "textHash": "57a3b4c6f49f6c3812a7fd942aa9578c76e8e1d794b01e480a2c6f051ecf227c",
+      "latencyMs": 6680,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:108",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 426,
+      "textHash": "8c6406c5184900f13035d27f9ae0821572140229585a2eac9e2721e129ad91f4",
+      "latencyMs": 5124,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:110",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 440,
+      "textHash": "63e3627aeee0385cd86810562f892db712a483d9cde2a5a9a8e3921aa5a98e23",
+      "latencyMs": 5643,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:112",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 428,
+      "textHash": "153b07247ab6bd53fe46b5829e3100427009b1ac29cc95e686b448628541ac51",
+      "latencyMs": 5718,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:114",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 439,
+      "textHash": "57152e11d3210bf394295381c534453849f207ce063c6e6cb4559bbd4024a284",
+      "latencyMs": 5977,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:116",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 433,
+      "textHash": "aa822d86cf8b60ecc6c3fcac1755b680922fc773b3ba4d4a2d5ca25773dfeccd",
+      "latencyMs": 5404,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:118",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 480,
+      "textHash": "13a324ebb9ca23524a9fc4f66bb0cbfc7bb702bd425616627d776d7ffbdc87de",
+      "latencyMs": 5633,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:120",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 499,
+      "textHash": "734e53a89379857f19a700ef469a39bdc4a56d9473c50c799fbd3fb30fba5cd0",
+      "latencyMs": 6017,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:122",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 459,
+      "textHash": "d6333de0003be859fad7e3b7521e0a0218b9807a310d6d230462c66b84664588",
+      "latencyMs": 5008,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:124",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 458,
+      "textHash": "8ee55886b1f55482a596e3782fa7c7b8a04133ca5d7c9828f5512be63f9c5de7",
+      "latencyMs": 5552,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:126",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 434,
+      "textHash": "3f6f397835274511eeaa880a7b1b4b8e050732d85bd4bce5e40617103048d271",
+      "latencyMs": 4110,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:128",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 429,
+      "textHash": "c5eeefedb9375bab8148dff0112ec575de3145d3d6e6f6033d7914ebd01e3760",
+      "latencyMs": 4670,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:130",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 431,
+      "textHash": "fe8b2c383dbfe57dde5e46dae123af5cf77b25e162ff320c8a65822d21405341",
+      "latencyMs": 4000,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:132",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 432,
+      "textHash": "8838a735c6a409880bc50780e0065340ecfb8f7afe128dd3b6faf883e382e920",
+      "latencyMs": 3832,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:136",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 451,
+      "textHash": "d2c1655a4b92c18c9916dcc46f53cfad436e0387203bce81048ec8039e25fc86",
+      "latencyMs": 4070,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:138",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 461,
+      "textHash": "2706db7d5a911624cf156dc22ef5b977f8c86f8cc2516a794b60d4f7a3fef98e",
+      "latencyMs": 4090,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "chrome:10",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "inputTokens": 541,
+      "textHash": "d8e15e0dd004753fc5ab14dcc308cc3d5f69fde778b02d174398b57bd6f95945",
+      "latencyMs": 4792,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:169",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 424,
+      "textHash": "97b0c61b99f65f9eda32799cfefb51dcf1a56c172576a34ae2d00896ab8e13dd",
+      "latencyMs": 3746,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:171",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 425,
+      "textHash": "2b798c9de389682e09f4a446cad8cfb04eb3f3e43de8bc070b2c8f2abe42538a",
+      "latencyMs": 4708,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:173",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 426,
+      "textHash": "a40555b4f202ae60c7840879511bff921822608ba6c88b122e2e921cfe7de573",
+      "latencyMs": 3864,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:177",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 424,
+      "textHash": "907e2a1cda4611014beb5f395fc263691ef19485d04d74e5ddf11c09cf52b280",
+      "latencyMs": 3840,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "chrome:179",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 425,
+      "textHash": "5f91292002a5f7a226cd1794e0445f1bac365d571f479892bfa2c96738481e05",
+      "latencyMs": 3879,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:192",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 435,
+      "textHash": "4648a8c443a4c62a240d382d032d2be95ebdc199fa1c9a959bd5a951301ef89e",
+      "latencyMs": 3847,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:193",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 440,
+      "textHash": "b69628da2d96c46a36e7103ae31ba78ad6028794a165b54ddf332f585e9149ee",
+      "latencyMs": 4048,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:196",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "inputTokens": 430,
+      "textHash": "6f75cf67aacc3dd0c55ab96110562e4181d84dcbd82f0ca0e698cb769f0cb6d9",
+      "latencyMs": 3812,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:198",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 434,
+      "textHash": "7ca40a3b3a14b73a835e7bda6a504b165b33d97466c8ecdcf6f3f086bcbd3e36",
+      "latencyMs": 4431,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:205",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "inputTokens": 426,
+      "textHash": "d9aedbdeffe6bbadd37d7c9ea0417f0d65209d9eae10ad656fea686a2190cf29",
+      "latencyMs": 4761,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:207",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 455,
+      "textHash": "2be0e622007edf9d0e38efdf72ca66ed16a8e2988e38c6b33b1ccd26e5629200",
+      "latencyMs": 4007,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:212",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 461,
+      "textHash": "8aa987e50b5123a97ce7bf9f8b98f00934e50452cfe2d96f4de9d2bce6ea50c5",
+      "latencyMs": 4255,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:214",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 477,
+      "textHash": "dcb654b0a61312114d212f9589a63c4fb36eddb3f24bbe6800ac334d2efe920d",
+      "latencyMs": 4604,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:217",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 430,
+      "textHash": "4648a8c443a4c62a240d382d032d2be95ebdc199fa1c9a959bd5a951301ef89e",
+      "latencyMs": 4627,
+      "extraction": {
+        "member": false,
+        "mapping": "ambiguous duplicate · included for review"
+      }
+    },
+    {
+      "caseId": "mozilla:219",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 445,
+      "textHash": "5bcc8043aee6f70243e036f20faa55549988fef815278dca105d2e2c6db51e32",
+      "latencyMs": 4818,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:221",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 438,
+      "textHash": "ac8a7475f19bbb6efc8c017fcdc9dcdc5ee2d4c5521affe44488323361860cc2",
+      "latencyMs": 4499,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:223",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 437,
+      "textHash": "76c020fb1dc3de2df8b5437f6c2f6e9b93db53c945f1f206b00118260f531e07",
+      "latencyMs": 3846,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:225",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 439,
+      "textHash": "cf47937a056c76f06861951abbfcbc722e7a21b30e353ebe856e03295014f3ae",
+      "latencyMs": 4021,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:227",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 440,
+      "textHash": "e05dd2bcce34dc17ccd2153b657df3d095da50ae1e6dc4d0bf84cf6433d120eb",
+      "latencyMs": 3904,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:229",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 441,
+      "textHash": "2aebc6831bfdb26318983c4076bb6bea3e1786a070b8be5181ae08a0f5593c6e",
+      "latencyMs": 3788,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:231",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 442,
+      "textHash": "53cdd705b58b7bfa0a2ee874eddf9f4d284f8df906802ef87b4da5b0ab9f9be8",
+      "latencyMs": 4609,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:233",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 443,
+      "textHash": "7ac00f31e957a6044a3d74ffcee9cfa531b48ed25f1969b26f141d4a3273ece9",
+      "latencyMs": 4142,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:235",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 476,
+      "textHash": "049a0d603346e08af09028627e0816a24641ac11d8462e3ebe471f9d717e4c85",
+      "latencyMs": 4493,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "mozilla:18",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 426,
+      "textHash": "ac2199a6c30913caeac1238b6ab6d0e7c9820cbd134c74b5a0a5a10958f1a288",
+      "latencyMs": 3880,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:20",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 424,
+      "textHash": "0d53969a7f8dcc8e8c09a15b5b2319b6694763b305f56e586439909ed2989f55",
+      "latencyMs": 3756,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:21",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 427,
+      "textHash": "e1ff7a90610311027cdc7238fa223154380d0dae3603d6a7bd102dfef6f5f31b",
+      "latencyMs": 3931,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:22",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 427,
+      "textHash": "a62ad47b54027a97db24d8ea97f085d6b2a6c635f1ef6a589232399eb5bd6b9e",
+      "latencyMs": 3671,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:23",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 429,
+      "textHash": "4b0ed88f7d99420fb3ba2c68e20992280f6dcac4afaf32da17bee89c656c2ccf",
+      "latencyMs": 3989,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "mozilla:24",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 428,
+      "textHash": "35c00a76c746fb36127d5df695252d42b60dcaab6387129eca2bccfb0e9237e3",
+      "latencyMs": 3710,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:0",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 427,
+      "textHash": "00eb0560f893af79c663536705e4178651a980f521e05c221566834da5079b6c",
+      "latencyMs": 3743,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:2",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 444,
+      "textHash": "f37e52856487fd62eb1f8dd6c58e4af7ee5129d57af230dafa356b0fa762b4d8",
+      "latencyMs": 3938,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:4",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 440,
+      "textHash": "e71fa5b2bd8eaf3a03e19fcdf683ad373f2a688071542ef3539f9065f5346fc3",
+      "latencyMs": 3768,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:6",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 443,
+      "textHash": "60a6c3fdbf0e5722341be531ec49b5759d0b7d96966db40c8bd2c3a4ae6f5d20",
+      "latencyMs": 3738,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:8",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 425,
+      "textHash": "591265f8fc1930ef8cc72bb32f0841f7a404c94dd56c76331f6e174bdf098ab1",
+      "latencyMs": 3921,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:10",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 431,
+      "textHash": "b53e6de3eecff7fed8d9e73abad276fba1d01d05eb81fd07a56daf857f90bf91",
+      "latencyMs": 3942,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:12",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 428,
+      "textHash": "7f885aa0881c9c8dc7b80972a473d797d2000bc53aa75419b5d02797af026d9c",
+      "latencyMs": 3785,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:14",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 425,
+      "textHash": "840982810fb80866114681d05f3b3c001d5aeb90f3b2713e226b707f842e2ac1",
+      "latencyMs": 3896,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:16",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 445,
+      "textHash": "7e56a16ac9a77350a74db6a3be864563d79fbcffc532420b3344b0ee198b0a95",
+      "latencyMs": 4142,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:18",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 448,
+      "textHash": "07238897e56f6808ea8d3370a29130152dcac3acad7621846286f5d9bed586ce",
+      "latencyMs": 4675,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:20",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 434,
+      "textHash": "5700422d1b7a83bb59bf08f6690fbe8ee6dacbec41da45d0ee22417389369f51",
+      "latencyMs": 4058,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:22",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 440,
+      "textHash": "28908a981bce13e09e0e7e4d8603d257c2c7ba6dbc3f5546e0f31c64339f8670",
+      "latencyMs": 4414,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:24",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 430,
+      "textHash": "2875b6f9a9c686023e682c010ecb48cb72e3a9896ea43fa7a3ec7bc8f83a2fa9",
+      "latencyMs": 3708,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:26",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 429,
+      "textHash": "4e5be6b37a56bfea075361146e3f6c5c0a8fd215586f0d41ef5a2b0d71f1f4c7",
+      "latencyMs": 3660,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:28",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 434,
+      "textHash": "6114e100b619df50cffe9873545ca0f5cfa3308d969b22a3488c9e8ef2e43d3a",
+      "latencyMs": 4309,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:30",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "inputTokens": 444,
+      "textHash": "b282a380bab1d0ca60518ffdedda57ba7a4009bb114ff0f16f5d482e6336037f",
+      "latencyMs": 5260,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:32",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 430,
+      "textHash": "ac6a19bebf85994cebd0ecbccc284ab6dcccb0b94a5a09ab1d90fd8a6bd327db",
+      "latencyMs": 5337,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:34",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 442,
+      "textHash": "170b2540f9a6810acf6ba1dac553d0339155ca32d7991825f53f6fc43bc4aef6",
+      "latencyMs": 4095,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "queue:36",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 430,
+      "textHash": "8f3eef404e1c1c31bd2859c6605d712c1a8370abbf3951bb0feaa8285cae8ff4",
+      "latencyMs": 4340,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "queue:38",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 428,
+      "textHash": "e81be7b684a39c6619b56c49012109d09dd1c8c23533ac1e24972582169f81c1",
+      "latencyMs": 3901,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:0",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 427,
+      "textHash": "d8ad52fe744bc09a798a52716bbb652248bdc87c3107842763f496f9815192f5",
+      "latencyMs": 3688,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:2",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 449,
+      "textHash": "38458d1dcbeb436dd63e782dff35b49337a15ff180bcc7424aa6f5b6d318c9c9",
+      "latencyMs": 4017,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:4",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 443,
+      "textHash": "58a0932f69e327cc679ec1f03a887b45126705e338bcf5d23ce4fd0f062a2afc",
+      "latencyMs": 3878,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:6",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 428,
+      "textHash": "60293341f1dd632cb4be007060728bb1256d43aa30d576a99a33ad4254248bb6",
+      "latencyMs": 4335,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:8",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 429,
+      "textHash": "ded7eaf3548ca66337b3f4143cc53058373808c912d307e5209957219996ab9e",
+      "latencyMs": 3770,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:10",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 432,
+      "textHash": "33ca7ffa1fac962a73bc01702292fc4e4fc639f7d6eb168fd4287fc0ff82f6ad",
+      "latencyMs": 3848,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:12",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 447,
+      "textHash": "473f967ef862b7dccb6bbaeb0a002bbeb0c0c2d4d14d66b7c34bcfc63b4a71f9",
+      "latencyMs": 4102,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:14",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 441,
+      "textHash": "87988d3bf7e392bbdaeee78b7d7a7bc8c20586406d14456e83b300088136b2e0",
+      "latencyMs": 3863,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:16",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 438,
+      "textHash": "872cf9216cc1e92443b346facf9c83520b228722406f7d43a9f81743f3cf9dbe",
+      "latencyMs": 3930,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:18",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 449,
+      "textHash": "6f2370ba517fb3637cea9b6dbe88bcae65e874dc3d7dad99c802e6ce92246618",
+      "latencyMs": 4370,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:20",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 425,
+      "textHash": "028030e17b48a39c8f7bd2f7b0f0385b4b5f6bb6a6e798a4e7cd3773e0358d5c",
+      "latencyMs": 3737,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:22",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 448,
+      "textHash": "a51e0738c48f85ccc9a90f30720e5cbb5705389e8b0d6c5b6337001a6990b4d9",
+      "latencyMs": 4160,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:24",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 434,
+      "textHash": "f94303d94f57860beaebe2361354159f6d946f0c6f890c95fe90d85981ea433c",
+      "latencyMs": 3895,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:26",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 429,
+      "textHash": "403fdeecb696cce67198f78062ba24cf94766328e12b5fcad5161a979faa6d12",
+      "latencyMs": 3937,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:28",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 431,
+      "textHash": "71655d8d1fb21b7770dc8d6a823d176fef4bffcf8daeab856449f9eb859b509a",
+      "latencyMs": 3741,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:30",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 430,
+      "textHash": "f9e54a5538a8ef495e38a7f0c3598b6ecf10af75db3e6aab9089ba1101771195",
+      "latencyMs": 3608,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:32",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 436,
+      "textHash": "9809b142781862e00ea69455eb0809891af2dacaf9c022c1453e4b2a253e0a08",
+      "latencyMs": 3757,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:34",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "inputTokens": 448,
+      "textHash": "c49b5e00058f752714cdf74a8fe90bb5b224f555586563bc513c3eab36b773c6",
+      "latencyMs": 3753,
+      "extraction": {
+        "member": true,
+        "mapping": "exact source text in Defuddle output"
+      }
+    },
+    {
+      "caseId": "library:36",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 430,
+      "textHash": "10840e2abd1fa6c1057ede3c94424469670589e1dd8014da53c7e44738b0b050",
+      "latencyMs": 3962,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    },
+    {
+      "caseId": "library:38",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "inputTokens": 428,
+      "textHash": "2b4dc8d0fe750a3ef67d34ffc7f328be0b3a27981d13a7ba11d8dfb2c442ded3",
+      "latencyMs": 4267,
+      "extraction": {
+        "member": false,
+        "mapping": "not in Defuddle output · preserved"
+      }
+    }
+  ],
+  "status": "ready",
+  "thresholdPolicy": "Strict generated label; no calibrated score. No automatic exclusion unless finite-corpus release targets pass.",
+  "startupMs": 15489,
+  "metrics": {
+    "total": 88,
+    "article": 60,
+    "nuisance": 28,
+    "articleFalseExclusions": 11,
+    "nuisancePrecision": 0.7105263157894737,
+    "nuisanceRecall": 0.9642857142857143,
+    "abstentions": 3,
+    "medianMs": 4021,
+    "p95Ms": 5956
+  },
+  "finiteTargetsPassed": false,
+  "elapsedMs": 394737,
+  "processPeakRssBytes": 3894923264
+}

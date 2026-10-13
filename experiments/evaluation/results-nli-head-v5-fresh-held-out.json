@@ -1,0 +1,733 @@
+{
+  "date": "2026-10-13T19:34:15.352Z",
+  "validationClass": "Actual NLI inference reused to evaluate the trained classification head. No mock logits. Desktop Node CPU, not Safari.",
+  "split": "fresh-held-out",
+  "model": {
+    "id": "Xenova/nli-deberta-v3-xsmall",
+    "revision": "2a4f614a701367a02d51389039afc998faeda637",
+    "dtype": "q8",
+    "license": "Apache-2.0",
+    "weightBytes": 87246587,
+    "contextTokens": 460,
+    "labelsVersion": "function-v5-metadata-context"
+  },
+  "head": {
+    "weights": [
+      0.1963541082355274,
+      0.39655321037745433,
+      1.061431057026336,
+      1.3646667444895064,
+      0.6853170738159781,
+      -0.9966462859830464,
+      1.253797244460878,
+      -2.3079926263437307,
+      2.374327926420961,
+      1.6009562992337312,
+      0.1274649066603572,
+      0.25765630776537013,
+      -1.077493606869844,
+      -0.17451739421180323,
+      -0.7650416172011537,
+      -1.9233985240433,
+      -1.1507835098927943,
+      1.3352991673371002
+    ],
+    "bias": -1.0338904050093447,
+    "threshold": 0.5,
+    "featureModel": "Xenova/nli-deberta-v3-xsmall",
+    "featureRevision": "2a4f614a701367a02d51389039afc998faeda637",
+    "validatedExclusion": false
+  },
+  "metrics": {
+    "total": 85,
+    "article": 62,
+    "nuisance": 23,
+    "articleFalseExclusions": 4,
+    "nuisancePrecision": 0.8260869565217391,
+    "nuisanceRecall": 0.8260869565217391,
+    "abstentions": 0
+  },
+  "finiteTargetsPassed": false,
+  "rows": [
+    {
+      "caseId": "graham:0",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.08318145414378522,
+      "latencyMs": 119
+    },
+    {
+      "caseId": "graham:1",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03757633039578245,
+      "latencyMs": 187
+    },
+    {
+      "caseId": "graham:2",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.012547434516854711,
+      "latencyMs": 196
+    },
+    {
+      "caseId": "graham:3",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.060444319887795334,
+      "latencyMs": 147
+    },
+    {
+      "caseId": "graham:4",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.10152790901820685,
+      "latencyMs": 187
+    },
+    {
+      "caseId": "graham:5",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01865552885601561,
+      "latencyMs": 302
+    },
+    {
+      "caseId": "graham:6",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02032073955576521,
+      "latencyMs": 341
+    },
+    {
+      "caseId": "graham:7",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.007760762115447558,
+      "latencyMs": 202
+    },
+    {
+      "caseId": "graham:8",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.06845745621336814,
+      "latencyMs": 143
+    },
+    {
+      "caseId": "graham:9",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.08388023815481832,
+      "latencyMs": 139
+    },
+    {
+      "caseId": "graham:10",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.0764691202372539,
+      "latencyMs": 161
+    },
+    {
+      "caseId": "graham:11",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04384283419957338,
+      "latencyMs": 167
+    },
+    {
+      "caseId": "graham:12",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.6764966043731736,
+      "latencyMs": 120
+    },
+    {
+      "caseId": "graham:13",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.7110977106082486,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "graham:14",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.7366621995029898,
+      "latencyMs": 81
+    },
+    {
+      "caseId": "graham:15",
+      "page": "graham",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.6573388605916445,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "seth:85",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.12177583010079285,
+      "latencyMs": 79
+    },
+    {
+      "caseId": "seth:87",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.09660396947759996,
+      "latencyMs": 113
+    },
+    {
+      "caseId": "seth:89",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.07921051386708698,
+      "latencyMs": 125
+    },
+    {
+      "caseId": "seth:91",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.051646012396068815,
+      "latencyMs": 141
+    },
+    {
+      "caseId": "seth:93",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.05266385079057504,
+      "latencyMs": 158
+    },
+    {
+      "caseId": "seth:95",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.10536871522143706,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "seth:97",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.1148380616195984,
+      "latencyMs": 96
+    },
+    {
+      "caseId": "seth:99",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11109786415814436,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "seth:101",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.07148793219396668,
+      "latencyMs": 87
+    },
+    {
+      "caseId": "seth:103",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.06839979702995405,
+      "latencyMs": 84
+    },
+    {
+      "caseId": "seth:105",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.06229943816063602,
+      "latencyMs": 87
+    },
+    {
+      "caseId": "seth:107",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04391129274966438,
+      "latencyMs": 81
+    },
+    {
+      "caseId": "seth:109",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11091793604012032,
+      "latencyMs": 108
+    },
+    {
+      "caseId": "seth:111",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.15915560959272823,
+      "latencyMs": 110
+    },
+    {
+      "caseId": "seth:113",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.10027958671201825,
+      "latencyMs": 90
+    },
+    {
+      "caseId": "seth:115",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.059461471441897784,
+      "latencyMs": 104
+    },
+    {
+      "caseId": "seth:117",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.08650782907247824,
+      "latencyMs": 92
+    },
+    {
+      "caseId": "seth:119",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.16170956241393955,
+      "latencyMs": 94
+    },
+    {
+      "caseId": "seth:121",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.08789553653183334,
+      "latencyMs": 88
+    },
+    {
+      "caseId": "seth:123",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.10160362929721337,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "seth:125",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11339976630530994,
+      "latencyMs": 94
+    },
+    {
+      "caseId": "seth:127",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11375512863254304,
+      "latencyMs": 95
+    },
+    {
+      "caseId": "seth:129",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11057104095004669,
+      "latencyMs": 100
+    },
+    {
+      "caseId": "seth:131",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.11819571991536916,
+      "latencyMs": 103
+    },
+    {
+      "caseId": "seth:133",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.31721563737139097,
+      "latencyMs": 99
+    },
+    {
+      "caseId": "seth:135",
+      "page": "seth",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.3910684220411367,
+      "latencyMs": 85
+    },
+    {
+      "caseId": "seth:7",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7381344997004257,
+      "latencyMs": 79
+    },
+    {
+      "caseId": "seth:10",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.3127069128312124,
+      "latencyMs": 76
+    },
+    {
+      "caseId": "seth:15",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7069367259237334,
+      "latencyMs": 100
+    },
+    {
+      "caseId": "seth:17",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.3321202477709763,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "seth:25",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.3461205498745005,
+      "latencyMs": 86
+    },
+    {
+      "caseId": "seth:56",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.794791395608078,
+      "latencyMs": 85
+    },
+    {
+      "caseId": "seth:72",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7224777987337786,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "seth:79",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.6691517490480101,
+      "latencyMs": 103
+    },
+    {
+      "caseId": "seth:169",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.4084960597900886,
+      "latencyMs": 98
+    },
+    {
+      "caseId": "seth:171",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.5496590350615423,
+      "latencyMs": 101
+    },
+    {
+      "caseId": "seth:175",
+      "page": "seth",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7889489905016971,
+      "latencyMs": 95
+    },
+    {
+      "caseId": "schneier:49",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.011280789335562582,
+      "latencyMs": 104
+    },
+    {
+      "caseId": "schneier:51",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.007264491415653849,
+      "latencyMs": 141
+    },
+    {
+      "caseId": "schneier:53",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.16903255319399677,
+      "latencyMs": 119
+    },
+    {
+      "caseId": "schneier:54",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.35990747557658126,
+      "latencyMs": 105
+    },
+    {
+      "caseId": "schneier:55",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.15008565888642972,
+      "latencyMs": 105
+    },
+    {
+      "caseId": "schneier:57",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.010664797031719814,
+      "latencyMs": 189
+    },
+    {
+      "caseId": "schneier:59",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01260690844022089,
+      "latencyMs": 201
+    },
+    {
+      "caseId": "schneier:61",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.006011751952353041,
+      "latencyMs": 278
+    },
+    {
+      "caseId": "schneier:63",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04334833307521634,
+      "latencyMs": 150
+    },
+    {
+      "caseId": "schneier:65",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.025220914584838303,
+      "latencyMs": 136
+    },
+    {
+      "caseId": "schneier:67",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.007838333425442335,
+      "latencyMs": 103
+    },
+    {
+      "caseId": "schneier:69",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014588195409358835,
+      "latencyMs": 125
+    },
+    {
+      "caseId": "schneier:71",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014682556434428548,
+      "latencyMs": 202
+    },
+    {
+      "caseId": "schneier:73",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.012038415472064417,
+      "latencyMs": 238
+    },
+    {
+      "caseId": "schneier:75",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.020992793759354585,
+      "latencyMs": 204
+    },
+    {
+      "caseId": "schneier:77",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.0066254736805834305,
+      "latencyMs": 229
+    },
+    {
+      "caseId": "schneier:79",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04254547171583384,
+      "latencyMs": 181
+    },
+    {
+      "caseId": "schneier:81",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016671203740903837,
+      "latencyMs": 342
+    },
+    {
+      "caseId": "schneier:83",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.030465802478374666,
+      "latencyMs": 288
+    },
+    {
+      "caseId": "schneier:85",
+      "page": "schneier",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016510925029030957,
+      "latencyMs": 182
+    },
+    {
+      "caseId": "schneier:5",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8864093273431731,
+      "latencyMs": 99
+    },
+    {
+      "caseId": "schneier:10",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9746485808959684,
+      "latencyMs": 80
+    },
+    {
+      "caseId": "schneier:11",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9497943809749356,
+      "latencyMs": 78
+    },
+    {
+      "caseId": "schneier:13",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9552247961247577,
+      "latencyMs": 76
+    },
+    {
+      "caseId": "schneier:37",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8560749693269247,
+      "latencyMs": 78
+    },
+    {
+      "caseId": "schneier:132",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8086762123870208,
+      "latencyMs": 81
+    },
+    {
+      "caseId": "schneier:134",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9828281179148978,
+      "latencyMs": 101
+    },
+    {
+      "caseId": "schneier:135",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9794400511874386,
+      "latencyMs": 117
+    },
+    {
+      "caseId": "schneier:136",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9836446433350275,
+      "latencyMs": 109
+    },
+    {
+      "caseId": "schneier:137",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9853891029538946,
+      "latencyMs": 96
+    },
+    {
+      "caseId": "schneier:138",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9844632362089164,
+      "latencyMs": 99
+    },
+    {
+      "caseId": "schneier:139",
+      "page": "schneier",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9835449115344951,
+      "latencyMs": 131
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0-alpha.1",
+  "scriptBytes": 841058,
+  "sha256": "f133e89faf53f107b8bfd0c416d76d524020f617b19d63444c0da0b6dea2673a",
+  "modelWorkerBytes": 213158,
+  "dependencies": {
+    "@breezystack/lamejs": "1.2.7",
+    "@huggingface/tokenizers": "0.2.0",
+    "@huggingface/transformers": "4.3.1",
+    "defuddle": "0.19.5",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
+    "esbuild": "0.28.1",
+    "lucide": "1.56.0"
+  },
+  "onnxruntimeWeb": "1.31.0-dev.20260914-8d85527a0"
+}

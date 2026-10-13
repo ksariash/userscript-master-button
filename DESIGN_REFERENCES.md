@@ -28,3 +28,4 @@ These are design principles. Browser CSS does not provide the complete native Ap
 ## Synthesis
 
 Adopt typography-led hierarchy, short control groups, one focused contextual action surface, comfortable reading space, and clear reversible annotations. Avoid a dashboard of every feature, large diagnostic panels, excessive rounded containers, and icons without understandable meaning. Validate this interpretation through the fresh prototype rather than assuming familiarity with a reference guarantees a beautiful result.
+

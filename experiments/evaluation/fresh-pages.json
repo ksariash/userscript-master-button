@@ -1,0 +1,463 @@
+{
+  "date": "2026-10-13T19:20:09.950Z",
+  "labeler": "Implementation author manually audits each chosen block before inference; no independent human audit",
+  "pages": [
+    {
+      "id": "graham",
+      "url": "https://paulgraham.com/read.html",
+      "selector": "td",
+      "layout": "legacy table essay",
+      "split": "fresh-held-out",
+      "htmlHash": "dc5d53e37d5bea9a912b45247d9f6e90b70b564eef3c02cc705ec4d9c42b8adf",
+      "labels": [
+        {
+          "index": 0,
+          "textHash": "62f748cc31e029c1a12139a036536b9b79bdb7ca173a8bd9cef8d4e2264a1011",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 1,
+          "textHash": "b829fef2d271a9027c61ad5a1bae7c81da2c260631a7415a9401056a42410b46",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 2,
+          "textHash": "ef747840029d625793d573133d12a6b88e8376fb0c8dd2e7f167c0cb63459b40",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 3,
+          "textHash": "4d299a5eb8d6d3789efc8bc80f2c8ea7f106e8b214811d506bc777a3b73c7ca0",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 4,
+          "textHash": "f1f1d919a3920233b9421a72a9292dc671a2affd15744d33fe0ed9d15a3a7889",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 5,
+          "textHash": "eebc0e4db79809880fc6ad65764175150a60dfe6ccd63ce1eb95199d8f4b341a",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 6,
+          "textHash": "fb12d99c35cb17668fe230d5415e25a9c2712c95a5d3a18c3baafe37dd59527b",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 7,
+          "textHash": "092c111fca1d374786d1e4478589101cdc6b776a4e19d932d6609effe64b90c9",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 8,
+          "textHash": "e376e6232d25aba3124d96bcc746d845a9880cf87a239f3bb93cd1df47068998",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 9,
+          "textHash": "8a7525b1492fb84833f5c4a69b30f4bfbb134f9b666b61a2c1872d63d234c085",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 10,
+          "textHash": "d3d0648e92a99f77aec2ab03defeb5fd3fec77d0fd94562a5308437a37e0120a",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 11,
+          "textHash": "1a01376a1da133829a0ea295a249cda773dfe99e872003c6f71ee4f134c9efb9",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 12,
+          "textHash": "d5f14a4df67f22905674ac255be675ebebe70a3a9ef7f4982ae3beed2d596f1d",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 13,
+          "textHash": "823bb3cd33ef62582bb0754067dc62eeda80262fa6c9e6858d4af0bfa4ca2e2b",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 14,
+          "textHash": "d17ba21b1a45d94f9e416a101993c6e4e0af0a1e923b153ce87906d176aa5c82",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 15,
+          "textHash": "93a2547ca69a5a5b04313a53818fafba7f41a37bb979fb7595a3f370410775c4",
+          "label": "ARTICLE"
+        }
+      ]
+    },
+    {
+      "id": "seth",
+      "url": "https://seths.blog/2025/09/bringing-goodwill-to-the-conversation/",
+      "selector": ".entry-content",
+      "layout": "WordPress essay and list",
+      "split": "fresh-held-out",
+      "htmlHash": "e93eb04697f440308cd9b171747a6e01271d939639af3206f50883b4830bd40e",
+      "labels": [
+        {
+          "index": 85,
+          "textHash": "41458c8b826d0157feeb792a3faa872c787dce7cf0b5c94511201f400cba88f4",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 87,
+          "textHash": "486cf96c56abf6006ea098a113e80b2a407b7dc0dd8732016e71b3a80a654507",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 89,
+          "textHash": "9a4ce97d9c4f7c7dbeb992780313815880f8610b61a91de56875092fb38cf5e1",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 91,
+          "textHash": "c851b4eb22e4ffb1a1fcbdae8d6e0bb494615439fdbadb3350a807aee1b40189",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 93,
+          "textHash": "f843172177863ccdf4da81fad7a029f5cdf1cff381233613753e80b11982d3d1",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 95,
+          "textHash": "8f1076dfa7dff27df3fedb0e148fbef21a317c0f17bc928e976c22283812f90e",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 97,
+          "textHash": "70559cd4689bd9a0523ca98de3420d5031e4cc97fa2e7dd5811ddcd35e7406a6",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 99,
+          "textHash": "1add34db6dcf44aabf5f15e9b923a80583678b8e7b767521c0785daf420ce0ed",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 101,
+          "textHash": "73d36b2549182be5c66700ac65f54c6d755dfe6b2fe79ac0fe151b09919148b2",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 103,
+          "textHash": "a1606f1db3e53323b67eba87172b3264634a16badf921f62d11faec0926acd82",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 105,
+          "textHash": "e073ee58c93fc517af049a99a9398b2ae617081bee9568055a4ef3684105bcf5",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 107,
+          "textHash": "8a1a4b902ca94b9378ba1a51315d9c9b185a212f994f6feaa3190266f6bc004f",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 109,
+          "textHash": "c40a8e181fa7c39a632e36bd6e92b11d34b882c4e73bc9f023a09df402c19d54",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 111,
+          "textHash": "3140e135e778a9919d6412b1423329e67a03170d4f96512d9349547d75790a58",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 113,
+          "textHash": "3a67bca91044d9230ee3280ddc2a91b1063b5e2c78fda3b9612c818e791bb5c8",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 115,
+          "textHash": "dfa6d4fd0fa20c8fc5536c39f19b65f70f3a9bbc70d2d94f7e1576b3e607cccd",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 117,
+          "textHash": "f7f679e2dd865d3a662e2849fd6571b004f5a1eb8d1f0b414cd617c00091ac41",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 119,
+          "textHash": "a1238a5b0a9cb8d89cc751fdcffbbc95852f748116a49517e9fd287130656172",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 121,
+          "textHash": "27dfe98c29d4c819392696f63277653aa5f0d52743c974360794762ce696beea",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 123,
+          "textHash": "8e79bc049c9e01ef57d85b9078d30024e771307af071749fc962c79c769f47a2",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 125,
+          "textHash": "abc771665b85390fcb160ff3afad3e56fdf8dd268007a6ad5548b349eb3678b9",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 127,
+          "textHash": "086f63532d423e7a53c3f36f89f0f3f1a8836fca5da24093e9098c6f8fbd9126",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 129,
+          "textHash": "66d3ecd1d58f3393622db4cb28cfee91030199eb6d0159930ef38011d4347c92",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 131,
+          "textHash": "cf9b965a545b783eac946408267ff60e8d5b725d4a42c1a83d7f3892e976c907",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 133,
+          "textHash": "a087e4242e13e5a82c0d17c3c89317cddeafddb014c11cc5c51506e83e482e86",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 135,
+          "textHash": "dc622e34250f2d970eff86714a661854959d85412ebb61c05eb428523e0076bc",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 7,
+          "textHash": "06e60a3596c8ac9e7c2e4a58ea00e83ed0a4134fc9275152e704d2a8f77239b4",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 10,
+          "textHash": "49c266baaaa70981ea188fa714d5c40cf13830d786a861c9943ae0d26a7f3fe9",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 15,
+          "textHash": "864daa4918aba2063608997d0fbd7eaf30a271dfc75042646c041dec3ffaf7d4",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 17,
+          "textHash": "cc0e38da9c41790bffef1b88af32d39ac285edce93da766810edc237cb2f1625",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 25,
+          "textHash": "0504af59d751a21afcb0291250d984a02e774ae921deca99f62dac7a56ac2f62",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 56,
+          "textHash": "edc20ad1335dcac230695e9fb72fa56230965f95ae183be0abf11c3445c1a5ed",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 72,
+          "textHash": "ca1bc6996a18b5c4598d8356bd542d112f09eb3defb56fe04915e31197f63192",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 79,
+          "textHash": "1c721b783680b60175b47a7bb0b97b73ed50f28d72416e1482e3476abd821ad6",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 169,
+          "textHash": "25b8bfdcf28cfe02d5b0e35ccedf1936096285c8f5faf76feb9f410e860a43c1",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 171,
+          "textHash": "6b2e9f1da9f0fab910cd42b2dc5bfddccd691c48b4fe614976bf8e795532a88e",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 175,
+          "textHash": "6349b8a6c3208520a2aac8014d8b3b11ef7c388b0f89faa7767e0966d4b19091",
+          "label": "NUISANCE"
+        }
+      ]
+    },
+    {
+      "id": "schneier",
+      "url": "https://www.schneier.com/essays/archives/2026/01/why-ai-keeps-falling-for-prompt-injection-attacks.html",
+      "selector": ".entry-content",
+      "layout": "security essay with quoted prompt injections",
+      "split": "fresh-held-out",
+      "htmlHash": "415a2339396975bf10e549041f4576e213f3a289807820cb13474d53a0af383c",
+      "labels": [
+        {
+          "index": 49,
+          "textHash": "c3c9769fa67d4a56df4f0b75aca7bc958f5334bbdd6d70ee1c90371782fd0097",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 51,
+          "textHash": "594dce9db7198bc820d9dd30eed759345e5452c7e8e9ca463d25c163e0099aab",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 53,
+          "textHash": "9788e54a1b563fd73a93cf3064896e4eb5f79db1bc4429a33ccd6aaf9a37b61c",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 54,
+          "textHash": "83b5e779433a8cad9e2e06a327d4c5f1f18f6bbd6cc626f059e9ae34186ce1ac",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 55,
+          "textHash": "d971bf4be0705781c0564cc13833b7f57e1f9bd2470f796267d526f9840cb433",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 57,
+          "textHash": "68d13df3bf7ab4a9e2e8da7f3e8cc27cf761102fa02f2cfdbfbca1dca300f25d",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 59,
+          "textHash": "1b3ae97f01bcb4a5907a3afe2d398ca96887b5c2cdf9a73223d5802e518bc034",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 61,
+          "textHash": "3eefb68baf313f3aaa44a302b857e155edf64331f616208b4408579e90bc4247",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 63,
+          "textHash": "f1d4a3d3d421df1fad0373e9cd0b742e162ae4dc18fa32877ff328a2d1278e69",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 65,
+          "textHash": "9fa4831ee184ef073fa082aad9048f6f573a0bd61dadd3806c847caaf72c9fad",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 67,
+          "textHash": "bc08055efaa2df7fa2acb3a951ce530b9867a375aec6fda28a9c7108e05359d5",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 69,
+          "textHash": "8461ba4c63fdc84b64b5326bb89b3d63ab265e2b0bcded00ce87567af3b32eab",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 71,
+          "textHash": "40ad7f37df0b0c6b14cb25adcc05e4b7adb713ba21f790e5a75dfc7e125b7d42",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 73,
+          "textHash": "588d70ff096f1d6bc1c9502539a47ee79a94d0f2dce12e3093045cfbaab15672",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 75,
+          "textHash": "954bd39f522d3808e3a04f2d1b5ee0bf3df5b85b2509905938f25518fe86125d",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 77,
+          "textHash": "109bdeeba173d9d7f47d23b167ae01279dc3dee2d1be2f3a88f3ba91b08826c2",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 79,
+          "textHash": "8829bb5985790bbac2c02358ac51d433c1c261b405bbbb86312000d0155b3aea",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 81,
+          "textHash": "821f4abacdb2d3e3340d7149237e00656840605c1eb5684e0cd26aa378a51265",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 83,
+          "textHash": "ab2618c85dc01448f6f38685655bdbd1850b5fa7dee1b3a16a4bf6733a10577a",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 85,
+          "textHash": "1c6ef579186f0a2e43119016aa8f6e412b8f32a9288a13d390022c91dcfd4f01",
+          "label": "ARTICLE"
+        },
+        {
+          "index": 5,
+          "textHash": "68c66ed0ede8d574d6a8213a6cbcef70bb70ab39905e045b8876758031895fec",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 10,
+          "textHash": "99af6606ff9d6cd5154d4d4e9c21e325086d3e904677cdb41d363c8a3480f862",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 11,
+          "textHash": "8c6bc099534a0251b576f6b88bd2db124ae9497c64bd9242e92a6aec23e6a73a",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 13,
+          "textHash": "f84ca2e7716bec9404f8a2806a17f3eda404f5cf33a4228f226b25a602c2e2e4",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 37,
+          "textHash": "cc0e38da9c41790bffef1b88af32d39ac285edce93da766810edc237cb2f1625",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 132,
+          "textHash": "1360c6fb985a75d4926a6e073ef76ba6ef4a6c9d8b0017a8611f88e6919718f2",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 134,
+          "textHash": "de54feec585e171c3cc78dcefdfa6078794becfbc485ddfab37e5ac87b5fe8ed",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 135,
+          "textHash": "2c9663d045c2ec5939f17450a9c6b202cc3bc75dd2954314d1e77d7aeb4e2980",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 136,
+          "textHash": "bf3da7fca428e4e1110586f31498bf40d3cc4ea846cb58c7cd9656ad26b75fdc",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 137,
+          "textHash": "1cabb17942cee1c4fcdf78414c095a09820a48e07e717e5797642524f10ba170",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 138,
+          "textHash": "eb2b4f1882d169ad2a1837aa984be74b9c70afc662b2d982e8413e591ee87f8a",
+          "label": "NUISANCE"
+        },
+        {
+          "index": 139,
+          "textHash": "d81a2a4e027a47c27e7ae46a13cc7dde6be0acc5a29ad98ca349ba4355391d0e",
+          "label": "NUISANCE"
+        }
+      ]
+    }
+  ],
+  "frozenAt": "2026-10-13T19:30:58.783Z",
+  "audit": "Manual semantic inspection before fresh inference: Seth article imperatives kept; outside newsletter/sidebar widgets excluded; Schneier quoted malicious instructions kept; direct related-essay links excluded; Graham article and its translations preserved."
+}

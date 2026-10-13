@@ -1,41 +1,31 @@
 # Master Button
 
-A discreet Safari utility for reading, reviewing unwanted passages, sharing clean links, and listening to articles on iPhone.
+A compact Safari Userscripts utility for source-preserving reading, passage review, Azure narration and clean-link sharing.
 
-**Status: implementation in progress.** The user removed review/approval gates and authorized continued implementation on 2026-10-13. A fresh Defuddle/local-language-model experiment and a separate interactive mobile design study established the starting direction. The first model failed nuisance recall. See [PROGRESS.md](PROGRESS.md) for current deliverables, evidence, and the complete remaining scope, and [REBUILD.md](REBUILD.md) for architecture and choices. Physical iPhone and live Azure verification remain separate from automated checks.
+**Experimental rebuild, `2.0.0-alpha.1`.** Review/approval gates were removed at the user’s request. Implementation continues autonomously. This is not a validated iPhone release: filtering quality still misses the target, so **automatic exclusions remain disabled**. Explicit Skip/Keep, remembered exceptions and selector rules are implemented. Physical Safari and live Azure verification remain untested.
 
-## Start here
+[Install / update](INSTALL.md) · [Progress and complete requirement ledger](PROGRESS.md) · [Validation](VALIDATION.md) · [Architecture](REBUILD.md) · [Site support](SUPPORT.md)
 
-Use [START_HERE.md](START_HERE.md) to begin a new implementation session. Read [AGENTS.md](AGENTS.md) before proposing changes.
+The pipeline is **original HTML inventory → Defuddle on a detached clone → actual local NLI language model + classification head → one authoritative decision store**. Original wording and source ranges remain available when extraction omits or cannot map a block. Page controls, reader, learning, narration and exports resolve the same decisions. Uncertain/unavailable classification stays included.
 
-| Document | Purpose |
-| --- | --- |
-| [REQUIREMENTS.md](REQUIREMENTS.md) | Product behavior, priorities, and unresolved feasibility choices |
-| [ALGORITHM_GUIDE.md](ALGORITHM_GUIDE.md) | Shared decisions, extraction, local inference, learning, and code comments |
-| [FRONTEND_GUIDE.md](FRONTEND_GUIDE.md) | Visual direction, compact interactions, and reusable components |
-| [DESIGN_REFERENCES.md](DESIGN_REFERENCES.md) | Primary sources and the design principles derived from them |
-| [ACCEPTANCE.md](ACCEPTANCE.md) | Functional, visual, model, and device validation gates |
+Implemented source includes live passage controls and Undo, reader selection/editing, site-scoped head learning, selector preview/rules, a cancellable direct Azure queue, local MP3 encoding, transcript/audio exports, URL tools and best-effort site adapters. Presence in source is distinct from device/service verification; see the ledger for partial and unverified behavior.
 
-The central workflow is **webpage HTML → Defuddle extraction → local language-model block classification → original article content with reversible nuisance exclusions**. The original page and transcript must share the same correction logic. Tapping Skip grays a passage in place; Keep restores it.
-
-## Review-stage experiments
-
-Use Node 24.19 or later. CPU binaries are included in the pinned ONNX Runtime package; the environment variable below skips its optional additional binary downloads.
+## Run locally
 
 ```sh
 ONNXRUNTIME_NODE_INSTALL=skip npm ci
-npm run build:prototype
 npm test
-npm run experiment
+npm run build
+npm run build:prototype
+node scripts/build-implementation-prototype.mjs
 ```
 
-The first experiment run downloads about 97.5 MB of model/tokenizer assets from Hugging Face, then performs inference on this computer. It sends no passages to an inference service. Real-page HTML is fetched directly from two documented sources. Cached captures and model weights stay in ignored `.cache/`; public results contain source hashes, labels, and timings.
+The single generated script and matching update metadata are under `dist/`. The deterministic build manifest records their hash and dependency versions.
 
-Open [prototype/review.html](prototype/review.html) for the self-contained interactive study, or [prototype/gallery.html](prototype/gallery.html) for comparable views. Speech and URL/site tools are explicitly unconnected. Model results and reproduction details are in [experiments/filtering/README.md](experiments/filtering/README.md).
+[Original design study](prototype/review.html) and [implementation preview](prototype/implementation.html) are separate from model evaluation. The implementation preview uses the production UI/core with mock extension storage and disconnected model/Azure integration. A gallery contains independent comparison frames; use one study to try synchronized corrections.
 
-## Rebuild boundaries
+[Actual model experiments](experiments/evaluation/README.md) include rejected configurations and author-labeled public-page/fixture results. No model is mocked in those evaluations. Public weights and temporary HTML captures stay ignored; article prose is not republished. The frozen base language model has no weight fine-tuning. Explicit corrections can train the small classification head with real gradient updates.
 
-Rebuild from these documents. Choose an architecture and local model on evidence; the former implementation is not a template. Demonstrate filtering and a polished mobile interface while implementing the complete feature set. Keep unavailable or unverified capabilities explicit.
+## Project instructions
 
-The reset is a normal commit that preserves repository history. The last implementation snapshot is commit `a9a28ea5bd75ecf1ab2f8a35e5cdbea9cf8c25aa`; recovery is possible if explicitly requested. Previous `dist/` install and update URLs are withdrawn until a new release is published. Already installed copies are not remotely uninstalled by this reset.
-
+Read [AGENTS.md](AGENTS.md), [REQUIREMENTS.md](REQUIREMENTS.md), [ALGORITHM_GUIDE.md](ALGORITHM_GUIDE.md), [FRONTEND_GUIDE.md](FRONTEND_GUIDE.md), [DESIGN_REFERENCES.md](DESIGN_REFERENCES.md) and [ACCEPTANCE.md](ACCEPTANCE.md). The rejected historical implementation was not retrieved or reused. No stable/full-product completion or green platform/service claim is made by this alpha.

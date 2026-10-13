@@ -1,0 +1,42 @@
+{
+  "kind": "Native Sites publication render of production UI with authored source and mock integrations",
+  "captureViewport": {
+    "width": 1200,
+    "height": 750
+  },
+  "studyFrames": {
+    "width": 390,
+    "height": 844,
+    "scale": 0.7
+  },
+  "renderEngineVersion": "Not reported by service",
+  "interactionValidation": "JSDOM only; browser QA unavailable",
+  "physicalIphoneSafari": "Not run",
+  "liveAzure": "Not run",
+  "captures": [
+    {
+      "file": "implementation-light.png",
+      "siteVersion": 11,
+      "siteVersionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_ca66721c4b0481918d339873792480db",
+      "siteSourceCommit": "4d6909076e150cad6effd5fc4239294f3a6db7d7"
+    },
+    {
+      "file": "implementation-dark.png",
+      "siteVersion": 10,
+      "siteVersionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_96b4776fb9f88191941bbc0ac70555bc",
+      "siteSourceCommit": "f1303052f4eccb3b527bc8c36f9f4ddfbfb26e9d"
+    },
+    {
+      "file": "implementation-light-busy.png",
+      "siteVersion": 12,
+      "siteVersionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_d4bcfbb216cc8191b668f14f878e3352",
+      "siteSourceCommit": "85766a8a9094528f435cd4285fe15f884a192eda"
+    },
+    {
+      "file": "implementation-dark-busy.png",
+      "siteVersion": 15,
+      "siteVersionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_b4c441ac8f80819187c0aa65492bae5e",
+      "siteSourceCommit": "be7ef6159c1da4566fff09c2a8a4fcb1b435d841"
+    }
+  ]
+}

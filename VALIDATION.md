@@ -1,20 +1,36 @@
-# Validation record and next checks
+# Validation record — experimental alpha
 
-## Reproduce the work that was run
+## Reproduce local checks
 
 ```sh
 ONNXRUNTIME_NODE_INSTALL=skip npm ci
-npm run build:prototype
 npm test
-npm run experiment
-MB_RESULTS=experiments/filtering/results-warm.json npm run experiment
+npm run build
+npm run build:prototype
+node scripts/build-implementation-prototype.mjs
 ```
 
-Node v24.19.0 on Linux x64; Transformers.js 4.3.1, native ONNX 1.30.0, Defuddle 0.19.5, linkedom 0.18.12. Test DOM uses JSDOM 29.0.1 with only our authored script executed; no external resource loading. All eleven tests passed. No GitHub Actions run was claimed.
+All **44 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. GitHub Actions also passed the 44-test/source-build workflow on commit `855426e7eb4beab7cb79b6a47c26dc06160bac1e` ([run 38482945224](https://github.com/ksariash/userscript-master-button/actions/runs/38482945224)). It ran npm ci, tests, build and a clean generated-file diff; no model download/evaluation, live Azure or physical Safari check.
 
-The model test uses a revision-pinned downloaded language model and real tensor execution. Policy tests supply assessments intentionally; they are not model evaluation. The GUI study uses authored article data and explicit corrections; its speech controls make no network requests. Node model inference and the prototype remain separate.
+## Actual model evaluation
 
-The real-page labels cover twelve ARTICLE blocks from two public pages (WebKit's Safari 26.0 article and Steph Ango's saw essay). The nuisance cases, including the related-books trap, are authored fixtures. Labels were set by the implementation author before inference and are not independently audited. There is no held-out precision/recall claim. Source page hashes and exact source IDs are in the raw results; captures stay ignored and are not republished.
+Real pinned ONNX inference ran separately on desktop CPU: FLAN-T5-small, Qwen3 0.6B and DeBERTa NLI. The initial 169 labels cover eight pages/four layouts; an additional 85 cases cover three new sites. Six initially mislabelled related links were corrected by semantic audit; initial manifests and Qwen results remain. Labels were set by the implementation author, without independent audit. Later debugging reused regression inputs; current reports are not an untouched final holdout.
+
+The current 85-case NLI/head report has **one ARTICLE false exclusion, 95% NUISANCE precision, 82.6% recall and three abstentions**. Abstentions count as nuisance misses. Targets are unmet; `baseline-head.json` keeps `validatedExclusion: false`. Automatic exclusion recall is therefore zero, and original text remains included unless explicitly corrected or matched by a saved rule. Scores are uncalibrated activations.
+
+Weights: 87,246,587 bytes, pinned revision and integrity in the evaluation/docs. Desktop feature runs took roughly nine seconds to initialize and peaked around 803–875 MB for the whole process. These are not Safari or iPhone resource measurements. See [the raw evaluation record](experiments/evaluation/README.md).
+
+## Actual browser-runtime code in Node
+
+The smaller browser worker uses Hugging Face Tokenizers 0.2.0 and ONNX Runtime Web directly. It omits unrelated model/task registries and embeds only one worker. Against Transformers.js/native CPU on four authored inputs, its native-CPU feature values matched within 5.6e-17 with equal token counts.
+
+Real one-thread WASM execution in Node differed from native CPU by up to 0.154 on those inputs. The separate 85-case WASM regression still had one ARTICLE error, 95% precision, 82.6% recall and three abstentions. It took 1,766 ms to initialize from local cached files; median block 665 ms, p95 1,470 ms, total 71,722 ms. Whole-process peak RSS was 1,389,916,160 bytes, including the evaluation process and its imported dependencies. This is actual WASM execution, **not browser or physical iPhone validation**, and not a new independent holdout. Do not transfer native performance/calibration claims to Safari or WebGPU.
+
+Reproduce with `node experiments/evaluation/runtime-parity.mjs`, `MB_RUNTIME=wasm node experiments/evaluation/runtime-parity.mjs`, and `MB_RUNTIME=wasm MB_SPLIT=fresh-held-out node experiments/evaluation/features.mjs`. The WASM parity report deliberately fails the numerical-equivalence criterion; preserve it. The production exclusion validation flag remains false.
+
+## Actual codec verification
+
+The local Lame encoder produced a mono 24 kHz MP3 from two authored tones: FFprobe reported 2.064 s and 24,768 bytes. FFmpeg decoded and sought without error. This proves a desktop codec path, not live Azure output, native iPhone sharing or locked-screen playback. Current speech tests use mock PCM and transport.
 
 ## Rendering and browser limits
 

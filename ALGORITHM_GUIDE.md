@@ -47,3 +47,4 @@ Bound concurrency and storage, release stale audio/resources, and distinguish re
 Keep extraction, classification, decision policy, learning, persistence, DOM rendering, and audio work behind small testable contracts. Prefer explicit async state and lifecycle cleanup over global flags and screen-specific side effects. Choose organization after the first working slice, rather than reproducing the old concatenated modules.
 
 Comments should explain **why**: precedence, source-mapping assumptions, platform workarounds, resource limits, or a race prevented. Document inputs/outputs and observable failure behavior at algorithm boundaries. Cite an official source and version for unusual API constraints. Explain the failure case of a workaround and how it can be removed. Avoid comments that restate syntax, unverifiable accuracy claims, and historical release narration. TODOs need a concrete missing behavior and acceptance condition.
+
