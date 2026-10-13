@@ -11,7 +11,7 @@
 
 ## Browser/device boundary
 
-All five Chromium suites were attempted locally; Chromium exits SIGTRAP before opening a page. GitHub Actions successfully ran the suites on the previous candidate and uploaded screenshots. The stabilization commit must pass the same workflow, including crowded-layout and focus assertions, before it is marked ready. Local jsdom is not layout evidence.
+All five Chromium suites were attempted locally; Chromium exits SIGTRAP before opening a page. GitHub Actions run [38430806720](https://github.com/ksariash/userscript-master-button/actions/runs/38430806720) passed all five Chromium suites on code commit `2daba57b614b3ff66c3b290d28011edf191ee8ce`, including crowded-layout, toolbar bounds and stable-focus assertions. Screenshots cover light/dark menu, Teach, Reader and page review. The contextual menu measured 325px and Speech approximately 480px tall at 390x844. Local jsdom is not layout evidence.
 
 Real MiniLM runtime/weights, live Azure synthesis, actual website DOMs and physical iPhone Safari have not been verified by these tests. jsdom does not measure layout. Fake vectors establish state transitions, not classifier quality.
 
