@@ -1,3 +1,53 @@
+# iPhone Master Button — 0.2.0
+
+A compact Safari Userscripts overlay with shared page/transcript corrections, local article extraction, and Azure narration.
+
+## What changed
+
+- Bundled Defuddle 0.19.5 extracts from a detached document while source IDs map back to original passages. Original wording remains intact; extraction membership alone never deletes prose.
+- **Filter → Review passages on page** closes the drawer and adds temporary Skip/Keep controls. Skipped passages gray in place and update the transcript immediately. Undo reverses the last correction and its prototype learning. Done removes controls. Use Advanced filtering to opt into collapsing skipped passages.
+- One passage store drives page styling, reader inclusion, speech requests and exports. Source text changes invalidate stale reader chunks until re-extraction.
+- Compact Teach view, expandable explanations, consolidated styling, usable touch targets and preserved form drafts.
+- Repair for malformed saved examples, broken mutation observation, duplicate training, transcript tap handling, buffering continuation and skipped queued speech requests.
+
+## Install or update
+
+Save `dist/master-button.user.js` in the iPhone Userscripts script folder and enable the Safari extension on your chosen sites. Disable earlier standalone scripts. The distribution metadata and install permissions are unchanged apart from version 0.2.0. Settings stay under `master-button:v1`; the Azure key remains under its separate extension-storage key. Valid legacy object-shaped examples are normalized; malformed entries are ignored without clearing unrelated settings.
+
+Until this PR is merged, use its branch's distribution to try the candidate. The automatic update URL still tracks `main`.
+
+## Filtering and speech
+
+Manual Keep/Skip wins over automatic classification. New corrections train one local prototype per sample; legacy token statistics are preserved but no longer double-incremented. MiniLM is an embedding model, not a generative model or weight fine-tuning. Its runtime/weights still download externally, while inference runs locally. If unavailable, review the retained text or disable Local AI before narration. Defuddle is bundled and uses no third-party extraction fallback.
+
+Speech settings require your own Azure key and region. Only enabled text is submitted; skipping after a request was sent cannot retract it. Already prepared unrelated audio is retained. Changing voice, region or quality invalidates prepared audio. Background/locked Safari transitions and combined MP3 seeking remain device-dependent.
+
+## Development
+
+```sh
+npm ci
+python3 build.py
+node --check dist/master-button.user.js
+npm test
+python3 -m pip install playwright
+python3 -m playwright install chromium
+python3 tests/browser.py
+python3 tests/reddit_delayed.py
+python3 tests/experience.py
+python3 tests/ux_revision.py
+python3 tests/page_review.py
+```
+
+Read **ALGORITHM_GUIDE.md** and **FRONTEND_GUIDE.md** before making changes. Build from `src/`, retain the licensed pinned vendor bundle, and commit source, matching distribution/metadata, documentation and tests together. See TESTING.md for verified scope and remaining device checks.
+
+## Limitations
+
+DOM and simulated model/audio tests do not establish physical iPhone behavior, real model accuracy or live Azure connectivity. Review controls prefer a margin but use an edge overlay on full-width pages; crowded short blocks need device review. Source mapping is conservative and falls back to retained original blocks. Dynamically changed article content requires re-extraction in an already-open reader. Site-specific media download, Reddit cleanup, consent handling and MP3 export retain the limitations described below.
+
+---
+
+## Historical release notes (0.1.x; superseded above where different)
+
 # iPhone Master Button
 
 One floating Safari **Userscripts** drawer with site-aware controls, editable clean links, conservative nuisance hiding, a reviewable article reader, and Azure Speech narration.
@@ -88,3 +138,4 @@ Speech: choose the Azure region in the region dropdown; save your key, then allo
 ## v0.1.4 follow-up: touch-target overlap
 
 Position the compact drawer adjacent to (not over) the draggable launcher. It opens above the launcher when room permits and below it near the top of the screen. Two physical touch events in the mobile Chromium simulation now **open and close** reliably with no overlapping overlay intercepting the second tap. The actual iPhone Safari gesture still requires device verification. All v0.1.3 filter and reader improvements are included.
+

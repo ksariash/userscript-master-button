@@ -1,15 +1,16 @@
 from pathlib import Path
+import os
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parent.parent
 html='''<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><header><a>Get the Reddit app</a></header><main><article><h1>Example article heading</h1><p>The first paragraph is an extended sample of article prose, with real content about research and development over the past several years.</p><aside class="related-block"><p>Check out these related articles</p></aside><p>This second paragraph is a little longer and should be kept when exporting or preparing article narration because it is main content.</p></article></main><div id="xpromo-bottom-sheet">Get the Reddit app</div><img width="450" height="450" src="https://images.example.com/photo.jpg"></body></html>'''
 with sync_playwright() as p:
- b=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+ b=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE'),headless=True,args=['--no-sandbox'])
  page=b.new_page(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
  page.set_default_timeout(6000)
  page.on('pageerror',lambda e:print('PAGE ERROR',e))
  print('start content',flush=True)
  page.set_content(html,wait_until='domcontentloaded')
- page.evaluate('''() => {window.GM={getValue:async(k,d)=>d,setValue:async()=>true,setClipboard:async()=>true,xmlHttpRequest:async()=>({status:200,response:'',responseText:''})};}''')
+ page.evaluate('''() => {window.GM={getValue:async(k,d)=>k.endsWith(':azure')?d:{semanticAuto:false},setValue:async()=>true,setClipboard:async()=>true,xmlHttpRequest:async()=>({status:200,response:'',responseText:''})};}''')
  print('evaluating script',flush=True)
  page.evaluate((ROOT/'dist/master-button.user.js').read_text().replace('const siteName = (host=location.hostname)',"const siteName = (host='www.reddit.com')"))
  print('waiting for button',flush=True)
@@ -40,3 +41,4 @@ with sync_playwright() as p:
  page.screenshot(path=str(ROOT/'dist/chromium-test.png'))
  print('Chromium integration: button, Reddit cleanup, filter preview/cancel, reader correction PASS')
  b.close()
+

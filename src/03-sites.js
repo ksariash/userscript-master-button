@@ -94,7 +94,7 @@ function redditRestoreScrollOwnership(){
 }
 
 function siteClean(){
- if(!cleanupEnabled()||siteName()==='other'||isAuthPage())return;
+ if(state.filterReview||!cleanupEnabled()||siteName()==='other'||isAuthPage())return;
  const name=siteName();if(name==='reddit')toggleRedditCSS(true);let hiddenPromos=0;for(const sel of siteSelectors[name]||[])for(const n of safeMatches(sel))if(hideNode(n,'Known '+name+' app prompt'))hiddenPromos++;
  if(name==='reddit')hiddenPromos+=redditExtraPromos();
  if(['reddit','instagram','facebook','x','linkedin'].includes(name)){
@@ -157,3 +157,4 @@ function expandFacebookComments(){
  if(target){target.click();notify('Requested Facebook’s native comments.');}else notify('No accessible native comments control found.');
 }
 function slashdotOlder(){if(siteName()!=='slashdot')return;const a=[...document.querySelectorAll('a')].find(x=>/older articles|older stories|more stories/i.test(text(x.textContent)));if(a?.href)location.assign(a.href);else notify('Older articles link not found.');}
+

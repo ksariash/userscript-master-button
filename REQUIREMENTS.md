@@ -184,3 +184,4 @@ Verify at least these scenarios:
 8. Updates preserve preferences, activate only a valid working version, and recover safely from failures.
 
 Prioritize accurate content preservation, responsive playback, easy correction, and reliable updates over cleverness or unnecessary complexity.
+

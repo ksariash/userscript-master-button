@@ -5,7 +5,7 @@ function notify(message){if(!host)return;const el=host.shadowRoot.querySelector(
 async function shareURL(u){try{if(navigator.share){await navigator.share({url:u});return;}}catch(e){if(e.name==='AbortError')return;}await copyText(u);notify('Copied link.');}
 async function copyText(v){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(v);return;}catch{}}if(typeof GM!=='undefined'&&typeof GM.setClipboard==='function'){await GM.setClipboard(v);return;}throw Error('No clipboard permission; use the URL editor to copy manually.');}
 function openView(v){
- if(state.filterReview&&!['teach','select-text','picker','filter','why'].includes(v))endFilterReview();
+ if(state.filterReview&&!passageStore.review&&!['teach','select-text','picker','filter','why'].includes(v))endFilterReview();
  state.view=v;render();
 }
 function positionCSS(){const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;return `left:${Math.max(5,(vv?.offsetLeft||0)+w-56-Math.max(5,Math.min(w-66,prefs.position.right)))}px;top:${Math.max(5,(vv?.offsetTop||0)+(vv?.height||innerHeight)-56-Math.max(8,Math.min((vv?.height||innerHeight)-66,prefs.position.bottom)))}px;bottom:auto;right:auto;`;}
@@ -44,144 +44,29 @@ const iconPaths={
 function ico(name,size=19){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]||iconPaths.chevron}</svg>`;}
 function tile(action,icon,label){return `<button class="mb-tile" data-action="${esc(action)}" type="button">${ico(icon,21)}<span>${esc(label)}</span></button>`;}
 function compact(action,icon,label,end=''){return `<button class="mb-compact" data-action="${esc(action)}" type="button"><span class="mb-compact-icon">${ico(icon,18)}</span><span class="mb-compact-label">${esc(label)}</span>${end?`<span class="mb-compact-end">${esc(end)}</span>`:ico('chevron',15)}</button>`;}
-const styles=`
-:host{all:initial;color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif!important;-webkit-font-smoothing:antialiased;}
-*,*::before,*::after{box-sizing:border-box;}
-button,input,textarea,select{font-family:inherit;-webkit-tap-highlight-color:transparent;}
-button{cursor:pointer;}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent,#528cff);outline-offset:2px;}
-.mb-launch{position:fixed;${positionCSS()}width:43px;height:43px;border-radius:50%;border:1px solid rgba(255,255,255,.19);background:rgba(24,29,40,.78);color:white;box-shadow:0 5px 20px #0003;z-index:2;font:500 20px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
-.mb-count{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;border-radius:9px;background:#4c80ef;color:white;font:600 10px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:2px 3px;}
-.mb-panel{--fg:#17202d;--muted:#747f90;--bg:#f8f9fc;--surface:#fff;--tile:#fff;--bd:#e7eaf0;--accent:#3766df;--tint:#edf3ff;position:fixed;right:10px;bottom:calc(env(safe-area-inset-bottom) + 64px);width:min(370px,calc(100vw - 20px));max-height:min(76dvh,650px);overflow:auto;overscroll-behavior:contain;z-index:3;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:24px;box-shadow:0 16px 55px rgba(0,0,0,.22),0 2px 6px rgba(0,0,0,.05);font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;pointer-events:auto;-webkit-overflow-scrolling:touch;}
-@media(prefers-color-scheme:dark){.mb-panel{--fg:#f5f6fb;--muted:#959cae;--bg:#1a1c24;--surface:#242732;--tile:#272a35;--bd:#343744;--accent:#95b4ff;--tint:#2c3852;}}
-.mb-panel.reader{inset:0;width:100%;max-height:100dvh;border:0;border-radius:0;display:flex;flex-direction:column;background:var(--bg);}
-.mb-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;background:var(--bg);padding:10px 12px 9px;gap:9px;border-bottom:1px solid var(--bd);}
-.mb-head h2{font-size:15px;line-height:1.25;font-weight:720;letter-spacing:-.35px;margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-.mb-head-start{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
-.mb-head button{flex-shrink:0;}.mb-brand{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--tint);color:var(--accent);font:600 19px system-ui;flex:none;}
-.mb-small{border:0;background:var(--surface);color:var(--fg);border-radius:10px;padding:7px 9px;font:600 12px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;min-height:32px;display:inline-flex;gap:5px;justify-content:center;align-items:center;}
-.mb-icon-btn{width:40px;height:40px;padding:9px;}
-.mb-body{padding:10px 12px 12px;display:grid;gap:9px;}
-.mb-section{display:grid;gap:7px;}
-.mb-section-head{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:1px 1px 0;}
-.mb-section-title{font-size:11px;font-weight:730;letter-spacing:.35px;color:var(--muted);text-transform:uppercase;}
-.mb-section-note{font:500 10px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--muted);}
-.mb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
-.mb-tile{min-width:0;min-height:67px;background:var(--tile);border:1px solid var(--bd);border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--fg);padding:9px 4px 8px;}
-.mb-tile svg{color:var(--accent);flex:none;}
-.mb-tile span{font:600 11px/1.14 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;white-space:nowrap;letter-spacing:-.12px;}
-.mb-compact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-.mb-compact{border:1px solid var(--bd);border-radius:12px;background:var(--tile);color:var(--fg);min-width:0;min-height:44px;padding:7px 9px;display:flex;align-items:center;gap:7px;text-align:left;font:600 11.7px/1.15 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;}
-.mb-compact-icon{color:var(--accent);flex:none;display:flex;}.mb-compact-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}.mb-compact-end{font:650 10px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--accent);white-space:nowrap;}.mb-compact>svg:last-child{color:var(--muted);opacity:.55;flex:none;}
-.mb-action{display:flex;gap:9px;align-items:center;justify-content:flex-start;background:var(--tile);color:var(--fg);border:1px solid var(--bd);border-radius:11px;min-height:44px;padding:8px 10px;text-align:left;font:600 12px/1.25 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;cursor:pointer;}
-.mb-action span:first-child{width:22px;flex-shrink:0;font-size:15px;text-align:center;}.mb-action:disabled,.mb-small:disabled{opacity:.48;}
-.mb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-.mb-muted{font-size:11px;line-height:1.45;color:var(--muted);margin:0;}
-.mb-footer{font:10px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--muted);text-align:center;padding:1px 0 1px;}
-.mb-rule{background:var(--surface);border:1px solid var(--bd);border-radius:11px;padding:9px;display:grid;gap:6px;overflow-wrap:anywhere;}
-.mb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.mb-field{display:grid;gap:4px;font-size:11px;color:var(--muted);font-weight:600;}
-.mb-input,.mb-select,.mb-textarea{width:100%;min-height:38px;border:1px solid var(--bd);border-radius:10px;background:var(--surface);color:var(--fg);font:13px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;padding:8px;}
-.mb-textarea{min-height:102px;resize:vertical;font-size:13px;}
-.mb-transcript{flex:1;min-height:0;overflow:auto;padding:8px 14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
-.mb-paragraph{display:flex;align-items:flex-start;gap:8px;padding:12px 0;border-bottom:1px solid var(--bd);line-height:1.65;white-space:pre-wrap;}
-.mb-paragraph small{font:500 10px -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:var(--muted);display:block;margin-bottom:3px;}
-.mb-paragraph.current{background:var(--tint);border-radius:12px;margin:3px -6px;padding:10px 6px;}
-.mb-paragraph.excluded{opacity:.46;}.mb-paragraph button{border:1px solid var(--bd);background:var(--surface);color:var(--fg);border-radius:10px;padding:6px;min-width:33px;min-height:33px;}
-.mb-controls{flex:none;border-top:1px solid var(--bd);padding:10px 12px calc(12px + env(safe-area-inset-bottom));display:grid;gap:9px;background:var(--bg);}
-.mb-range{width:100%;accent-color:var(--accent);height:14px;}.mb-player-row{display:flex;justify-content:space-between;align-items:center;gap:7px;}.mb-player-row .mb-small{min-width:38px;}.mb-primary-play{height:44px;min-width:53px!important;border-radius:14px;background:var(--fg);color:var(--bg);}.mb-player-extra{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}.mb-player-extra .mb-action{justify-content:center;text-align:center;flex-direction:column;gap:4px;padding:7px 3px;font-size:10px;min-height:44px;}.mb-player-extra .mb-action span:first-child{height:18px;width:20px;}
-.mb-toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 61px);left:10px;right:10px;margin:auto;max-width:370px;color:#fff;background:rgba(21,25,35,.95);padding:10px 12px;border-radius:12px;font:12px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;z-index:5;pointer-events:none;box-shadow:0 8px 25px #0005;}
-.mb-toast[hidden],.mb-panel[hidden]{display:none;}.mb-pill{font:600 10px;color:var(--muted);background:var(--surface);padding:4px 7px;border-radius:7px;}
-.mb-preview{height:95px;border-radius:11px;background:var(--surface);display:grid;place-items:center;overflow:hidden;}.mb-preview img,.mb-preview video{max-width:100%;max-height:95px;object-fit:contain;}
-
-/* v0.1.2 compact iPhone design tokens: 44pt target, 7pt between groups,
-   6/12pt gutters, separators instead of outlines, one obvious accent. */
-.mb-panel{--fg:#1c2535;--muted:#6e7787;--bg:#f4f5f8;--surface:#fff;--tile:#fff;--bd:#e5e8ee;--accent:#386de7;--tint:#eef3ff;border-radius:19px;width:min(352px,calc(100vw - 24px));max-height:min(73dvh,560px);font-size:13px;}
-@media(prefers-color-scheme:dark){.mb-panel{--fg:#f6f7fb;--muted:#a4abba;--bg:#171a21;--surface:#232730;--tile:#232730;--bd:#333743;--accent:#a0bdff;--tint:#293a55;}}
-.mb-head{padding:4px 8px;border-bottom:1px solid var(--bd);min-height:45px;}
-.mb-head h2{font-size:15px;font-weight:680;letter-spacing:-.27px;}
-.mb-icon-btn{height:42px;width:42px;border-radius:12px;background:transparent;padding:10px;}
-.mb-brand{height:30px;width:30px;border-radius:10px;}
-.mb-body{padding:9px 11px 11px;gap:7px;}
-.mb-section{gap:5px;}.mb-section-title{font-size:10px;letter-spacing:.6px;}.mb-section-note{font-size:10px;}
-.mb-tiles{gap:5px;}.mb-tile{min-height:59px;border-radius:12px;gap:3px;border-color:transparent;padding:6px 3px;}.mb-tile svg{height:19px;width:19px;}.mb-tile span{font-size:10.5px;}
-.mb-compact-grid{gap:5px;}.mb-compact{border-color:transparent;border-radius:11px;min-height:44px;padding:7px 10px;font-size:12px;}
-.mb-grid{gap:5px;}.mb-action{border-color:transparent;border-radius:11px;min-height:44px;padding:8px 11px;font-size:12.5px;font-weight:570;}
-.mb-small{min-height:39px;font-size:12px;}
-.mb-row{gap:6px;}.mb-rule{gap:6px;padding:9px;border-color:transparent;}
-.mb-field{font-size:11px;gap:3px;}.mb-input,.mb-select,.mb-textarea{min-height:44px;background:var(--surface);border-color:var(--bd);border-radius:11px;padding:8px 11px;font-size:14px;}
-.mb-settings-group{background:var(--surface);border-radius:13px;overflow:hidden;}
-.mb-setting{display:flex;align-items:center;min-height:47px;gap:9px;padding:2px 11px;border-bottom:1px solid var(--bd);}
-.mb-setting:last-child{border-bottom:0;}.mb-setting-label{font-weight:590;flex:0 0 90px;font-size:12.5px;}
-.mb-setting-value{flex:1;min-width:0;}.mb-setting-value .mb-input,.mb-setting-value .mb-select{min-height:40px;border:0;border-radius:0;background:transparent;padding:6px 2px;text-align:right;font-size:13px;}
-.mb-setting-value .mb-select{text-align-last:right;}.mb-setting .mb-small{flex:none;min-width:38px;min-height:40px;}
-.mb-caption{color:var(--muted);font-size:11px;line-height:1.35;padding:1px 3px;}
-.mb-kicker{font-size:10px;letter-spacing:.55px;text-transform:uppercase;font-weight:740;color:var(--muted);}
-.mb-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);min-width:0;line-height:1.35;}
-.mb-dot{width:7px;height:7px;border-radius:50%;background:#adb3bf;flex:none;}.mb-dot.ready{background:#28a36c;}.mb-dot.loading{background:#e9a63d;}.mb-dot.error{background:#d95c67;}
-.mb-status-text{overflow-wrap:anywhere;min-width:0;}
-.mb-minor{border:0;background:transparent;color:var(--accent);font-size:12px;min-height:40px;padding:4px 9px;font-weight:650;}
-.mb-voice-search{border:0;border-bottom:1px solid var(--bd);background:transparent;width:100%;padding:9px 12px;min-height:41px;color:var(--fg);font-size:13px;outline:none;}
-.mb-selection{display:grid;gap:6px;}.mb-selection blockquote{margin:0;padding:9px 11px;border-left:2px solid var(--accent);background:var(--surface);border-radius:8px;font-size:12px;max-height:84px;overflow:auto;}
-.mb-fieldset{display:grid;gap:4px;}.mb-inline{display:flex;align-items:center;gap:4px;min-width:0;}
-.mb-voice-status{font-size:10.5px;color:var(--muted);}
-.mb-transcript{padding:6px 12px;}.mb-paragraph{padding:8px 0;line-height:1.5;}
-.mb-controls{padding:7px 11px calc(8px + env(safe-area-inset-bottom));gap:6px;}
-.mb-pill{border-radius:6px;}
-@media(prefers-reduced-motion:no-preference){.mb-panel:not(.reader){animation:mb-in .15s cubic-bezier(.2,.8,.2,1);}@keyframes mb-in{from{opacity:.85;transform:translateY(5px) scale(.99)}to{opacity:1;transform:none}}}
-.mb-panel.view-speech .mb-body{gap:6px;padding:7px 10px 8px;}
-.mb-panel.view-speech .mb-setting{min-height:44px;}
-.mb-panel.view-speech .mb-row{min-height:36px;}
-.mb-panel.view-speech .mb-caption{margin:0;}
-/* 0.1.3 cohesive touch-first revision: one translucent sheet, grouped surfaces,
-   quiet explanations, full-size gesture targets and stable reader layout. */
-.mb-launch{width:56px;height:56px;border:0;background:transparent;box-shadow:none;color:#fff;font-size:23px;isolation:isolate;}
-.mb-launch::before{content:"";position:absolute;inset:6px;background:rgba(29,35,48,.91);border:1px solid rgba(255,255,255,.22);border-radius:50%;box-shadow:0 4px 16px #0005;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:-1;}
-.mb-launch-symbol{position:relative;pointer-events:none;}.mb-count{top:2px;right:2px;}
-.mb-panel{--fg:#171b24;--muted:#667085;--bg:rgba(248,249,252,.96);--surface:rgba(255,255,255,.96);--tile:transparent;--bd:rgba(24,34,56,.10);--accent:#366be5;--tint:rgba(56,106,229,.08);width:min(352px,calc(100vw - 20px));border-radius:23px;border:1px solid rgba(255,255,255,.68);box-shadow:0 20px 70px #10172840,0 1px 8px #10172814;-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);overflow:auto;}
-@media(prefers-color-scheme:dark){.mb-panel{--fg:#f4f6fa;--muted:#a1a8b7;--bg:rgba(24,28,36,.97);--surface:#282d38;--tile:transparent;--bd:rgba(255,255,255,.09);--accent:#a0baff;--tint:rgba(126,160,255,.14);border-color:#454957;}}
-.mb-head{min-height:48px;padding:6px 10px;gap:8px;border-color:var(--bd);background:transparent;}
-.mb-head h2{font-size:15px;font-weight:750;letter-spacing:-.35px;}
-.mb-icon-btn{background:var(--surface);border-radius:13px;min-height:44px;min-width:44px;}
-.mb-body{gap:10px;padding:10px 12px 11px;}
-.mb-kicker,.mb-section-title{font-weight:720;font-size:10px;letter-spacing:.7px;}
-.mb-tiles{gap:0;border-radius:15px;background:var(--surface);border:1px solid var(--bd);overflow:hidden;}
-.mb-tile{min-height:66px;border:0;border-radius:0;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:transparent;gap:5px;}
-.mb-tile:nth-child(3n){border-right:0;}.mb-tile:nth-last-child(-n+3){border-bottom:0;}.mb-tile:active{background:var(--tint);}
-.mb-compact-grid{gap:0;border-radius:15px;overflow:hidden;border:1px solid var(--bd);background:var(--surface);}
-.mb-compact{border:0;border-radius:0;min-height:46px;background:transparent;border-bottom:1px solid var(--bd);padding:9px 10px;}
-.mb-compact:nth-child(odd){border-right:1px solid var(--bd);}.mb-compact:nth-last-child(-n+2){border-bottom:0;}
-.mb-settings-group{border:1px solid var(--bd);border-radius:15px;background:var(--surface);overflow:hidden;}
-.mb-setting{min-height:48px;padding:5px 11px;border-bottom:1px solid var(--bd);gap:7px;}
-.mb-setting:last-child{border-bottom:0;}
-.mb-select{border:0;background:transparent;max-width:100%;text-align:right;font-weight:600;}
-.mb-voice-search{background:var(--surface);border:0;border-bottom:1px solid var(--bd);}
-.mb-action{border-radius:13px;background:var(--surface);min-height:44px;}
-.mb-semantic-status{display:flex;gap:8px;align-items:center;padding:10px 11px;border:1px solid var(--bd);border-radius:14px;background:var(--surface);flex-wrap:wrap;}
-.mb-status-copy{display:grid;gap:2px;flex:1;}.mb-status-copy strong{font-size:12px;}.mb-status-copy small{color:var(--muted);font-size:10px;}.mb-warn{width:100%;font-size:11px;color:#cc7744;overflow-wrap:anywhere;}
-.mb-action-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}.mb-strip-action{display:flex;justify-content:center;align-items:center;gap:5px;min-height:45px;background:var(--surface);border:1px solid var(--bd);border-radius:13px;color:var(--fg);font-size:11px;font-weight:650;}.mb-strip-action.selected{color:var(--accent);border-color:var(--accent);}
-.mb-switch{min-width:50px;width:50px;height:32px;border:0;border-radius:18px;background:#c9cfda;position:relative;padding:3px;}
-.mb-switch span{display:block;background:white;width:26px;height:26px;border-radius:50%;box-shadow:0 1px 3px #0003;transition:transform .16s;}.mb-switch.is-on{background:#366be5;}.mb-switch.is-on span{transform:translateX(18px);}
-.mb-range-setting{min-height:35px;border:0;}.mb-range-setting label{font-weight:640;font-size:12px;}.mb-range-setting output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:760;}
-#mb-threshold,#mb-seed-threshold{width:calc(100% - 22px);margin:3px 11px 10px;accent-color:var(--accent);}
-.mb-hint-row{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;padding:0 4px;margin-top:-4px;}
-.mb-score-card{padding:11px;background:var(--surface);border:1px solid var(--bd);border-radius:14px;}
-.mb-score-header{display:flex;align-items:center;justify-content:space-between;}.mb-score-number{font:730 20px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent);font-variant-numeric:tabular-nums;}
-.mb-score-bars{display:grid;gap:5px;margin:10px 0;}.mb-score-bars>div{display:flex;justify-content:space-between;align-items:center;gap:9px;color:var(--muted);font-size:11px;}.mb-score-bars b{color:var(--fg);font-variant-numeric:tabular-nums;}
-.mb-selection{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:10px;}.mb-selection blockquote{font-size:13px;line-height:1.5;max-height:26vh;overflow:auto;margin:5px 0 0;}
-.mb-panel.reader{border-radius:0;background:var(--bg);}.mb-panel.reader .mb-head{min-height:50px;}.mb-transcript{padding:4px 15px 16px;scrollbar-width:thin;}
-.mb-paragraph{gap:9px;padding:13px 0;line-height:1.55;border-color:var(--bd);}.mb-paragraph.current{background:var(--tint);margin:0 -9px;padding:13px 9px;}
-.mb-paragraph.excluded{opacity:.55;}.mb-pass-toggle{width:44px;min-width:44px;height:44px;min-height:44px;border-radius:13px!important;background:var(--surface)!important;display:grid;place-items:center;color:var(--fg);}
-.mb-pass-content{flex:1;min-width:0;}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;margin:0 0 5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
-.mb-why-btn{font:650 10px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent)!important;border:0!important;display:inline-flex;align-items:center;gap:2px;min-height:36px!important;padding:4px 7px!important;background:transparent!important;}
-.mb-pass-text{line-height:1.58;letter-spacing:-.1px;overflow-wrap:anywhere;}
-.mb-controls{padding:8px 14px calc(10px + env(safe-area-inset-bottom));gap:7px;box-shadow:0 -5px 22px #00000008;}
-.mb-timeline{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:680;color:var(--muted);font-variant-numeric:tabular-nums;}
-.mb-timeline span:first-child,.mb-timeline span:last-child{min-width:46px;}.mb-timeline span:last-child{text-align:right;}.mb-timeline span:nth-child(2){font-weight:500;}
-.mb-range{height:15px;margin:0;}.mb-player-extra .mb-action{background:var(--surface);border:1px solid var(--bd);}.mb-primary-play{border-radius:50%;height:48px;min-width:48px!important;}
-@media(prefers-reduced-motion:reduce){.mb-switch span{transition:none;}}
-
-`;
-const globalStyles=`[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
+const styles=`\n:host{all:initial;--fg:#202632;--muted:#687080;--bg:#f7f8fa;--surface:#fff;--bd:#dfe3e9;--accent:#305fca;--tint:#edf2fc;--gap:7px;--radius:12px;color-scheme:light dark;font:13px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;}
+@media(prefers-color-scheme:dark){:host{--fg:#edf0f5;--muted:#aab2c0;--bg:#20242c;--surface:#292f39;--bd:#414853;--accent:#a0bcff;--tint:#2d3951;}}
+*,*::before,*::after{box-sizing:border-box}button,input,select,textarea{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mb-launch{position:fixed;width:56px;height:56px;border:0;background:transparent;color:#fff;z-index:4;font-size:23px;touch-action:none;pointer-events:auto;display:grid;place-items:center;isolation:isolate}
+.mb-launch::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#242d3ce8;border:1px solid #ffffff44;box-shadow:0 3px 12px #0004;z-index:-1}.mb-launch-symbol{pointer-events:none}.mb-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#305fca;color:white;font-size:10px;padding:1px 4px}
+.mb-panel{position:fixed;z-index:3;width:min(352px,calc(100vw - 24px));max-height:500px;overflow:auto;overscroll-behavior:contain;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:19px;box-shadow:0 12px 36px #0003;pointer-events:auto;-webkit-overflow-scrolling:touch}
+.mb-panel[hidden],.mb-toast[hidden]{display:none}.mb-panel.reader{inset:0;border:0;border-radius:0;display:flex;flex-direction:column}
+.mb-head{display:flex;align-items:center;gap:7px;min-height:48px;padding:2px 7px;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:2;background:var(--bg)}.mb-head h2{font-size:15px;margin:0;flex:1;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mb-brand{width:30px;text-align:center;color:var(--accent);font-size:20px}
+.mb-body{display:grid;gap:var(--gap);padding:8px 10px 10px}.mb-section{display:grid;gap:5px}.mb-section-head,.mb-row,.mb-inline{display:flex;align-items:center;justify-content:space-between;gap:7px}.mb-section-title,.mb-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:650}.mb-section-note,.mb-footer{font-size:10px;color:var(--muted)}
+.mb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border-radius:var(--radius);overflow:hidden}.mb-tile{border:0;background:transparent;min-height:58px;display:grid;place-content:center;justify-items:center;gap:4px;font-size:11px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd)}.mb-tile svg{color:var(--accent)}.mb-tile:nth-child(3n){border-right:0}.mb-tile:nth-last-child(-n+3){border-bottom:0}
+.mb-compact-grid,.mb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.mb-compact,.mb-action{display:flex;align-items:center;gap:7px;text-align:left;min-height:44px;padding:7px 9px;border:0;border-radius:var(--radius);background:var(--surface);font-size:12px}.mb-action span:first-child,.mb-compact-icon{color:var(--accent);flex:none}.mb-compact-label{flex:1;min-width:0}.mb-compact-end{font-size:10px;color:var(--accent)}
+.mb-small,.mb-minor{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:44px;min-width:44px;padding:6px 8px;border:0;border-radius:10px;background:var(--surface);font-size:12px}.mb-minor{background:transparent;color:var(--accent)}.mb-icon-btn{width:44px;height:44px;background:transparent;padding:10px}
+.mb-settings-group{border-radius:var(--radius);background:var(--surface);overflow:hidden}.mb-setting{display:flex;align-items:center;gap:7px;min-height:44px;padding:0 9px;border-bottom:1px solid var(--bd)}.mb-setting:last-child{border-bottom:0}.mb-setting-label{font-size:12px;flex:0 0 90px}.mb-setting-value{flex:1;min-width:0}.mb-field{display:grid;gap:3px;font-size:11px;color:var(--muted)}.mb-input,.mb-select,.mb-textarea{width:100%;min-height:44px;padding:7px;border:1px solid var(--bd);border-radius:8px;background:var(--surface);color:var(--fg);font-size:16px}.mb-setting .mb-input,.mb-setting .mb-select{border:0;background:transparent;text-align:right}.mb-textarea{min-height:100px;resize:vertical}.mb-voice-search{width:100%;min-height:44px;padding:7px 10px;background:var(--surface);border:0;border-bottom:1px solid var(--bd);font-size:16px}
+.mb-caption,.mb-muted{margin:0;color:var(--muted);font-size:11px;line-height:1.4;overflow-wrap:anywhere}.mb-voice-status{font-size:11px;color:var(--muted)}.mb-semantic-status{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:4px 2px}.mb-status-copy{flex:1;display:grid;gap:2px}.mb-status-copy strong{font-size:12px}.mb-status-copy small,.mb-status{font-size:10px;color:var(--muted)}.mb-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}.mb-dot.ready{background:#258558}.mb-dot.error{background:#c35b53}.mb-dot.loading{background:#bd882c}.mb-warn{width:100%;font-size:11px;overflow-wrap:anywhere}
+.mb-switch{position:relative;min-width:50px;width:50px;height:44px;border:0;border-radius:15px;background:transparent;padding:9px 3px}.mb-switch::before{content:"";position:absolute;inset:7px 0;background:#848b96;border-radius:16px}.mb-switch.is-on::before{background:#305fca}.mb-switch span{position:relative;display:block;width:24px;height:24px;background:#fff;border-radius:50%}.mb-switch.is-on span{transform:translateX(20px)}
+.mb-action-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.mb-strip-action{min-height:44px;display:flex;align-items:center;justify-content:center;gap:5px;border:0;border-radius:10px;background:var(--surface);font-size:12px}.mb-strip-action.selected{color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.mb-details{border-top:1px solid var(--bd);padding:0 2px}.mb-details>summary,.mb-selection>summary{min-height:44px;padding:10px 2px;cursor:pointer;font-size:12px}.mb-selection>summary{line-height:1.45;overflow-wrap:anywhere}.mb-selection blockquote{margin:0;padding:6px;border-left:2px solid var(--accent);max-height:130px;overflow:auto;font-size:13px}.mb-details[open]{display:block}.mb-details .mb-caption{margin:7px 0}.mb-score-header{display:flex;justify-content:space-between;font-size:12px}.mb-score-number{font-variant-numeric:tabular-nums;color:var(--accent)}.mb-score-bars{display:grid;gap:5px;margin:7px 0;font-size:11px}.mb-score-bars>div{display:flex;justify-content:space-between;color:var(--muted)}.mb-score-card,.mb-rule{padding:7px 0}.mb-rule{display:grid;gap:5px;overflow-wrap:anywhere;border-bottom:1px solid var(--bd)}.mb-hint-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}#mb-threshold,#mb-seed-threshold{width:100%;min-height:44px;accent-color:var(--accent)}
+.mb-transcript{flex:1;min-height:0;overflow:auto;padding:4px 12px 12px;overscroll-behavior:contain}.mb-paragraph{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid var(--bd)}.mb-paragraph.current{background:var(--tint)}.mb-paragraph.excluded .mb-pass-text{color:var(--muted);background:var(--surface)}.mb-pass-toggle{min-width:44px;min-height:44px;border:0;border-radius:10px;background:var(--surface);display:grid;place-items:center}.mb-pass-content{flex:1;min-width:0}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}.mb-why-btn{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--accent);font-size:11px}.mb-pass-text{display:block;width:100%;min-height:44px;text-align:left;border:0;background:transparent;padding:0;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere}
+.mb-controls{flex:none;display:grid;gap:4px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);background:var(--bg)}.mb-timeline{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}.mb-range{width:100%;height:28px;margin:0;accent-color:var(--accent)}.mb-player-row{display:flex;justify-content:space-between;align-items:center;gap:5px}.mb-primary-play{background:var(--fg);color:var(--bg);border-radius:50%;height:44px;width:44px}.mb-player-extra{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.mb-player-extra .mb-action{justify-content:center;font-size:10px;gap:3px;padding:5px 2px}.mb-player-extra .mb-action svg{width:14px}
+.mb-toast{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:352px;margin:auto;padding:9px 11px;border-radius:12px;background:#202631f2;color:#fff;z-index:6;font-size:12px;line-height:1.4;pointer-events:none;overflow-wrap:anywhere;max-height:100px;overflow:hidden}.mb-preview{height:95px;display:grid;place-items:center;overflow:hidden}.mb-preview img{max-width:100%;max-height:95px}.mb-pill{font-size:10px;color:var(--muted)}
+.mb-page-toggle{position:fixed;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--accent);font-size:22px;z-index:2;isolation:isolate}.mb-page-toggle::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface);border:1px solid var(--bd);z-index:-1}.mb-page-toggle[aria-pressed=true]{color:var(--muted)}.mb-review-bar{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;right:12px;max-width:352px;margin:auto;display:flex;align-items:center;gap:4px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;pointer-events:auto;box-shadow:0 3px 15px #0003;z-index:5;font-size:12px}.mb-review-bar span{flex:1}.mb-review-bar button{min-width:44px;min-height:44px;padding:4px 8px;background:transparent;color:var(--accent);border:0}
+\n`;
+const globalStyles=`[data-mb-skipped]{color:#727780!important;background-color:rgba(128,128,128,.09)!important;}[data-mb-skipped] *{color:inherit!important;}[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
 function head(title){const menu=state.view==='menu';return `<header class="mb-head">${menu?'<span class="mb-brand" aria-hidden="true">✦</span>':`<button type="button" class="mb-small mb-icon-btn" data-action="back" aria-label="Back">${ico('back',19)}</button>`}<h2>${esc(title)}</h2><button type="button" class="mb-small mb-icon-btn" data-action="close" aria-label="Close drawer">${ico('close',16)}</button></header>`;}
 function renderMenu(){
  const s=siteName(),active=cleanupEnabled(),site=s[0].toUpperCase()+s.slice(1);
@@ -219,20 +104,20 @@ function renderFilter(){return `${head('Filter')}<div class="mb-body mb-filter-v
  <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'Automatic':'Off'}</span><button class="mb-switch ${prefs.semanticAuto?'is-on':''}" role="switch" aria-checked="${prefs.semanticAuto}" aria-label="Enable local semantic filter" data-action="semantic-toggle"><span></span></button></div></div>
  ${semanticStatus()}
  <div class="mb-action-strip"><button data-action="filter-preview" class="mb-strip-action ${state.filterReview?'selected':''}">${ico('eye',17)} <span>${state.filterReview?'End preview':'Show all'}</span></button><button data-action="select-phrase" class="mb-strip-action">${ico('pointer',17)} <span>Teach</span></button><button data-action="pick-filter" class="mb-strip-action">${ico('filter',17)} <span>Pick</span></button></div>
- <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-threshold">Learned match sensitivity</label><output id="mb-threshold-value">${Number(prefs.semanticThreshold??.79).toFixed(2)}</output></div><input type="range" id="mb-threshold" min="0.60" max="0.96" step="0.01" value="${prefs.semanticThreshold??.79}" aria-label="Learned match threshold"></div>
- <div class="mb-hint-row"><span>Lower = filters more</span><span>Higher = safer</span></div>
+ ${button('page-review',ico('pointer',17),'Review passages on page')}
+ <details class="mb-details"><summary>Advanced filtering</summary><div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-threshold">Learned match sensitivity</label><output id="mb-threshold-value">${Number(prefs.semanticThreshold??.79).toFixed(2)}</output></div><input type="range" id="mb-threshold" min="0.60" max="0.96" step="0.01" value="${prefs.semanticThreshold??.79}" aria-label="Learned match threshold"></div>
+ <div class="mb-hint-row"><span>Lower = filters more</span><span>Higher = safer</span></div>${button('hide-skipped',ico('eye',17),prefs.hideSkipped?'Skipped: hidden':'Skipped: gray')}</details>
  <div class="mb-row"><button data-action="semantic-load" class="mb-minor">${ico('refresh',14)} ${semantic.status==='ready'?'Rescan':'Retry model'}</button><button data-action="rules" class="mb-minor">Rules & scores ${ico('chevron',14)}</button></div>
  <p class="mb-caption">${state.filterReview?'All filtered elements are visible for inspection. Tap End preview to reapply your rules.':'Corrections on the page or in the reader train the same local classifier.'}</p>
  </div>`;}
 function renderTeach(){return `${head('Teach filter')}<div class="mb-body">
- <div class="mb-selection"><span class="mb-kicker">Selected words</span><blockquote>${esc(state.selectionText||'Select text from the article to teach.')}</blockquote></div>
- <div class="mb-settings-group"><div class="mb-setting"><label class="mb-setting-label" for="mb-reason">Reason</label><div class="mb-setting-value"><select id="mb-reason" class="mb-select">${Object.entries(semanticCategories).filter(([k])=>k!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div></div></div>
- <div class="mb-grid">${button('teach-skip',ico('close',16),'Skip like this')}${button('teach-keep',ico('check',16),'Keep like this')}</div>
- ${state.selectionScore?`<div class="mb-score-card">${renderScoreDetails(state.selectionScore)}</div>`:''}
- ${semanticStatus()}<p class="mb-caption">Page content is visible while teaching; nearby previously hidden passages are included as context for the new example. Only embeddings are saved.</p>
- <button data-action="select-phrase" class="mb-minor">Change selected text</button></div>`;}
-function renderWhy(){const p=reading.passages[state.whyIndex];return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
- <div class="mb-score-card">${renderScoreDetails(p?.analysis)}</div><div class="mb-row">${button('pass-toggle:'+state.whyIndex,ico('check',17),p?.excluded?'Include this':'Skip this')}${button('pass-analyze:'+state.whyIndex,ico('refresh',17),'Analyze again')}</div>
+ <details class="mb-selection"><summary>${esc((state.selectionText||'Select article text').slice(0,160))}${state.selectionText.length>160?'…':''}</summary><blockquote>${esc(state.selectionText)}</blockquote></details>
+ <div class="mb-setting"><label for="mb-reason">Reason</label><select id="mb-reason" class="mb-select">${Object.entries(semanticCategories).filter(([k])=>k!=='article').map(([k,v])=>`<option value="${k}" ${state.selectionReason===k?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+ <div class="mb-grid">${button('teach-skip',ico('close',16),'Skip like this',state.teaching?'disabled':'')}${button('teach-keep',ico('check',16),'Keep like this',state.teaching?'disabled':'')}</div>
+ ${state.teachError?`<p role="alert" class="mb-caption">${esc(state.teachError)}</p>`:''}
+ <details class="mb-details"><summary>Details · ${state.teaching?'Saving…':state.selectionScore?.excluded?'Suggested skip':'Suggested keep'}</summary>${renderScoreDetails(state.selectionScore)}${semanticStatus()}<button data-action="select-phrase" class="mb-minor">Change selection</button></details></div>`;}
+function renderWhy(){const source=state.whySource&&passageStore.byId.get(state.whySource);const p=source?{...source,excluded:passageExcluded(source)}:reading.passages[state.whyIndex];const toggle=source?'source-toggle:'+source.id:'pass-toggle:'+state.whyIndex;return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${source?passageStore.records.indexOf(source)+1:(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
+ <div class="mb-score-card">${renderScoreDetails(p?.analysis)}</div><div class="mb-row">${button(toggle,ico('check',17),p?.excluded?'Include this':'Skip this')}${source?'':button('pass-analyze:'+state.whyIndex,ico('refresh',17),'Analyze again')}</div>
  ${button('filter',ico('sliders',16),'Filter thresholds')}</div>`;}
 function renderSelectText(){return `${head('Select text')}<div class="mb-body"><p class="mb-caption">Long-press and highlight a phrase on the webpage. Then tap ✦ or “Use selection”. Do not select entire articles.</p>${button('selection-use',ico('check',17),'Use highlighted text')}${button('teach-skip',ico('minus',17),'Skip cached selection')}</div>`;}
 function renderPicker(){return `${head('Select nuisance element')}<div class="mb-body"><p>Tap an unwanted element on the webpage. Its matching elements will be outlined before you save anything.</p><div class="mb-rule"><strong>${esc(state.pickerSelector||'No element selected')}</strong><span class="mb-muted">${pickerMatches.length} matching elements highlighted</span>${pickerMatches.length?`<div class="mb-grid">${button('preview',preview?'◉':'◎',preview?'Undo preview':'Preview hiding')}${button('picker-save','✓','Save rule')}</div>${button('picker-next','↓','Show next match')}`:''}</div>${button('picker-cancel','×','Cancel and restore')}</div>`;}
@@ -258,9 +143,9 @@ function renderSpeech(){const count=state.voicesRegion===prefs.azure.region?stat
  <p class="mb-caption">Key stays in extension storage. Enabled narration text is sent directly to Azure.</p></div>`;}
 function renderReader(){
  const total=reading.passages.length,ready=reading.passages.filter(p=>p.blob&&!p.excluded).length,enabled=enabledIndices().length;
- const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button class="mb-pass-toggle" type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${ico(p.excluded?'check':'close',18)}</button><div class="mb-pass-content"><div class="mb-pass-meta"><span>${String(i+1).padStart(2,'0')} · ${esc(p.excluded?'Skipped':p.status==='ready'?'Ready':'Included')}</span><button type="button" data-action="pass-why:${i}" class="mb-why-btn">${esc(p.analysis?.model==='MiniLM'?formatScore(p.analysis.score):'Why?')} ${ico('chevron',12)}</button></div><div class="mb-pass-text" style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
- return `${head('Article reader')}<div class="mb-body" style="flex:none;padding-bottom:5px"><div class="mb-row"><span class="mb-muted">${ready}/${enabled} ready${reading.preparing?' · Preparing…':''}</span><button class="mb-small" data-action="reader-edit">${ico('file',14)} Edit text</button></div></div>${editor}
- <section class="mb-controls"><div class="mb-timeline"><span data-audio-now>0:00</span><span data-audio-segments>${reading.index+1}/${reading.passages.length} passages</span><span data-audio-total>—:—</span></div><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.playing?'Pause':'Play'}">${ico(reading.playing?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
+ const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button class="mb-pass-toggle" type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${ico(p.excluded?'check':'close',18)}</button><div class="mb-pass-content"><div class="mb-pass-meta"><span>${String(i+1).padStart(2,'0')} · ${esc(p.excluded?'Skipped':p.status==='ready'?'Ready':'Included')}</span><button type="button" data-action="pass-why:${i}" class="mb-why-btn">${esc(p.analysis?.model==='MiniLM'?formatScore(p.analysis.score):'Why?')} ${ico('chevron',12)}</button></div><button type="button" class="mb-pass-text" style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}" aria-label="Play passage ${i+1}">${esc(p.text)}</button></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
+ return `${head('Article reader')}<div class="mb-body" style="flex:none;padding-bottom:5px"><div class="mb-row"><span class="mb-muted">${ready}/${enabled} ready${reading.waitingIndex!==null&&reading.wantsPlay?' · Buffering…':reading.preparing?' · Preparing…':''}</span><button class="mb-small" data-action="reader-edit">${ico('file',14)} Edit text</button></div></div>${editor}
+ <section class="mb-controls"><div class="mb-timeline"><span data-audio-now>0:00</span><span data-audio-segments>${reading.index+1}/${reading.passages.length} passages</span><span data-audio-total>—:—</span></div><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.wantsPlay?'Pause':'Play'}">${ico(reading.wantsPlay?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
  <div class="mb-player-extra">${button('prepare',ico('wave',17),reading.preparing?'Preparing':'Prepare')}${button('export-mp3',ico('download',17),'MP3')}${button('export-text',ico('file',17),'Transcript')}${button('filter',ico('sliders',17),'Filter')}</div>
  <div class="mb-row"><button class="mb-small" data-action="stop">${ico('close',13)} Stop</button><button class="mb-small" data-action="reader-new">${ico('refresh',13)} Re-extract</button><button class="mb-small" data-action="minimize">${ico('minus',13)} Minimize</button></div></section>`;
 }
@@ -272,16 +157,26 @@ function render(){if(!host)return;const shadow=host.shadowRoot;const content=sta
  shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'')+' view-'+state.view;const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';const launchBox=shadow.querySelector('.mb-launch').getBoundingClientRect();
  const below=launchBox.top<Math.min(340,(vv?.height||innerHeight)*0.42);
  if(state.view==='reader'){panel.style.top=`${vv?.offsetTop||0}px`;panel.style.bottom='auto';panel.style.maxHeight='100dvh';}
- else if(below){panel.style.top=`${launchBox.bottom+10}px`;panel.style.bottom='auto';panel.style.maxHeight=`${Math.max(140,(vv?.height||innerHeight)-launchBox.bottom-24)}px`;}
- else {panel.style.top='auto';panel.style.bottom=`${Math.max(14,innerHeight-launchBox.top+10)}px`;panel.style.maxHeight=`${Math.max(140,launchBox.top-24)}px`;}
+ else if(below){panel.style.top=`${launchBox.bottom+10}px`;panel.style.bottom='auto';panel.style.maxHeight=`${Math.max(80,Math.min(500,(vv?.offsetTop||0)+(vv?.height||innerHeight)-launchBox.bottom-24))}px`;}
+ else {panel.style.top='auto';panel.style.bottom=`${Math.max(14,innerHeight-launchBox.top+10)}px`;panel.style.maxHeight=`${Math.max(80,Math.min(500,launchBox.top-(vv?.offsetTop||0)-24))}px`;}
 panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content){
   // Preserve reader scroll and focused passage even when applying Skip/Keep or playing audio.
   const oldTranscript=panel.querySelector('[data-transcript]');
   const savedScroll=oldTranscript?.scrollTop;
   const hadTranscript=!!oldTranscript&&state.view==='reader'&&!state.readerEditing;
   const savedFocus=shadow.activeElement?.getAttribute?.('data-action');
+  const disclosures=[...panel.querySelectorAll('details')].map(d=>d.open);
+  const keyValue=panel.querySelector('#mb-key')?.value;
+  const active=shadow.activeElement,focusId=active?.id,caret=active?.selectionStart;
   panel.innerHTML=content;
+  if(panel.dataset.lastView===state.view){
+   panel.querySelectorAll('details').forEach((d,i)=>d.open=!!disclosures[i]);
+   if(keyValue&&panel.querySelector('#mb-key'))panel.querySelector('#mb-key').value=keyValue;
+   const next=focusId&&panel.querySelector('#'+CSS.escape(focusId));if(next){next.focus({preventScroll:true});try{next.setSelectionRange(caret,caret);}catch{}}
+  }
+  panel.dataset.lastView=state.view;
   if(hadTranscript){const next=panel.querySelector('[data-transcript]');if(next)next.scrollTop=savedScroll;}
   if(savedFocus?.startsWith('pass-')&&state.view==='reader')panel.querySelector(`[data-action="${savedFocus}"]`)?.focus({preventScroll:true});
  }
- if(state.view==='reader')updateAudioProgress();updateCount();}
+ if(state.view==='reader')updateAudioProgress();updateCount();renderPageControls();}
+

@@ -3,7 +3,7 @@
 const hidden=new Map(); let picker=null, pickerMatches=[], preview=false, filterTick=0;
 const BAN_SEL='[data-mb-host],html,body,head,main,article,[role="main"],shreddit-post';
 function protectedNode(el){return !el || !el.isConnected || el.closest('[data-mb-host]') || el.matches(BAN_SEL) || el.querySelector('article,main,[role="main"],[data-mb-host]') || el===document.documentElement || el===document.body;}
-function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(hidden.has(el))return false;hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
+function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
 function showNode(el){const old=hidden.get(el);if(!old)return;if(old.display)el.style.setProperty('display',old.display,old.priority);else el.style.removeProperty('display');hidden.delete(el);updateCount();}
 function showAll(){for(const e of [...hidden.keys()])showNode(e);}
 function updateCount(){if(!host)return;for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String([...hidden.keys()].filter(e=>e.isConnected&&!([...hidden.keys()].some(other=>other!==e&&other.contains(e)))).length);}
@@ -12,15 +12,16 @@ function safeMatches(sel){try{return [...document.querySelectorAll(sel)].slice(0
 function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
 function beginFilterReview(){
  if(state.filterReview)return;
- state.reviewHidden=new Map(hidden);state.filterReview=true;showAll();render();
+ state.reviewHidden=new Map(hidden);state.filterReview=true;toggleRedditCSS(false);showAll();renderPagePassages();render();
 }
 function endFilterReview(){
  if(!state.filterReview)return;
  state.filterReview=false;state.reviewHidden=null;
+ if(cleanupEnabled())siteClean();renderPagePassages();
  if(filterEnabled()){appliedFilter();resetSemanticReview();}
  render();
 }
-function setFiltering(enabled){prefs.filter[domainKey()]=enabled;saveSettings();if(!enabled){showAll();}else appliedFilter();render();}
+function setFiltering(enabled){prefs.filter[domainKey()]=enabled;saveSettings();if(!enabled){showAll();}else appliedFilter();syncPassageViews();render();}
 function nodeSelector(el){
   if(el.id&&/^[a-zA-Z][\w:-]{2,75}$/.test(el.id)&&!/\d{5,}/.test(el.id))return '#'+CSS.escape(el.id);
   let s=el.tagName.toLowerCase();const cls=[...el.classList].filter(c=>/^[a-z][\w-]{2,48}$/i.test(c)&&!/[0-9a-f]{8,}/i.test(c)&&!/^css-|^sc-|^jsx-/i.test(c)).slice(0,2);
@@ -50,3 +51,4 @@ function nuisanceReason(el,str){
  return '';
 }
 function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text'};}
+

@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '0.1.4';
+const VERSION = '0.2.0';
 const URL_BLACKLIST = new Set(['fbclid','gclid','dclid','gbraid','wbraid','msclkid','mc_cid','mc_eid','igshid','vero_id','oly_enc_id','oly_anon_id','_hsenc','_hsmi','__hsfp','ref_src','spm','yclid']);
 const text = v => String(v == null ? '' : v).replace(/\s+/g,' ').trim();
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -44,3 +44,4 @@ function chunkText(input,max=1550){
  }return out;
 }
 const libTest = {cleanURL,amazonData,camelURL,appleMapsURL,tokens,tokenHash,chunkText,siteName};
+
