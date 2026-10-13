@@ -2,7 +2,7 @@
 """Reproducible dependency-free userscript builder."""
 from pathlib import Path
 P=Path(__file__).resolve().parent
-VERSION='0.1.4'
+VERSION='0.2.0'
 META=f'''// ==UserScript==
 // @name         iPhone Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
@@ -36,9 +36,12 @@ META=f'''// ==UserScript==
 '''
 def build():
     src='\n'.join(p.read_text() for p in sorted((P/'src').glob('*.js')))
-    result=META+'\n;(()=>{\n'+src+'\n})();\n'
+    vendor=(P/'vendor'/'defuddle-0.19.5.js').read_text()
+    wrapped='const Defuddle=(()=>{const module={exports:{}};const exports=module.exports;\n'+vendor+'\nreturn module.exports;})();\n'
+    result=META+'\n;(()=>{\n'+wrapped+src+'\n})();\n'
     (P/'dist').mkdir(exist_ok=True)
     (P/'dist'/'master-button.user.js').write_text(result)
     (P/'dist'/'master-button.meta.js').write_text(META)
     print('Built',len(result),'bytes from',len(list((P/'src').glob('*.js'))),'modules')
 if __name__=='__main__':build()
+

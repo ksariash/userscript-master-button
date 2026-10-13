@@ -49,3 +49,8 @@ Does the default drawer fit on an iPhone without scrolling? Are routine settings
 - **Release screenshots and regression:** inspect default drawer, compact Speech, Filter, and Reader screenshots in 390 × 844 Chromium. Run `tests/ux_revision.py`, assert stable scroll after a click and the 56px hitbox. Repeat physical iPhone tests for pointer capture/keyboard, audio and model memory before claiming full parity.
 
 **Launcher anchor rule:** the expanded drawer must not overlap the tap surface that opened it. Position the drawer above the launcher by default and below it when needed; clamp max height to the visible viewport. A second tap on the launcher must close the drawer on mobile touch emulation.
+
+
+## 0.2.0 refinement
+
+`FRONTEND_GUIDE.md` defines the consolidated component system. Explicit Review passages mode may show temporary per-passage controls; exit removes them. Gray skipped text without collapsing geometry by default. Teach details and advanced thresholds use progressive disclosure. These refinements supersede earlier card-heavy recipes.

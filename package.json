@@ -1,0 +1,7 @@
+{
+  "name": "userscript-master-button",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {"test": "node tests/unit.cjs && node tests/pipeline.cjs && node tests/stabilization.cjs", "build": "python3 build.py"},
+  "devDependencies": {"jsdom": "26.1.0"}
+}

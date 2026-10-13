@@ -14,3 +14,4 @@ assert.equal(appleMapsURL('https://www.google.com/maps/@40.2,-122,12z'),null);
 assert.equal(siteName('www.reddit.com'),'reddit');
 assert.ok(chunkText('a'.repeat(3300),1550).every(s=>s.length<=1550));
 console.log('Unit tests: 9 passed');
+

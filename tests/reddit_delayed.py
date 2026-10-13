@@ -1,5 +1,6 @@
 """Synthetic timed Reddit app upsell + scroll-lock regression, not a live Reddit test."""
 from pathlib import Path
+import os
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parent.parent
 script=(ROOT/'dist/master-button.user.js').read_text().replace('const siteName = (host=location.hostname)',"const siteName = (host='www.reddit.com')")
@@ -10,11 +11,11 @@ html,body{margin:0}#upsell{position:fixed;inset:0;z-index:99999;color:white;back
 <script>setTimeout(()=>{const x=document.createElement('div');x.id='upsell';x.innerHTML='<h1>Get the best of Reddit in the app</h1><p>Personalize your feed, discover more of what you like, and join your favorite communities.</p><button>Get the Reddit App</button>';document.body.appendChild(x);document.body.classList.add('scroll-disabled');document.body.style.overflow='hidden';setTimeout(()=>document.documentElement.style.overflow='hidden',300)},700);</script>
 </body></html>'''
 with sync_playwright() as p:
- b=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+ b=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE'),headless=True,args=['--no-sandbox'])
  page=b.new_page(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
  page.on('pageerror',lambda e:print('PAGE ERROR:', e))
  page.set_content(page_html,wait_until='domcontentloaded')
- page.evaluate('''() => {window.GM={getValue:async(k,d)=>d,setValue:async()=>true,setClipboard:async()=>true,xmlHttpRequest:async()=>({status:200,response:'',responseText:''})};}''')
+ page.evaluate('''() => {window.GM={getValue:async(k,d)=>k.endsWith(':azure')?d:{semanticAuto:false},setValue:async()=>true,setClipboard:async()=>true,xmlHttpRequest:async()=>({status:200,response:'',responseText:''})};}''')
  page.evaluate(script)
  page.locator('[data-mb-host] .mb-launch').wait_for()
  page.wait_for_timeout(2600)
@@ -37,3 +38,4 @@ with sync_playwright() as p:
  page.screenshot(path=str(ROOT/'dist/reddit-drawer.png'))
  print('Delayed Reddit interstitial, re-lock recovery, article preservation, compact drawer PASS',panel)
  b.close()
+

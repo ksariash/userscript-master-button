@@ -1,3 +1,4 @@
+function hideSiteNode(el,reason){return hideNode(el,reason,'site');}
 const REDDIT_NAGS=[
  '#configured-xpromo-unrated_block','#configured-xpromo-blocking_xpromo_nsfw_blocking','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop_cms','#desktop-dynamic-upsell-dialog','#app-upsell-blocking-bottom-sheet-direct','#app-upsell-blocking-bottom-sheet-seo','#xpromo-bottom-sheet','#xpromo-new-app-selector','#xpromo-app-selector','#xpromo-small-header','#nsfw-desktop-auth-blocking-modal-dialog','#nsfw-desktop-auth-blocking-modal-overlay-element','#nsfw-qr-dialog','#blocking-modal','#nsfw-desktop-auth-blocking-modal','xpromo-top-button','xpromo-app-selector','faceplate-bottom-sheet[id*="xpromo"]','rpl-bottom-sheet[id*="app-upsell"]','rpl-bottom-sheet[id*="xpromo"]','configured-xpromo-modal[id*="xpromo"]','.configured-xpromo-bottom-sheet','.configured-xpromo-full-screen','.XPromoPopup','.XPromoPopupRpl','.XPromoPopupRplNew','.XPromoBottomBar','.XPromoInFeed','.XPromoPill','.AppSelectorModal__body','.upsell_banner','.rpl-dialog#age-gate-interstitial'
 ];
@@ -50,14 +51,14 @@ function redditExtraPromos(){
  const headings=safeMatches('h1,h2,h3,[role="heading"]').filter(h=>REDDIT_PROMO_HEAD.test(text(h.textContent).slice(0,150)));
  for(const heading of headings.slice(0,18)){
   const candidate=redditRootForPromotion(heading);
-  if(candidate){candidate.setAttribute('data-mb-reddit-nag','');if(hideNode(candidate,'Reddit app interstitial'))removed++;}
+  if(candidate){candidate.setAttribute('data-mb-reddit-nag','');if(hideSiteNode(candidate,'Reddit app interstitial'))removed++;}
  }
  // A plain visible modal may lack a heading but still contain unmistakable app-promo copy.
  for(const el of safeMatches(REDDIT_DIALOGISH).slice(0,55)){
   if(protectedNode(el)||el.querySelector('input,textarea,[contenteditable="true"]'))continue;
   const msg=text(el.textContent).slice(0,1200);
   if(msg&&msg.length<1000&&REDDIT_PROMO_HEAD.test(msg)){
-   el.setAttribute('data-mb-reddit-nag','');if(hideNode(el,'Reddit app interstitial'))removed++;
+   el.setAttribute('data-mb-reddit-nag','');if(hideSiteNode(el,'Reddit app interstitial'))removed++;
   }
  }
  return removed;
@@ -94,17 +95,17 @@ function redditRestoreScrollOwnership(){
 }
 
 function siteClean(){
- if(!cleanupEnabled()||siteName()==='other'||isAuthPage())return;
- const name=siteName();if(name==='reddit')toggleRedditCSS(true);let hiddenPromos=0;for(const sel of siteSelectors[name]||[])for(const n of safeMatches(sel))if(hideNode(n,'Known '+name+' app prompt'))hiddenPromos++;
+ if(state.filterReview||!cleanupEnabled()||siteName()==='other'||isAuthPage())return;
+ const name=siteName();if(name==='reddit')toggleRedditCSS(true);let hiddenPromos=0;for(const sel of siteSelectors[name]||[])for(const n of safeMatches(sel))if(hideSiteNode(n,'Known '+name+' app prompt'))hiddenPromos++;
  if(name==='reddit')hiddenPromos+=redditExtraPromos();
  if(['reddit','instagram','facebook','x','linkedin'].includes(name)){
   // Never hide a generic dialog based solely on its role: only clearly matching promo copy.
   for(const el of safeMatches(DIALOGS).slice(0,50)){
-   const body=text(el.textContent).slice(0,900);if(body.length&&NAG_RE.test(body)&&body.length<700&&el.querySelectorAll('input,textarea').length===0)hideNode(el,'App or login interruption');
+   const body=text(el.textContent).slice(0,900);if(body.length&&NAG_RE.test(body)&&body.length<700&&el.querySelectorAll('input,textarea').length===0)hideSiteNode(el,'App or login interruption');
   }
   for(const a of safeMatches('header a,nav a,header button,nav button').slice(0,60)){
    const label=text(a.textContent+' '+(a.getAttribute('aria-label')||''));
-   if(NAG_RE.test(label)&&label.length<85)hideNode(a,'App promotion');
+   if(NAG_RE.test(label)&&label.length<85)hideSiteNode(a,'App promotion');
   }
  }
  if(name==='reddit'){if(hiddenPromos)redditDismissed=true;redditUnlockScroll();if(prefs.nsfw)revealReddit();}
@@ -126,7 +127,7 @@ function revealReddit(){
  for(const e of safeMatches('xpromo-nsfw-blocking-container')){
   const sr=e.shadowRoot;if(!sr)continue;
   if(!sr.querySelector('slot[data-mb-nsfw]')){const slot=document.createElement('slot');slot.dataset.mbNsfw='1';sr.append(slot);}
-  sr.querySelectorAll('[role="dialog"],.prompt,.viewInApp').forEach(n=>{if(NAG_RE.test(text(n.textContent)))hideNode(n,'NSFW app prompt');});
+  sr.querySelectorAll('[role="dialog"],.prompt,.viewInApp').forEach(n=>{if(NAG_RE.test(text(n.textContent)))hideSiteNode(n,'NSFW app prompt');});
  }
 }
 function updateSite(){siteClean();appliedFilter();}
@@ -157,3 +158,4 @@ function expandFacebookComments(){
  if(target){target.click();notify('Requested Facebook’s native comments.');}else notify('No accessible native comments control found.');
 }
 function slashdotOlder(){if(siteName()!=='slashdot')return;const a=[...document.querySelectorAll('a')].find(x=>/older articles|older stories|more stories/i.test(text(x.textContent)));if(a?.href)location.assign(a.href);else notify('Older articles link not found.');}
+
