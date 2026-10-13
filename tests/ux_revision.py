@@ -12,7 +12,13 @@ with sync_playwright() as p:
  page.set_content(html)
  page.evaluate('''() => {window.GM={getValue:async(k,d)=>d,setValue:async()=>true};}''')
  page.evaluate(script.replace('\n})();','\nwindow.__mb_test={reading,prefs,semantic,semanticDecision,beginFilterReview,endFilterReview,hideNode,hidden,host,render};\n})();'))
- page.locator('.mb-launch').click();page.locator('[data-action="reader"]').click()
+ launcher=page.locator('.mb-launch');rect=launcher.bounding_box();cx=rect['x']+rect['width']/2;cy=rect['y']+rect['height']/2
+ page.touchscreen.tap(cx,cy)
+ assert page.locator('.mb-panel').is_visible(),'First tap must open'
+ page.touchscreen.tap(cx,cy)
+ assert not page.locator('.mb-panel').is_visible(),'Second tap must close'
+ page.touchscreen.tap(cx,cy)
+ page.locator('[data-action="reader"]').click()
  page.locator('[data-transcript]').wait_for()
  page.locator('[data-transcript]').evaluate('(e)=>e.scrollTop=1040')
  original=page.locator('[data-transcript]').evaluate('(e)=>e.scrollTop')

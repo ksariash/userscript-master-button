@@ -11,9 +11,9 @@ One floating Safari **Userscripts** drawer with site-aware controls, editable cl
 5. Turn off the original seven userscripts if they are still installed so their independent modifications and overlays do not compete with the master button.
 6. For speech, open **Speech settings**, supply your own Azure Speech resource key and region, save, then **Load voices**. Key is stored via Userscripts extension-specific `GM.setValue`, not `localStorage`.
 
-> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. **The 0.1.1 `document-start` metadata remains unchanged in 0.1.3.** The storage keys remain unchanged, so the script itself does not migrate or intentionally erase settings.
+> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. **The 0.1.1 `document-start` metadata remains unchanged in 0.1.4.** The storage keys remain unchanged, so the script itself does not migrate or intentionally erase settings.
 
-## Included in 0.1.3
+## Included in 0.1.4
 
 - Redesigned compact, iPhone-style Shadow DOM drawer with a three-column tools grid, tight site-control rows, persistent draggable button, responsive light/dark appearance, filtered-item count and condensed reader/player controls.
 - Conservative URL cleaner, URL editor and native share/copy fallback; recognizable Amazon ASIN links and regional camelcamelcamel shortcuts.
@@ -83,3 +83,8 @@ On iPhone, visit a normal article and open Filter. Check whether the status adva
 Future LLM implementers: read **`AGENTS.md`** and **`DESIGN_SYSTEM.md`** before touching any UI. Sources and measurable density/accessibility criteria are in the design system. To teach a phrase, select text on the webpage, open Filter → Teach a phrase, choose a reason and Skip similar/Keep similar. To train from the reader, toggle Skip/Keep beside the transcript passage; only explicit choices are training labels. The model learning display is not a claim of generative AI or model-weight fine-tuning.
 
 Speech: choose the Azure region in the region dropdown; save your key, then allow the voice request to finish. The list is fetched from that region only and is searchable; a voice sample plays next to the picker. Voice tests mock Azure API results and do not prove actual Azure connectivity on iPhone.
+
+
+## v0.1.4 follow-up: touch-target overlap
+
+Position the compact drawer adjacent to (not over) the draggable launcher. It opens above the launcher when room permits and below it near the top of the screen. Two physical touch events in the mobile Chromium simulation now **open and close** reliably with no overlapping overlay intercepting the second tap. The actual iPhone Safari gesture still requires device verification. All v0.1.3 filter and reader improvements are included.

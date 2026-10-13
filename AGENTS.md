@@ -14,3 +14,5 @@ Never re-render a reader transcript without preserving scrollTop and touch focus
 On the filter: one-tap enable/disable and temporary **Show all** preview must remain obvious. Teaching or adding rules restores hidden content while inspecting and includes previously hidden neighboring passages in context, then returns to the page's filtered state when finished/canceled. Both the webpage and transcript use explicit Keep/Skip learning. Explain *why* with the model name/source, Skip/Keep/seed similarity scores, actual thresholds and fallback reason. Scores are similarities, NOT probabilities. Provide separate adjustable thresholds for learned and built-in matches. Never train on model predictions or seeking.
 
 Browser regression `tests/ux_revision.py` is mandatory. Publish `src`, `dist`, `AGENTS.md`, `DESIGN_SYSTEM.md`, README and tests in the same GitHub commit. No chat-only releases; verify raw distribution content after publishing. Preserve `master-button:v1` settings format.
+
+Do not allow the open drawer to cover the floating launcher. Test both first and second touch events in `tests/ux_revision.py` after every menu-position or viewport change.

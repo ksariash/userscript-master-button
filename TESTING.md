@@ -29,3 +29,8 @@ Run `python tests/experience.py`. It verifies 30+ Azure region values, three **m
 - **Not yet tested:** actual iPhone tap handling, actual MiniLM model code/weights download in iOS Safari Userscripts, live Azure playback/duration, real website prompt behavior. A synthetic embedding does not verify actual LLM inference or semantic accuracy.
 - The two similarity thresholds govern learned Skip examples (default 0.79) and built-in nuisance seeds (default 0.89); Keep examples can protect candidate prose. Similarity is not a posterior probability or calibrated certainty.
 - If local inference fails on the device, capture the exact status/error from Filter rather than assuming filtering is active.
+
+
+## 0.1.4 touch-panel anchor
+
+`tests/ux_revision.py` now verifies first mobile touchscreen tap opens and second tap closes; panel must not cover the 56px launcher hit area. The actual Safari/Userscripts app is still unverified.
