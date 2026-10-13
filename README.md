@@ -11,14 +11,14 @@ One floating Safari **Userscripts** drawer with site-aware controls, editable cl
 5. Turn off the original seven userscripts if they are still installed so their independent modifications and overlays do not compete with the master button.
 6. For speech, open **Speech settings**, supply your own Azure Speech resource key and region, save, then **Load voices**. Key is stored via Userscripts extension-specific `GM.setValue`, not `localStorage`.
 
-> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. You may need to reinstall the file if script metadata or permissions change.
+> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. **Reinstall the `.user.js` file for 0.1.1** because the run-at metadata changed from `document-idle` to `document-start`. The storage keys remain unchanged, so the script itself does not migrate or intentionally erase settings.
 
-## Included in 0.1.0
+## Included in 0.1.1
 
-- Single draggable, accessible Shadow DOM drawer with persistent position, mobile light/dark support, filtered-item count and a mini playback menu.
+- Redesigned compact, iPhone-style Shadow DOM drawer with a three-column tools grid, tight site-control rows, persistent draggable button, responsive light/dark appearance, filtered-item count and condensed reader/player controls.
 - Conservative URL cleaner, URL editor and native share/copy fallback; recognizable Amazon ASIN links and regional camelcamelcamel shortcuts.
 - Per-site reversible nuisance hiding, custom CSS selector rules, safe inspect/preview/cancel/save workflow, and dynamic rescanning; user correction token learning is hashed and local.
-- Reddit cleanup / best-effort NSFW reveal (no Old Reddit support). Cleanup rules for X, Facebook, Instagram, and LinkedIn; optional Slashdot reading layout, older articles and search; recognizable Google Maps-to-Apple Maps URL auto-routing.
+- Reddit cleanup / best-effort NSFW reveal (no Old Reddit support). The cleanup includes early CSS suppression of known promos, recognition of large timed app interstitials with the “Get the best of Reddit in the app” headline, and recurring restoration of Reddit-imposed scrolling locks. Cleanup rules for X, Facebook, Instagram, and LinkedIn; optional Slashdot reading layout, older articles and search; recognizable Google Maps-to-Apple Maps URL auto-routing.
 - A common media picker and temporary click-to-select mode for X, Instagram, Facebook and LinkedIn; sharing/downloading directly accessible image and video files. Facebook comments are expanded via native controls only.
 - Article selection/extraction, editable passage list, explicit Keep/Skip corrections, Azure REST neural voice list/demo/synthesis, progressive MP3 preparation, multi-passage play/pause, passage jump, speed, manual seek, text export and best-effort combined MP3 export.
 - An update check against the published metadata; Userscripts is responsible for installing updates (the page never evals remote JavaScript).
@@ -47,9 +47,12 @@ python build.py
 node --check dist/master-button.user.js
 node tests/unit.cjs
 python tests/browser.py
+python tests/reddit_delayed.py
 ```
 
 Browser tests use local synthetic HTML, a mocked Userscripts grant layer and headless Chromium. They are **not** iPhone/Safari verification or tests on actual Reddit/Instagram servers. Inspect `tests/` before interpreting the assertions. The failed/stale `tests/browser.cjs` prototype is not used.
+
+**0.1.1 regression:** `python tests/reddit_delayed.py` simulates a delayed full-screen Reddit app upsell, a first body scroll lock, and a subsequent HTML scroll lock. It confirms cleanup, content preservation and a compact drawer in mobile Chromium. This is not verification against live Reddit or real iPhone Safari.
 
 **iPhone checklist:** Confirm Userscripts permissions and one button; drag and rotate; open Reddit anonymously and check scrolling/app nag removal; toggle NSFW; navigate X and Instagram carousel and test both media pickers; test Google Maps opt-in/redirect; verify rule preview/cancel and re-open; try a long article, select/edit text, Azure region/key failure, voices/demo; ensure synthesis charges correspond only to enabled passages; play/pause/minimize; lock the screen; export a prepared MP3 and verify duration in Files/Music/VLC; update manually and check stored settings.
 
