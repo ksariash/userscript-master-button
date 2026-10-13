@@ -10,7 +10,7 @@ Apply translucency sparingly to floating navigation/player surfaces. Content and
 
 ## Proposed starting tokens
 
-These are project starting points to validate in a prototype, not measured values copied from reference products. Keep tokens centralized and reusable; adjust the system coherently after review.
+These are project starting points to validate in a prototype, not measured values copied from reference products. Keep tokens centralized and reusable; adjust the system coherently during implementation.
 
 | Element | Starting rule |
 | --- | --- |
@@ -52,6 +52,7 @@ Isolate utility styling from the website. Respect safe areas, dynamic/visual vie
 
 ## Design proof
 
-Before full implementation, present an interactive prototype covering launcher/menu, page correction, reader/player, Why, and speech setup. Capture light/dark screenshots over both clean and cluttered pages. Inspect 320px width, 390×844, landscape, keyboard, large text, long excerpts, and error states.
+Maintain an interactive prototype through implementation covering launcher/menu, page correction, reader/player, Why, and speech setup. Capture light/dark screenshots over both clean and cluttered pages. Inspect 320px width, 390×844, landscape, keyboard, large text, long excerpts, and error states.
 
 Review hierarchy, spacing rhythm, type, balance, alignment, control density, and reading space with the user. Screenshot assertions and a token list cannot prove aesthetic quality. Keep the approved visual direction consistent through implementation, and review screenshots again when real content replaces prototype data.
+

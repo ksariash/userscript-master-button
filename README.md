@@ -2,7 +2,7 @@
 
 A discreet Safari utility for reading, reviewing unwanted passages, sharing clean links, and listening to articles on iPhone.
 
-**Status: requirements only.** The previous implementation was withdrawn because filtering and visual quality did not meet the user's expectations. This repository is the specification for a fresh build. It currently contains no executable code, installable userscript, dependencies, tests, or CI workflows.
+**Status: implementation in progress.** The user removed review/approval gates and authorized continued implementation on 2026-10-13. A fresh Defuddle/local-language-model experiment and a separate interactive mobile design study established the starting direction. The first model failed nuisance recall. See [PROGRESS.md](PROGRESS.md) for current deliverables, evidence, and the complete remaining scope, and [REBUILD.md](REBUILD.md) for architecture and choices. Physical iPhone and live Azure verification remain separate from automated checks.
 
 ## Start here
 
@@ -18,8 +18,24 @@ Use [START_HERE.md](START_HERE.md) to begin a new implementation session. Read [
 
 The central workflow is **webpage HTML → Defuddle extraction → local language-model block classification → original article content with reversible nuisance exclusions**. The original page and transcript must share the same correction logic. Tapping Skip grays a passage in place; Keep restores it.
 
+## Review-stage experiments
+
+Use Node 24.19 or later. CPU binaries are included in the pinned ONNX Runtime package; the environment variable below skips its optional additional binary downloads.
+
+```sh
+ONNXRUNTIME_NODE_INSTALL=skip npm ci
+npm run build:prototype
+npm test
+npm run experiment
+```
+
+The first experiment run downloads about 97.5 MB of model/tokenizer assets from Hugging Face, then performs inference on this computer. It sends no passages to an inference service. Real-page HTML is fetched directly from two documented sources. Cached captures and model weights stay in ignored `.cache/`; public results contain source hashes, labels, and timings.
+
+Open [prototype/review.html](prototype/review.html) for the self-contained interactive study, or [prototype/gallery.html](prototype/gallery.html) for comparable views. Speech and URL/site tools are explicitly unconnected. Model results and reproduction details are in [experiments/filtering/README.md](experiments/filtering/README.md).
+
 ## Rebuild boundaries
 
-Rebuild from these documents. Choose an architecture and local model on evidence; the former implementation is not a template. Demonstrate filtering and a polished mobile interface before expanding the feature set. Keep unavailable or unverified capabilities explicit.
+Rebuild from these documents. Choose an architecture and local model on evidence; the former implementation is not a template. Demonstrate filtering and a polished mobile interface while implementing the complete feature set. Keep unavailable or unverified capabilities explicit.
 
 The reset is a normal commit that preserves repository history. The last implementation snapshot is commit `a9a28ea5bd75ecf1ab2f8a35e5cdbea9cf8c25aa`; recovery is possible if explicitly requested. Previous `dist/` install and update URLs are withdrawn until a new release is published. Already installed copies are not remotely uninstalled by this reset.
+

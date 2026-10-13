@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "labeledBeforeInference": true,
+  "labeler": "Implementation author; no independent human audit yet",
+  "purpose": "Feasibility probe, not the 150-block release benchmark",
+  "synthetic": [{
+    "path": "fixtures/city.html", "url": "https://example.org/city",
+    "provenance": "Original authored fixture, including a BBC-style related-books interruption; not a BBC capture",
+    "labels": {
+      "nav": "NUISANCE", "title": "ARTICLE", "intro": "ARTICLE", "story": "ARTICLE",
+      "related-heading": "NUISANCE", "related-book": "NUISANCE", "related-story": "NUISANCE",
+      "bridge": "ARTICLE", "ads-discussion": "ARTICLE", "quote": "ARTICLE", "mixed-prose": "ARTICLE",
+      "mixed-promo": "NUISANCE", "caption": "ARTICLE", "list-heading": "ARTICLE", "list-one": "ARTICLE",
+      "list-two": "ARTICLE", "subscriptions": "ARTICLE", "duplicate-one": "ARTICLE", "duplicate-two": "ARTICLE",
+      "sale": "NUISANCE", "app": "NUISANCE", "injection": "ARTICLE", "ending": "ARTICLE", "footer": "NUISANCE", "copyright": "NUISANCE"
+    }
+  }],
+  "real": [
+    { "name": "webkit-26", "url": "https://webkit.org/blog/17333/webkit-features-in-safari-26-0/", "layout": "technical article",
+      "selectors": [{ "selector": "article h1", "label": "ARTICLE", "take": 1 }, { "selector": "article .bodycopy > p", "label": "ARTICLE", "take": 5 }] },
+    { "name": "saw", "url": "https://stephango.com/saw", "layout": "personal essay",
+      "selectors": [{ "selector": "main h1", "label": "ARTICLE", "take": 1 }, { "selector": "main p", "label": "ARTICLE", "take": 5 }] }
+  ]
+}

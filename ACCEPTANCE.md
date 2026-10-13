@@ -8,7 +8,7 @@ The old code passed automated checks but did not satisfy the user. A new release
 - Execute a real local model; measure download/startup/inference/resource costs. Demonstrate failure with text preserved and an honest unavailable state.
 - Skip a passage on the original page: it grays in place, the matching transcript changes, future narration/export selection updates, and Undo restores both state and learning contribution. Keep survives late automatic results.
 - Correct short, nested, full-width, already excluded, and dynamically inserted passages without covering prose or activating a link.
-- Present the compact interactive design prototype and rendered light/dark states for user review before broader implementation.
+- Present the compact interactive design prototype and rendered light/dark states for feedback alongside broader implementation.
 
 ## Filtering evaluation
 
@@ -38,8 +38,9 @@ Capture main menu, page review, Why/long excerpt, reader/player, and speech sett
 
 Record the device/OS, Safari, Userscripts version, viewport, actual model backend, and live-service conditions for physical iPhone verification. Desktop browser emulation and WebKit automation must be labeled separately. If device access or credentials are unavailable, provide a concrete manual checklist and mark those gates pending; do not claim them passed.
 
-Locked-screen playback needs a real device trial, including buffering and passage transitions. Prepared recordings need a local-player trial. User review of screenshots/prototype remains necessary for aesthetic acceptance; a numerical layout test alone cannot provide it.
+Locked-screen playback needs a real device trial, including buffering and passage transitions. Prepared recordings need a local-player trial. User feedback on screenshots/prototype remains useful for aesthetic evaluation and does not gate implementation; a numerical layout test alone cannot provide it.
 
 ## Release record
 
 List completed, deferred, blocked, and unverified requirements; reproducible test commands; model benchmark results; screenshot evidence; installation/update instructions; and platform limitations. A partial milestone must be labeled accordingly. Never retain a green CI badge as a substitute for these results.
+

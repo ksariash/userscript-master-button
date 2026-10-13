@@ -1,0 +1,38 @@
+{
+  "kind": "Native Sites publication render",
+  "captureViewport": {
+    "width": 1200,
+    "height": 750
+  },
+  "studyFrames": {
+    "width": 390,
+    "height": 844,
+    "scale": 0.7
+  },
+  "renderEngineVersion": "Not reported by service",
+  "interactionValidation": "JSDOM only; browser UI interaction was blocked by sign-in",
+  "physicalIphoneSafari": "Not run",
+  "liveAzure": "Not run",
+  "captures": [
+    {
+      "file": "light-clean.png",
+      "siteVersion": 4,
+      "siteSourceCommit": "3a3e0eabe0da52f78999782b01fcf977cf5ac57d"
+    },
+    {
+      "file": "dark-clean.png",
+      "siteVersion": 3,
+      "siteSourceCommit": "4e66b5761f4ea406d061ad93e3ae64e4d71e77aa"
+    },
+    {
+      "file": "light-busy.png",
+      "siteVersion": 5,
+      "siteSourceCommit": "6be467ffaba5585e44ab3ea0bd1ecdc3ff77d86e"
+    },
+    {
+      "file": "dark-busy.png",
+      "siteVersion": 6,
+      "siteSourceCommit": "8ab512f39e998ca594241cdb2d8c8493dde74975"
+    }
+  ]
+}
