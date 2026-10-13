@@ -69,7 +69,7 @@ function semanticDecision(vec,domain=domainKey(),contextVector=null){
 }
 function resetSemanticReview(){
  semantic.revision++;
- for(const p of passageStore.records){p.analyzedRevision=-1;if(!prefs.semanticAuto)p.analysis={...inspectPassage(p.text,p.element),model:'Heuristic',source:'DOM and site rules',score:null};}
+ for(const p of classificationRecords()){p.analyzedRevision=-1;p.modelAnalysis=null;p.analysis=classifyPassage(p);}
  syncPassageViews();scheduleSemanticScan();
 }
 async function analyzePhrase(value,element=null){
@@ -106,7 +106,7 @@ function scheduleSemanticScan(){
 async function runSemanticScan(){
  if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled()||state.filterReview)return;
  refreshPassages();const epoch=passageStore.epoch,revision=semantic.revision;
- const candidates=passageStore.records.filter(p=>p.analyzedRevision!==revision).slice(0,24);
+ const candidates=classificationRecords().filter(p=>p.analyzedRevision!==revision).slice(0,24);
  if(!candidates.length)return;
  semantic.running=true;let failed=false;
  try{
@@ -119,10 +119,10 @@ async function runSemanticScan(){
   let offset=0;
   candidates.forEach((p,index)=>{const count=chunkText(p.text,600).length,decisions=vectors.slice(offset,offset+count).map(v=>semanticDecision(v,domainKey(),contextVectors[index]));offset+=count;
    // Never gray a mixed long passage because only its first excerpt looks promotional.
-   p.analysis=decisions.find(d=>!d.excluded)||decisions[0];p.analysis={...p.analysis,extraction:p.extraction};p.analyzedRevision=revision;semantic.scanned++;});
+   p.modelAnalysis=decisions.find(d=>!d.excluded)||decisions[0];p.analysis=classifyPassage(p,p.modelAnalysis);p.analyzedRevision=revision;semantic.scanned++;});
   syncPassageViews();reconcilePlayback();
  }catch(e){failed=true;semantic.detail='Filtering paused. Retry model from Filter.';return false;}
- finally{semantic.running=false;if(!failed&&passageStore.records.some(p=>p.analyzedRevision!==semantic.revision))scheduleSemanticScan();}
+ finally{semantic.running=false;if(!failed&&classificationRecords().some(p=>p.analyzedRevision!==semantic.revision))scheduleSemanticScan();}
 }
 async function reclassifyTranscript(){
  if(!semantic.extractor)return;

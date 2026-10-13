@@ -6,11 +6,12 @@
 - `node --check dist/master-button.user.js`: passed.
 - Existing utility suite: passed.
 - `tests/pipeline.cjs`: passed with jsdom, actual Defuddle 0.19.5, deterministic fake embeddings and simulated audio/GM requests. Covers extraction-to-original-node mapping, malformed saved data, shared page/reader overrides, single prototype replacement, Undo while inference is pending, style restoration, dynamic insertion/text changes, classification beyond the first batch, buffering continuation and skipped queued requests.
+- `tests/stabilization.cjs`: covers corroborated extraction decisions, rule exclusion/preview consistency, teaching Undo, pending learning reset, removed/reinserted nodes and navigation.
 - Python browser test files compile.
 
 ## Browser/device boundary
 
-All five Chromium suites were attempted locally. Chromium exits with SIGTRAP before a page can open in this environment. **No local screenshot, layout or touch verification is claimed.** The GitHub workflow runs these suites on Ubuntu and uploads light/dark mobile screenshots; its actual result must be checked before merging.
+All five Chromium suites were attempted locally; Chromium exits SIGTRAP before opening a page. GitHub Actions successfully ran the suites on the previous candidate and uploaded screenshots. The stabilization commit must pass the same workflow, including crowded-layout and focus assertions, before it is marked ready. Local jsdom is not layout evidence.
 
 Real MiniLM runtime/weights, live Azure synthesis, actual website DOMs and physical iPhone Safari have not been verified by these tests. jsdom does not measure layout. Fake vectors establish state transitions, not classifier quality.
 
@@ -18,7 +19,7 @@ Real MiniLM runtime/weights, live Azure synthesis, actual website DOMs and physi
 
 1. At 390x844, inspect menu, Filter, Teach, Speech, Reader and on-page controls in both themes. Confirm compact Teach <=360px, Speech <=530px and main menu <=450px, without clipping or overlapping targets.
 2. On iPhone, review an article, Skip on the page, open the transcript and Keep the same passage. Verify synchronization, scroll preservation, Undo, Done, source links, keyboard and launcher taps.
-3. Test multiple short adjacent passages and edge-to-edge article layouts for control overlap. Review controls may be omitted when two 44px targets cannot fit within their source blocks; the transcript remains the complete correction surface.
+3. Test multiple short adjacent passages and edge-to-edge article layouts for control overlap. A native passage chooser must provide correction access when 44px markers do not fit. Markers must never cover prose or links.
 4. Edit/add source content dynamically and navigate within an SPA. Confirm new content is reviewed and stale transcript chunks cannot be narrated.
 5. Load the actual MiniLM model, test unrelated articles and related-story blocks, and inspect false positives before changing thresholds.
 6. Use real Azure credentials for multi-passage playback, buffering, pause while buffering, cancel, voice change, skipped queued passages and exported MP3 duration. Skipping an already-submitted request cannot retract the transmitted text.

@@ -3,13 +3,18 @@
 const hidden=new Map(); let picker=null, pickerMatches=[], preview=false, filterTick=0;
 const BAN_SEL='[data-mb-host],html,body,head,main,article,[role="main"],shreddit-post';
 function protectedNode(el){return !el || !el.isConnected || el.closest('[data-mb-host]') || el.matches(BAN_SEL) || el.querySelector('article,main,[role="main"],[data-mb-host]') || el===document.documentElement || el===document.body;}
-function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
+function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
 function showNode(el){const old=hidden.get(el);if(!old)return;if(old.display)el.style.setProperty('display',old.display,old.priority);else el.style.removeProperty('display');hidden.delete(el);updateCount();}
 function showAll(){for(const e of [...hidden.keys()])showNode(e);}
-function updateCount(){if(!host)return;for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String([...hidden.keys()].filter(e=>e.isConnected&&!([...hidden.keys()].some(other=>other!==e&&other.contains(e)))).length);}
+function updateCount(){
+ if(!host)return;
+ const nodes=[...new Set([...hidden.keys(),...passageStore.records.filter(p=>p.element?.hasAttribute('data-mb-skipped')).map(p=>p.element)])].filter(el=>el.isConnected);
+ const count=nodes.filter(el=>!nodes.some(parent=>parent!==el&&parent.contains(el))).length;
+ for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String(count);
+}
 function activeRules(){return (prefs.rules[domainKey()]||[]).filter(r=>r.enabled!==false);}
 function safeMatches(sel){try{return [...document.querySelectorAll(sel)].slice(0,350);}catch{return [];}}
-function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
+function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}refreshRuleEvidence();syncPassageViews();reconcilePlayback();scheduleSemanticScan();}
 function beginFilterReview(){
  if(state.filterReview)return;
  state.reviewHidden=new Map(hidden);state.filterReview=true;toggleRedditCSS(false);showAll();renderPagePassages();render();
@@ -40,15 +45,15 @@ function classificationScore(v,domain=domainKey()){
  for(const t of terms){const data=model[tokenHash(t)];if(data){val+=Math.log((data.skip+1)/(data.keep+1));hits++;}}
  return {score:hits?val/Math.sqrt(hits):0,hits};
 }
-function learnPassage(v,decision){const domain=domainKey(),model=prefs.learning[domain]||={};for(const t of [...new Set(tokens(v))].slice(0,60)){const k=tokenHash(t);const e=model[k]||={keep:0,skip:0};e[decision]=Math.min(30,e[decision]+1);model[k]=e;}const keys=Object.keys(model);if(keys.length>700)for(const k of keys.slice(0,keys.length-700))delete model[k];saveSettings();}
 function nuisanceReason(el,str){
  const feedback=classificationScore(str);
- if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score < -0.8)return '';
- const context=((el?.className&&typeof el.className==='string'?el.className:'')+' '+(el?.id||'')+' '+(el?.getAttribute?.('aria-label')||'')).toLowerCase();
- if(/related|recommend|newsletter|promo|advert|sponsor|outbrain|taboola/.test(context))return 'Promotional or recommendation component';
- if(/(?:^|\W)(?:related articles|you might also like|recommended for you|sign up for our newsletter|from around the web|advertisement)(?:\W|$)/i.test(str.slice(0,170)))return 'Likely recommendation or promotion';
- const s=feedback;if(prefs.learningEnabled?.[domainKey()]!==false&&s.hits>=2&&s.score>1.8)return 'Learned from your corrections';
+ if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score<-.8)return '';
+ const explicit=/^(?:related (?:articles|stories)\b|recommended for you\b|you might also like\b|sign up for (?:our |the )?newsletter\b|subscribe now\b|download our app\b|(?:advertisement|sponsored content)[.!:]?$)/i.test(str.slice(0,170));
+ if(explicit)return 'Promotional or related-story copy';
+ const component=el?.closest?.('aside,[role="complementary"],[class*="related" i],[class*="recommend" i],[class*="newsletter" i],[class*="promo" i],[class*="advert" i],[class*="sponsor" i]');
+ if(component&&!component.matches('article,main,[role="main"]'))return 'Promotional or recommendation component';
+ if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score>1.8)return 'Learned from your earlier corrections';
  return '';
 }
-function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text'};}
+function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text',explicitCopy:why==='Promotional or related-story copy'};}
 

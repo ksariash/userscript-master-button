@@ -122,13 +122,18 @@ const cleanupEnabled=()=>prefs.siteCleanup[siteName()]!==false;
 const hidden=new Map(); let picker=null, pickerMatches=[], preview=false, filterTick=0;
 const BAN_SEL='[data-mb-host],html,body,head,main,article,[role="main"],shreddit-post';
 function protectedNode(el){return !el || !el.isConnected || el.closest('[data-mb-host]') || el.matches(BAN_SEL) || el.querySelector('article,main,[role="main"],[data-mb-host]') || el===document.documentElement || el===document.body;}
-function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
+function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
 function showNode(el){const old=hidden.get(el);if(!old)return;if(old.display)el.style.setProperty('display',old.display,old.priority);else el.style.removeProperty('display');hidden.delete(el);updateCount();}
 function showAll(){for(const e of [...hidden.keys()])showNode(e);}
-function updateCount(){if(!host)return;for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String([...hidden.keys()].filter(e=>e.isConnected&&!([...hidden.keys()].some(other=>other!==e&&other.contains(e)))).length);}
+function updateCount(){
+ if(!host)return;
+ const nodes=[...new Set([...hidden.keys(),...passageStore.records.filter(p=>p.element?.hasAttribute('data-mb-skipped')).map(p=>p.element)])].filter(el=>el.isConnected);
+ const count=nodes.filter(el=>!nodes.some(parent=>parent!==el&&parent.contains(el))).length;
+ for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String(count);
+}
 function activeRules(){return (prefs.rules[domainKey()]||[]).filter(r=>r.enabled!==false);}
 function safeMatches(sel){try{return [...document.querySelectorAll(sel)].slice(0,350);}catch{return [];}}
-function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
+function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}refreshRuleEvidence();syncPassageViews();reconcilePlayback();scheduleSemanticScan();}
 function beginFilterReview(){
  if(state.filterReview)return;
  state.reviewHidden=new Map(hidden);state.filterReview=true;toggleRedditCSS(false);showAll();renderPagePassages();render();
@@ -159,28 +164,67 @@ function classificationScore(v,domain=domainKey()){
  for(const t of terms){const data=model[tokenHash(t)];if(data){val+=Math.log((data.skip+1)/(data.keep+1));hits++;}}
  return {score:hits?val/Math.sqrt(hits):0,hits};
 }
-function learnPassage(v,decision){const domain=domainKey(),model=prefs.learning[domain]||={};for(const t of [...new Set(tokens(v))].slice(0,60)){const k=tokenHash(t);const e=model[k]||={keep:0,skip:0};e[decision]=Math.min(30,e[decision]+1);model[k]=e;}const keys=Object.keys(model);if(keys.length>700)for(const k of keys.slice(0,keys.length-700))delete model[k];saveSettings();}
 function nuisanceReason(el,str){
  const feedback=classificationScore(str);
- if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score < -0.8)return '';
- const context=((el?.className&&typeof el.className==='string'?el.className:'')+' '+(el?.id||'')+' '+(el?.getAttribute?.('aria-label')||'')).toLowerCase();
- if(/related|recommend|newsletter|promo|advert|sponsor|outbrain|taboola/.test(context))return 'Promotional or recommendation component';
- if(/(?:^|\W)(?:related articles|you might also like|recommended for you|sign up for our newsletter|from around the web|advertisement)(?:\W|$)/i.test(str.slice(0,170)))return 'Likely recommendation or promotion';
- const s=feedback;if(prefs.learningEnabled?.[domainKey()]!==false&&s.hits>=2&&s.score>1.8)return 'Learned from your corrections';
+ if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score<-.8)return '';
+ const explicit=/^(?:related (?:articles|stories)\b|recommended for you\b|you might also like\b|sign up for (?:our |the )?newsletter\b|subscribe now\b|download our app\b|(?:advertisement|sponsored content)[.!:]?$)/i.test(str.slice(0,170));
+ if(explicit)return 'Promotional or related-story copy';
+ const component=el?.closest?.('aside,[role="complementary"],[class*="related" i],[class*="recommend" i],[class*="newsletter" i],[class*="promo" i],[class*="advert" i],[class*="sponsor" i]');
+ if(component&&!component.matches('article,main,[role="main"]'))return 'Promotional or recommendation component';
+ if(prefs.learningEnabled?.[domainKey()]!==false&&feedback.hits>=2&&feedback.score>1.8)return 'Learned from your earlier corrections';
  return '';
 }
-function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text'};}
+function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text',explicitCopy:why==='Promotional or related-story copy'};}
 
 
 // One page-scoped ledger. Views never classify or own copies of passage decisions.
-const passageStore={records:[],byElement:new WeakMap(),byId:new Map(),nextId:1,epoch:0,review:false,undo:[],extractor:'Not extracted',error:'',url:location.href};
+const passageStore={records:[],byElement:new WeakMap(),byId:new Map(),nextId:1,epoch:0,review:false,undo:[],selectedId:null,extractor:'Not extracted',error:'',url:location.href};
 const PASSAGE_SELECTOR='p,h1,h2,h3,h4,blockquote,li,pre,figcaption';
-function passageExcluded(p){return p.override!==null?p.override==='skip':filterEnabled()&&!!p.analysis?.excluded;}
-function passageReason(p){return p.override!==null?`You ${p.override==='skip'?'skipped':'kept'} this passage`:p.analysis?.reason||'Article text';}
+function passageAnalysis(p){
+ const base=p.analysis||{excluded:false,reason:'Not classified',model:'Unavailable',source:'no inference',score:null};
+ const ownedHidden=[...hidden,...(state.reviewHidden||[])].find(([el])=>p.element&&(el===p.element||el.contains(p.element)));
+ const rule=filterEnabled()?p.ruleReason:null;
+ const automaticReason=rule||ownedHidden?.[1].reason;
+ if(p.override!==null)return {...base,excluded:p.override==='skip',reason:`You ${p.override==='skip'?'skipped':'kept'} this passage`,source:'Your explicit choice'};
+ if(automaticReason)return {...base,excluded:true,reason:automaticReason,source:'Saved page rule'};
+ return {...base,excluded:filterEnabled()&&!!base.excluded};
+}
+function passageExcluded(p){return passageAnalysis(p).excluded;}
+function passageReason(p){return passageAnalysis(p).reason;}
+function refreshRuleEvidence(){
+ const rules=activeRules();
+ for(const p of passageStore.byId.values()){
+  p.ruleReason=null;if(!p.element)continue;
+  for(const rule of rules){
+   let match;try{match=p.element.closest?.(rule.selector);}catch{continue;} // Invalid legacy selectors fail conservatively.
+   if(match&&!protectedNode(match)){p.ruleReason=`Custom rule: ${rule.selector}`;break;}
+  }
+ }
+}
+function classifyPassage(p,model=null){
+ const structure=inspectPassage(p.text,p.element);
+ const removed=p.extraction==='Outside extracted content';
+ const extractionKnown=passageStore.extractor==='Defuddle 0.19.5';
+ // Extraction alone is never an exclusion. Corroborate rejected blocks with specific clutter evidence.
+ const structuralSkip=structure.explicitCopy||(extractionKnown&&removed&&structure.excluded);
+ const protectedByLearning=model?.source==='your Keep example';
+ const excluded=!!model?.excluded||(!protectedByLearning&&structuralSkip);
+ const structuralReason=excluded&&!model?.excluded;
+ return {...(model||{model:'Heuristic',score:null}),excluded,
+  reason:structuralReason?structure.reason:model?.reason||(removed?'Retained for review outside extracted article':'Article text'),
+  source:structuralReason?(removed?'Defuddle + structural evidence':'Explicit promotional copy'):model?.source||'Defuddle article structure',
+  extraction:p.extraction,structuralReason:structure.reason,uncertain:!excluded&&!protectedByLearning&&removed};
+}
+function classificationRecords(){
+ const records=new Map(passageStore.records.map(p=>[p.id,p]));
+ for(const chunk of reading.passages){const p=passageStore.byId.get(chunk.sourceId);if(p)records.set(p.id,p);}
+ return [...records.values()];
+}
 function passageRecord(element){return element?passageStore.byElement.get(element):null;}
 function resetPassageStore(){
- for(const p of passageStore.records)restorePassageStyle(p);
- passageStore.records=[];passageStore.byElement=new WeakMap();passageStore.byId.clear();passageStore.epoch++;passageStore.undo=[];passageStore.url=location.href;
+ for(const p of passageStore.records){restorePassageStyle(p);p.element.removeAttribute('data-mb-review-target');}
+ passageStore.review=false;state.filterReview=false;state.reviewHidden=null;stopPreview();if(picker){document.removeEventListener('click',picker,true);picker=null;}
+ passageStore.records=[];passageStore.byElement=new WeakMap();passageStore.byId.clear();passageStore.epoch++;passageStore.undo=[];passageStore.selectedId=null;state.pageSelected=null;state.whySource=null;passageStore.url=location.href;
 }
 function refreshPassages(){
  if(passageStore.url!==location.href){stopPlayback(true);reading.passages=[];resetPassageStore();}
@@ -188,7 +232,7 @@ function refreshPassages(){
  const root=roots.sort((a,b)=>text(b.textContent).length-text(a.textContent).length)[0]||document.body;
  if(!root)return [];
  let nodes=[...root.querySelectorAll(PASSAGE_SELECTOR)].filter(el=>text(el.textContent).length>=8&&!el.querySelector(PASSAGE_SELECTOR)&&!el.closest('nav,header,footer,[data-mb-host],script,style,textarea,[contenteditable="true"]'));
- if(!nodes.length&&text(root.textContent).length>20)nodes=[root];
+ // Plain body/main roots never become grayable passages; users can select or paste unstructured text.
  const changed=nodes.length!==passageStore.records.length||nodes.some((el,i)=>passageStore.records[i]?.element!==el||passageStore.records[i]?.text!==text(el.textContent));
  if(!changed){renderPageControls();return passageStore.records;}
  const old=new Set(passageStore.records);
@@ -199,9 +243,9 @@ function refreshPassages(){
    p={id:String(passageStore.nextId++),text:value,element:el,override:null,revision:0,analysis:null,analyzedRevision:-1,originalDisplay:null};
    passageStore.byElement.set(el,p);passageStore.byId.set(p.id,p);
   }
-  old.delete(p);return p;
+  passageStore.byId.set(p.id,p);old.delete(p);return p;
  });
- for(const p of old){restorePassageStyle(p);passageStore.byId.delete(p.id);}
+ for(const p of old){restorePassageStyle(p);if(passageStore.byElement.get(p.element)===p)passageStore.byElement.delete(p.element);passageStore.byId.delete(p.id);}
  // IDs are applied only to the detached copy. Never rebuild live page HTML.
  const clone=document.cloneNode(true);clone.querySelectorAll('[data-mb-source]').forEach(el=>el.removeAttribute('data-mb-source'));
  const originalNodes=[...document.querySelectorAll(PASSAGE_SELECTOR)],copyNodes=[...clone.querySelectorAll(PASSAGE_SELECTOR)];
@@ -217,10 +261,11 @@ function refreshPassages(){
   passageStore.extractor=retained.size?'Defuddle 0.19.5':'Structural fallback';passageStore.error=retained.size?'':'Extraction could not map this page; original passages retained.';
  }catch(e){passageStore.extractor='Structural fallback';passageStore.error='Article extraction unavailable; original passages retained.';}
  for(const p of passageStore.records){
-  p.extraction=retained.has(p.id)?'Retained by Defuddle':'Outside extracted content';
-  if(!p.analysis){const heuristic=inspectPassage(p.text,p.element);p.analysis={...heuristic,model:'Heuristic',source:'DOM and site rules',score:null};}
+  const evidence=retained.has(p.id)?'Retained by Defuddle':retained.size?'Outside extracted content':'Extraction unavailable';
+  if(p.extraction!==evidence){p.extraction=evidence;p.analyzedRevision=-1;}
+  p.analysis=classifyPassage(p,p.modelAnalysis||null);
  }
- passageStore.epoch++;syncPassageViews();reconcilePlayback();return passageStore.records;
+ passageStore.epoch++;refreshRuleEvidence();syncPassageViews();reconcilePlayback();return passageStore.records;
 }
 function restorePassageStyle(p){
  if(!p.element)return;
@@ -230,53 +275,108 @@ function restorePassageStyle(p){
 function renderPagePassages(){
  for(const p of passageStore.records){
   restorePassageStyle(p);
-  if(!p.element.isConnected||!filterEnabled()||(state.filterReview&&!passageStore.review)||!passageExcluded(p))continue;
+  if(!p.element.isConnected||(!filterEnabled()&&p.override===null)||(state.filterReview&&!passageStore.review)||!passageExcluded(p))continue;
   p.element.setAttribute('data-mb-skipped','');
   // Preserve geometry and text. Collapsing is an explicit secondary preference.
-  if(prefs.hideSkipped&&!passageStore.review&&!protectedNode(p.element)){p.originalDisplay={value:p.element.style.getPropertyValue('display'),priority:p.element.style.getPropertyPriority('display')};p.element.style.setProperty('display','none','important');}
+  if(prefs.hideSkipped&&!passageStore.review&&!hidden.has(p.element)&&!protectedNode(p.element)){p.originalDisplay={value:p.element.style.getPropertyValue('display'),priority:p.element.style.getPropertyPriority('display')};p.element.style.setProperty('display','none','important');}
  }
  renderPageControls();
 }
 function syncPassageViews(){
- for(const p of reading.passages){const source=passageStore.byId.get(p.sourceId);if(!source){if(p.sourceId){p.excluded=true;p.reason='Source changed; re-extract to include updated text.';}continue;}p.excluded=passageExcluded(source);p.manual=source.override!==null;p.reason=passageReason(source);p.analysis=source.analysis;}
+ for(const p of reading.passages){const source=passageStore.byId.get(p.sourceId);if(!source){if(p.sourceId){p.excluded=true;p.reason='Source changed; re-extract to include updated text.';}continue;}p.excluded=passageExcluded(source);p.manual=source.override!==null;p.reason=passageReason(source);p.analysis=passageAnalysis(source);}
  renderPagePassages();render();
 }
-async function correctPassage(p,decision){
- if(p)state.pageSelected=p.id;
- if(!p||!['keep','skip'].includes(decision))return;
- if(p.override===decision)return;
- const h=tokenHash(embeddingInput(p.text).toLowerCase()),domain=domainKey();
- passageStore.undo.push({id:p.id,override:p.override,h,domain,example:vectorsForSite(domain).find(x=>x.h===h)});passageStore.undo=passageStore.undo.slice(-30);
- if(decision==='keep'&&p.element)for(const el of [...hidden.keys()])if(el===p.element||el.contains(p.element))showNode(el);
- p.override=decision;p.revision++;syncPassageViews();reconcilePlayback();
- try{await teachSemantic(p.text,decision,decision==='keep'?'article':'offtopic',p.element);}catch(e){notify('Choice applied. Learning unavailable; retry from Filter.');}
+async function correctPassage(p,decision,options={}){
+ if(!['keep','skip'].includes(decision))return false;
+ const sample=options.sample||p?.text;if(!sample)throw Error('Select text first.');
+ if(p){state.pageSelected=p.id;passageStore.selectedId=p.id;}
+ const h=tokenHash(embeddingInput(sample).toLowerCase()),domain=domainKey();
+ if(!p||p.override!==decision||options.sample){
+  passageStore.undo.push({id:p?.id||null,override:p?.override??null,h,domain,example:vectorsForSite(domain).find(x=>x.h===h)});
+  passageStore.undo=passageStore.undo.slice(-30);
+ }
+ if(p){
+  if(decision==='keep'&&p.element)for(const el of [...hidden.keys()])if(el===p.element||el.contains(p.element))showNode(el);
+  p.override=decision;p.revision++;
+ }
+ updateSite();syncPassageViews();reconcilePlayback();
+ try{return await teachSemantic(sample,decision,options.reason||(decision==='keep'?'article':'offtopic'),p?.element||options.element);}
+ catch(e){if(options.reportError)throw e;notify('Choice applied. Learning unavailable; retry from Filter.');return false;}
 }
 async function undoPassageCorrection(){
- const item=passageStore.undo.pop();if(!item)return;
- const p=passageStore.byId.get(item.id);if(!p)return;
- cancelTraining(item.domain,item.h);p.override=item.override;p.revision++;
- const examples=vectorsForSite(item.domain).filter(x=>x.h!==item.h);if(item.example)examples.push(item.example);prefs.semanticExamples[item.domain]=examples.slice(-24);
- semantic.revision++;await saveSettings();resetSemanticReview();syncPassageViews();reconcilePlayback();
+ let item,p;
+ while(passageStore.undo.length){item=passageStore.undo.pop();p=item.id&&passageStore.byId.get(item.id);if(!item.id||p)break;item=null;}
+ if(!item)return;
+ cancelTraining(item.domain,item.h);if(p){p.override=item.override;p.revision++;}
+ const examples=vectorsForSite(item.domain).filter(x=>x.h!==item.h);if(item.example)examples.push(item.example);
+ prefs.semanticExamples[item.domain]=examples.slice(-24);
+ await saveSettings();resetSemanticReview();updateSite();syncPassageViews();reconcilePlayback();
+}
+async function resetSiteLearning(){
+ const domain=domainKey();
+ for(const key of trainingVersions.keys())if(key.startsWith(domain+'|'))trainingVersions.set(key,trainingVersions.get(key)+1);
+ delete prefs.semanticExamples[domain];delete prefs.learning[domain];
+ // An old Undo must not resurrect prototypes that the user intentionally reset.
+ passageStore.undo=passageStore.undo.filter(x=>x.domain!==domain);
+ await saveSettings();resetSemanticReview();updateSite();syncPassageViews();reconcilePlayback();
 }
 function setPageReview(on){
  if(on){refreshPassages();beginFilterReview();}
  passageStore.review=on;if(!on)endFilterReview();state.view='';renderPagePassages();render();scheduleSemanticScan();
 }
-function renderPageControls(){
- if(!host)return;let layer=host.shadowRoot.querySelector('.mb-page-controls');
- if(!layer){layer=document.createElement('div');layer.className='mb-page-controls';host.shadowRoot.append(layer);}
- if(!passageStore.review||state.view){layer.replaceChildren();return;}
- const viewport=window.visualViewport,w=viewport?.width||innerWidth,h=viewport?.height||innerHeight,top=viewport?.offsetTop||0,left=viewport?.offsetLeft||0;
- const fragment=document.createDocumentFragment();let lastBottom=-100;
- for(const p of passageStore.records){
-  const r=p.element.getBoundingClientRect();if(!r.width||!r.height||r.bottom<top||r.top>top+h-58)continue;
-  // Prefer the left margin. On edge-to-edge layouts use a compact right-edge control.
-  const x=r.left-left>=48?r.left-46:Math.min(left+w-46,r.right-44);
-  const y=Math.max(top+2,r.top,lastBottom+2);if(y>Math.min(r.bottom,top+h-102))continue;
-  const b=document.createElement('button');b.type='button';b.className='mb-page-toggle';b.dataset.action='page-toggle:'+p.id;b.style.left=x+'px';b.style.top=y+'px';b.setAttribute('aria-label',`${passageExcluded(p)?'Keep':'Skip'} passage: ${p.text.slice(0,65)}`);b.setAttribute('aria-pressed',String(passageExcluded(p)));b.textContent=passageExcluded(p)?'✓':'−';fragment.append(b);lastBottom=y+44;
- }
- const bar=document.createElement('div');bar.className='mb-review-bar';bar.innerHTML=`<span>Review passages</span>${state.pageSelected?'<button type="button" data-action="page-why">Why</button>':''}<button type="button" data-action="page-undo" ${passageStore.undo.length?'':'disabled'}>Undo</button><button type="button" data-action="page-review-end">Done</button>`;fragment.append(bar);layer.replaceChildren(fragment);
+function selectReviewPassage(id,scroll=false){
+ const p=passageStore.byId.get(id);if(!p?.element)return;
+ passageStore.selectedId=id;state.pageSelected=id;
+ if(scroll)p.element.scrollIntoView({block:'center',behavior:'auto'});
+ renderPageControls();
 }
+function renderPageControls(){
+ if(!host)return;
+ let layer=host.shadowRoot.querySelector('.mb-page-controls');
+ if(!layer){layer=document.createElement('div');layer.className='mb-page-controls';host.shadowRoot.append(layer);}
+ for(const p of passageStore.records)p.element.removeAttribute('data-mb-review-target');
+ if(!passageStore.review||state.view){layer.replaceChildren();return;}
+ let bar=layer.querySelector('.mb-review-bar');
+ if(!bar){
+  bar=document.createElement('div');bar.className='mb-review-bar';
+  bar.innerHTML='<div class="mb-review-picker" hidden><select id="mb-review-passage" aria-label="Choose passage to review"></select><button type="button" data-action="page-selected-toggle">Skip</button></div><div class="mb-review-actions"><span>Review passages</span><button type="button" data-action="page-why">Why</button><button type="button" data-action="page-undo">Undo</button><button type="button" data-action="page-review-end">Done</button></div>';
+  layer.append(bar);
+ }
+ const viewport=window.visualViewport,w=viewport?.width||innerWidth,h=viewport?.height||innerHeight,top=viewport?.offsetTop||0,left=viewport?.offsetLeft||0;
+ const markers=new Map([...layer.querySelectorAll('.mb-page-toggle')].map(b=>[b.dataset.sourceId,b]));
+ const visible=[];let lastBottom=top-46,needsPicker=false;
+ for(const p of passageStore.records){
+  const r=p.element.getBoundingClientRect();
+  if(!r.width||!r.height||r.bottom<top||r.top>top+h-102)continue;
+  visible.push(p);
+  const rightMargin=left+w-r.right>=48,leftMargin=r.left-left>=48;
+  const x=rightMargin?r.right+2:leftMargin?r.left-46:null;
+  const y=Math.max(top+2,r.top,lastBottom+2);
+  // Crowded and edge-to-edge text uses the native passage chooser, never a target over text.
+  if(x===null||y+44>Math.min(r.bottom+6,top+h-106)){needsPicker=true;continue;}
+  let b=markers.get(p.id);
+  if(!b){b=document.createElement('button');b.type='button';b.className='mb-page-toggle';b.dataset.sourceId=p.id;layer.insertBefore(b,bar);}
+  markers.delete(p.id);b.dataset.action='page-toggle:'+p.id;
+  b.style.left=x+'px';b.style.top=y+'px';
+  b.setAttribute('aria-label',`${passageExcluded(p)?'Keep':'Skip'} passage: ${p.text.slice(0,65)}`);
+  b.setAttribute('aria-pressed',String(passageExcluded(p)));b.textContent=passageExcluded(p)?'✓':'−';lastBottom=y+44;
+ }
+ for(const b of markers.values())b.remove();
+ const selected=passageStore.byId.get(passageStore.selectedId);
+ if(needsPicker&&(!selected||!selected.element.isConnected))selectReviewPassageInitial(visible[0]||passageStore.records[0]);
+ const active=passageStore.byId.get(passageStore.selectedId);
+ if(active?.element)active.element.setAttribute('data-mb-review-target','');
+ const picker=bar.querySelector('.mb-review-picker');picker.hidden=!needsPicker;
+ const sel=bar.querySelector('select'),signature=passageStore.records.map(p=>p.id).join(',');
+ if(sel.dataset.signature!==signature){
+  sel.replaceChildren(...passageStore.records.map((p,i)=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${i+1} · ${p.text.slice(0,48)}`;return o;}));sel.dataset.signature=signature;
+ }
+ if(active)sel.value=active.id;
+ const toggle=bar.querySelector('[data-action="page-selected-toggle"]');toggle.disabled=!active;toggle.textContent=active&&passageExcluded(active)?'Keep':'Skip';
+ bar.querySelector('[data-action="page-why"]').disabled=!active;
+ bar.querySelector('[data-action="page-undo"]').disabled=!passageStore.undo.length;
+}
+function selectReviewPassageInitial(p){if(p){passageStore.selectedId=p.id;state.pageSelected=p.id;}}
 let pageControlFrame=0;
 function schedulePageControls(){if(pageControlFrame)return;pageControlFrame=requestAnimationFrame(()=>{pageControlFrame=0;renderPageControls();});}
 
@@ -351,7 +451,7 @@ function semanticDecision(vec,domain=domainKey(),contextVector=null){
 }
 function resetSemanticReview(){
  semantic.revision++;
- for(const p of passageStore.records){p.analyzedRevision=-1;if(!prefs.semanticAuto)p.analysis={...inspectPassage(p.text,p.element),model:'Heuristic',source:'DOM and site rules',score:null};}
+ for(const p of classificationRecords()){p.analyzedRevision=-1;p.modelAnalysis=null;p.analysis=classifyPassage(p);}
  syncPassageViews();scheduleSemanticScan();
 }
 async function analyzePhrase(value,element=null){
@@ -388,7 +488,7 @@ function scheduleSemanticScan(){
 async function runSemanticScan(){
  if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled()||state.filterReview)return;
  refreshPassages();const epoch=passageStore.epoch,revision=semantic.revision;
- const candidates=passageStore.records.filter(p=>p.analyzedRevision!==revision).slice(0,24);
+ const candidates=classificationRecords().filter(p=>p.analyzedRevision!==revision).slice(0,24);
  if(!candidates.length)return;
  semantic.running=true;let failed=false;
  try{
@@ -401,10 +501,10 @@ async function runSemanticScan(){
   let offset=0;
   candidates.forEach((p,index)=>{const count=chunkText(p.text,600).length,decisions=vectors.slice(offset,offset+count).map(v=>semanticDecision(v,domainKey(),contextVectors[index]));offset+=count;
    // Never gray a mixed long passage because only its first excerpt looks promotional.
-   p.analysis=decisions.find(d=>!d.excluded)||decisions[0];p.analysis={...p.analysis,extraction:p.extraction};p.analyzedRevision=revision;semantic.scanned++;});
+   p.modelAnalysis=decisions.find(d=>!d.excluded)||decisions[0];p.analysis=classifyPassage(p,p.modelAnalysis);p.analyzedRevision=revision;semantic.scanned++;});
   syncPassageViews();reconcilePlayback();
  }catch(e){failed=true;semantic.detail='Filtering paused. Retry model from Filter.';return false;}
- finally{semantic.running=false;if(!failed&&passageStore.records.some(p=>p.analyzedRevision!==semantic.revision))scheduleSemanticScan();}
+ finally{semantic.running=false;if(!failed&&classificationRecords().some(p=>p.analyzedRevision!==semantic.revision))scheduleSemanticScan();}
 }
 async function reclassifyTranscript(){
  if(!semantic.extractor)return;
@@ -579,7 +679,7 @@ const MIME_MP3='audio/mpeg';
 function revokeAudioURL(){if(lastAudioURL){URL.revokeObjectURL(lastAudioURL);lastAudioURL=null;}}
 function chunksForRecord(p){return chunkText(p.text).map(t=>({text:t,sourceId:p.id,element:p.element,excluded:passageExcluded(p),manual:p.override!==null,reason:passageReason(p),analysis:p.analysis,blob:null,status:'idle'}));}
 function detachedPassages(value){
- return chunkText(value).flatMap(t=>{const p={id:'text-'+passageStore.nextId++,text:t,element:null,override:null,revision:0,analysis:{excluded:false,reason:'Edited or selected text',model:'Manual',source:'Your text',score:null}};passageStore.byId.set(p.id,p);return chunksForRecord(p);});
+ return chunkText(value).flatMap(t=>{const p={id:'text-'+passageStore.nextId++,text:t,element:null,override:null,revision:0,analyzedRevision:-1,extraction:'User-provided text',analysis:{excluded:false,reason:'Edited or selected text',model:'Manual',source:'Your text',score:null}};passageStore.byId.set(p.id,p);return chunksForRecord(p);});
 }
 function discoverPassages(){
  refreshPassages();const selection=text(window.getSelection()?.toString()||'');
@@ -638,7 +738,7 @@ async function prepareReading(){
   if(!azureKey){openView('speech');return;}
   if(prefs.semanticAuto&&filterEnabled()){
    try{await loadSemantic();await ensureSemanticSeeds();
-    while(job===reading.generation&&passageStore.records.some(p=>p.analyzedRevision!==semantic.revision)){
+    while(job===reading.generation&&classificationRecords().some(p=>p.analyzedRevision!==semantic.revision)){
      if(semantic.running)await new Promise(resolve=>setTimeout(resolve,30));else if(await runSemanticScan()===false)throw Error('Classification unavailable');
      if(state.filterReview||!prefs.semanticAuto||!filterEnabled())break;
     }}catch(e){notify('Model unavailable. Review passages or turn Local AI off before preparing.');openView('filter');return;}
@@ -762,7 +862,7 @@ const styles=`\n:host{all:initial;--fg:#202632;--muted:#687080;--bg:#f7f8fa;--su
 .mb-launch{position:fixed;width:56px;height:56px;border:0;background:transparent;color:#fff;z-index:4;font-size:23px;touch-action:none;pointer-events:auto;display:grid;place-items:center;isolation:isolate}
 .mb-launch::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#242d3ce8;border:1px solid #ffffff44;box-shadow:0 3px 12px #0004;z-index:-1}.mb-launch-symbol{pointer-events:none}.mb-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#305fca;color:white;font-size:10px;padding:1px 4px}
 .mb-panel{font:13px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;position:fixed;z-index:3;width:min(352px,calc(100vw - 24px));max-height:500px;overflow:auto;overscroll-behavior:contain;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:19px;box-shadow:0 12px 36px #0003;pointer-events:auto;-webkit-overflow-scrolling:touch}
-.mb-panel[hidden],.mb-toast[hidden]{display:none}.mb-panel.reader{inset:0;border:0;border-radius:0;display:flex;flex-direction:column}
+.mb-launch[hidden],.mb-panel[hidden],.mb-toast[hidden]{display:none}.mb-panel.reader{inset:0;border:0;border-radius:0;display:flex;flex-direction:column}
 .mb-head{display:flex;align-items:center;gap:7px;min-height:48px;padding:2px 7px;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:2;background:var(--bg)}.mb-head h2{font-size:15px;margin:0;flex:1;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mb-brand{width:30px;text-align:center;color:var(--accent);font-size:20px}
 .mb-body{display:grid;gap:var(--gap);padding:8px 10px 10px}.mb-section{display:grid;gap:5px}.mb-section-head,.mb-row,.mb-inline{display:flex;align-items:center;justify-content:space-between;gap:7px}.mb-section-title,.mb-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:650}.mb-section-note,.mb-footer{font-size:10px;color:var(--muted)}
 .mb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border-radius:var(--radius);overflow:hidden}.mb-tile{border:0;background:transparent;min-height:58px;display:grid;place-content:center;justify-items:center;gap:4px;font-size:11px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd)}.mb-tile svg{color:var(--accent)}.mb-tile:nth-child(3n){border-right:0}.mb-tile:nth-last-child(-n+3){border-bottom:0}
@@ -776,9 +876,9 @@ const styles=`\n:host{all:initial;--fg:#202632;--muted:#687080;--bg:#f7f8fa;--su
 .mb-transcript{flex:1;min-height:0;overflow:auto;padding:4px 12px 12px;overscroll-behavior:contain}.mb-paragraph{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid var(--bd)}.mb-paragraph.current{background:var(--tint)}.mb-paragraph.excluded .mb-pass-text{color:var(--muted);background:var(--surface)}.mb-pass-toggle{min-width:44px;min-height:44px;border:0;border-radius:10px;background:var(--surface);display:grid;place-items:center}.mb-pass-content{flex:1;min-width:0}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}.mb-why-btn{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--accent);font-size:11px}.mb-pass-text{display:block;width:100%;min-height:44px;text-align:left;border:0;background:transparent;padding:0;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere}
 .mb-controls{flex:none;display:grid;gap:4px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);background:var(--bg)}.mb-timeline{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}.mb-range{width:100%;height:28px;margin:0;accent-color:var(--accent)}.mb-player-row{display:flex;justify-content:space-between;align-items:center;gap:5px}.mb-primary-play{background:var(--fg);color:var(--bg);border-radius:50%;height:44px;width:44px}.mb-player-extra{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.mb-player-extra .mb-action{justify-content:center;font-size:10px;gap:3px;padding:5px 2px}.mb-player-extra .mb-action svg{width:14px}
 .mb-toast{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:352px;margin:auto;padding:9px 11px;border-radius:12px;background:#202631f2;color:#fff;z-index:6;font-size:12px;line-height:1.4;pointer-events:none;overflow-wrap:anywhere;max-height:100px;overflow:hidden}.mb-preview{height:95px;display:grid;place-items:center;overflow:hidden}.mb-preview img{max-width:100%;max-height:95px}.mb-pill{font-size:10px;color:var(--muted)}
-.mb-page-controls,.mb-toast{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}.mb-page-toggle{position:fixed;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--accent);font-size:22px;z-index:2;isolation:isolate}.mb-page-toggle::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface);border:1px solid var(--bd);z-index:-1}.mb-page-toggle[aria-pressed=true]{color:var(--muted)}.mb-review-bar{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;right:12px;max-width:352px;margin:auto;display:flex;align-items:center;gap:4px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;pointer-events:auto;box-shadow:0 3px 15px #0003;z-index:5;font-size:12px}.mb-review-bar span{flex:1}.mb-review-bar button{min-width:44px;min-height:44px;padding:4px 8px;background:transparent;color:var(--accent);border:0}
+.mb-page-controls,.mb-toast{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}.mb-page-toggle{position:fixed;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--accent);font-size:22px;z-index:2;isolation:isolate}.mb-page-toggle::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface);border:1px solid var(--bd);z-index:-1}.mb-page-toggle[aria-pressed=true]{color:var(--muted)}.mb-review-bar{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;right:12px;max-width:352px;margin:auto;display:grid;gap:0;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;pointer-events:auto;box-shadow:0 3px 15px #0003;z-index:5;font-size:12px}.mb-review-actions,.mb-review-picker{display:flex;align-items:center;gap:4px}.mb-review-picker[hidden]{display:none}.mb-review-picker select{flex:1;min-width:0;min-height:44px;border:0;background:transparent;font-size:16px}.mb-review-bar span{flex:1}.mb-review-bar button{min-width:44px;min-height:44px;padding:4px 8px;background:transparent;color:var(--accent);border:0}
 \n`;
-const globalStyles=`[data-mb-skipped]{color:#727780!important;background-color:rgba(128,128,128,.09)!important;}[data-mb-skipped] *{color:inherit!important;}[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
+const globalStyles=`[data-mb-review-target]{outline:2px solid #4c80ff!important;outline-offset:2px!important;}[data-mb-skipped]{color:#727780!important;background-color:rgba(128,128,128,.09)!important;}[data-mb-skipped] *{color:inherit!important;}[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
 function head(title){const menu=state.view==='menu';return `<header class="mb-head">${menu?'<span class="mb-brand" aria-hidden="true">✦</span>':`<button type="button" class="mb-small mb-icon-btn" data-action="back" aria-label="Back">${ico('back',19)}</button>`}<h2>${esc(title)}</h2><button type="button" class="mb-small mb-icon-btn" data-action="close" aria-label="Close drawer">${ico('close',16)}</button></header>`;}
 function renderMenu(){
  const s=siteName(),active=cleanupEnabled(),site=s[0].toUpperCase()+s.slice(1);
@@ -794,7 +894,7 @@ function renderMenu(){
  <section class="mb-section"><div class="mb-section-head"><span class="mb-section-title">Tools</span><span class="mb-section-note">${esc(location.hostname)}</span></div>
  <div class="mb-tiles">${tile('share-clean','share','Share link')}${tile('url','link','Edit URL')}${tile('reader','headphones','Read aloud')}${tile('filter','filter','Filter page')}${tile('rules','sliders','Filter rules')}${tile('speech','wave','Speech')}</div></section>
  ${siteActions.length?`<section class="mb-section"><div class="mb-section-head"><span class="mb-section-title">${esc(site)} controls</span><span class="mb-section-note">Automatic where possible</span></div><div class="mb-compact-grid">${siteActions.join('')}</div></section>`:''}
- <div class="mb-row"><span class="mb-footer">v${VERSION} · <span data-count>0</span> hidden items</span><button type="button" class="mb-small" data-action="updates">${ico('refresh',13)} Updates</button></div></div>`;
+ <div class="mb-row"><span class="mb-footer">v${VERSION} · <span data-count>0</span> filtered items</span><button type="button" class="mb-small" data-action="updates">${ico('refresh',13)} Updates</button></div></div>`;
 }
 function renderURL(){return `${head('Edit URL')}<div class="mb-body"><label class="mb-field">Destination URL<textarea class="mb-textarea" rows="3" id="mb-url">${esc(state.urlDraft||location.href)}</textarea></label><div class="mb-grid">${button('url-clean','✦','Clean URL')}${button('url-copy','▣','Copy')}${button('url-share','↗','Share')}${button('url-open','↗','Open URL')}</div><p class="mb-muted">Only confirmed tracking parameters are removed. Other parameters and fragments are preserved.</p></div>`;}
 function semanticStatus(){const n=vectorsForSite().length;
@@ -827,8 +927,8 @@ function renderTeach(){return `${head('Teach filter')}<div class="mb-body">
  <div class="mb-setting"><label for="mb-reason">Reason</label><select id="mb-reason" class="mb-select">${Object.entries(semanticCategories).filter(([k])=>k!=='article').map(([k,v])=>`<option value="${k}" ${state.selectionReason===k?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
  <div class="mb-grid">${button('teach-skip',ico('close',16),'Skip like this',state.teaching?'disabled':'')}${button('teach-keep',ico('check',16),'Keep like this',state.teaching?'disabled':'')}</div>
  ${state.teachError?`<p role="alert" class="mb-caption">${esc(state.teachError)}</p>`:''}
- <details class="mb-details"><summary>Details · ${state.teaching?'Saving…':state.selectionScore?.excluded?'Suggested skip':'Suggested keep'}</summary>${renderScoreDetails(state.selectionScore)}${semanticStatus()}<button data-action="select-phrase" class="mb-minor">Change selection</button></details></div>`;}
-function renderWhy(){const source=state.whySource&&passageStore.byId.get(state.whySource);const p=source?{...source,excluded:passageExcluded(source)}:reading.passages[state.whyIndex];const toggle=source?'source-toggle:'+source.id:'pass-toggle:'+state.whyIndex;return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${source?passageStore.records.indexOf(source)+1:(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
+ <details class="mb-details"><summary>Details · ${state.teaching?'Saving…':state.selectionScore?.model==='MiniLM'?(state.selectionScore.excluded?'Suggested skip':'Suggested keep'):'Analysis'}</summary>${renderScoreDetails(state.selectionScore)}${semanticStatus()}<button data-action="select-phrase" class="mb-minor">Change selection</button></details></div>`;}
+function renderWhy(){const source=state.whySource&&passageStore.byId.get(state.whySource);const p=source?{...source,excluded:passageExcluded(source),analysis:passageAnalysis(source)}:reading.passages[state.whyIndex];const toggle=source?'source-toggle:'+source.id:'pass-toggle:'+state.whyIndex;return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${source?passageStore.records.indexOf(source)+1:(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
  <div class="mb-score-card">${renderScoreDetails(p?.analysis)}</div><div class="mb-row">${button(toggle,ico('check',17),p?.excluded?'Include this':'Skip this')}${source?'':button('pass-analyze:'+state.whyIndex,ico('refresh',17),'Analyze again')}</div>
  ${button('filter',ico('sliders',16),'Filter thresholds')}</div>`;}
 function renderSelectText(){return `${head('Select text')}<div class="mb-body"><p class="mb-caption">Long-press and highlight a phrase on the webpage. Then tap ✦ or “Use selection”. Do not select entire articles.</p>${button('selection-use',ico('check',17),'Use highlighted text')}${button('teach-skip',ico('minus',17),'Skip cached selection')}</div>`;}
@@ -837,7 +937,7 @@ function renderRules(){const rules=prefs.rules[domainKey()]||[];return `${head('
  ${semanticStatus()}<div class="mb-grid">${button('select-phrase',ico('pointer',17),'Teach text')}${button('pick-filter',ico('filter',17),'Visual rule')}</div>
  ${rules.length?rules.map((r,i)=>`<div class="mb-rule"><strong>${esc(r.selector)}</strong><span class="mb-muted">${safeMatches(r.selector).length} matches · ${r.enabled?'Enabled':'Disabled'}</span><div class="mb-grid">${button('rule-toggle:'+i,r.enabled?'✓':'○',r.enabled?'Disable':'Enable')}${button('rule-edit:'+i,'✎','Edit')}${button('rule-delete:'+i,'⌫','Delete')}</div></div>`).join(''):'<p class="mb-caption">No CSS rules yet. Phrase learning does not require CSS selectors.</p>'}
  <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-seed-threshold">Built-in nuisance sensitivity</label><output id="mb-seed-threshold-value">${Number(prefs.semanticSeedThreshold??0.89).toFixed(2)}</output></div><input type="range" id="mb-seed-threshold" min="0.70" max="0.98" step="0.01" value="${prefs.semanticSeedThreshold??0.89}"></div>
- <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Token fallback</span><span class="mb-setting-value">${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}</span><button class="mb-minor" data-action="learning-toggle">Toggle</button></div>
+ <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Learned examples</span><span class="mb-setting-value">${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}</span><button class="mb-minor" data-action="learning-toggle">Toggle</button></div>
  <div class="mb-setting"><span class="mb-setting-label">Learning</span><span class="mb-setting-value">${vectorsForSite().length} examples</span><button class="mb-minor" data-action="semantic-reset">Reset</button></div></div>
  <p class="mb-caption">Only your explicit selections and transcript Skip/Keep choices train the filter. No page histories are saved.</p></div>`;}
 const azureRegions=[['australiaeast','Australia East'],['brazilsouth','Brazil South'],['canadacentral','Canada Central'],['canadaeast','Canada East'],['centralindia','Central India'],['centralus','Central US'],['eastasia','East Asia'],['eastus','East US'],['eastus2','East US 2'],['francecentral','France Central'],['germanywestcentral','Germany West Central'],['italynorth','Italy North'],['japaneast','Japan East'],['japanwest','Japan West'],['koreacentral','Korea Central'],['northcentralus','North Central US'],['northeurope','North Europe'],['norwayeast','Norway East'],['qatarcentral','Qatar Central'],['southafricanorth','South Africa North'],['southcentralus','South Central US'],['southeastasia','Southeast Asia'],['swedencentral','Sweden Central'],['switzerlandnorth','Switzerland North'],['switzerlandwest','Switzerland West'],['uaenorth','UAE North'],['uksouth','UK South'],['ukwest','UK West'],['westcentralus','West Central US'],['westeurope','West Europe'],['westus','West US'],['westus2','West US 2'],['westus3','West US 3']];
@@ -866,7 +966,7 @@ function renderMedia(){state.siteMedia=mediaItems();const i=Math.min(state.media
  <div class="mb-grid">${button('media-picker','◎','Select on page')}${button('media-share','↗','Share file')}${button('media-download','⇩','Download file')}${button('media-open','↗','Open source')}</div></div>`;}
 function renderMediaPicker(){return `${head('Tap page media')}<div class="mb-body"><p>Tap an image or video on the website. The tap will select it rather than open the post.</p>${button('media-cancel','×','Cancel selection')}</div>`;}
 function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='why'?renderWhy():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
- shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'')+' view-'+state.view;const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';const launchBox=shadow.querySelector('.mb-launch').getBoundingClientRect();
+ shadow.querySelector('.mb-launch').hidden=state.view==='reader';shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'')+' view-'+state.view;const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';const launchBox=shadow.querySelector('.mb-launch').getBoundingClientRect();
  const below=launchBox.top<Math.min(340,(vv?.height||innerHeight)*0.42);
  if(state.view==='reader'){panel.style.top=`${vv?.offsetTop||0}px`;panel.style.bottom='auto';panel.style.maxHeight='100dvh';}
  else if(below){panel.style.top=`${launchBox.bottom+10}px`;panel.style.bottom='auto';panel.style.maxHeight=`${Math.max(80,Math.min(500,(vv?.offsetTop||0)+(vv?.height||innerHeight)-launchBox.bottom-24))}px`;}
@@ -895,6 +995,7 @@ panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';p
 
 async function handleAction(action,el){
  try{
+  if(action==='page-selected-toggle'){const p=passageStore.byId.get(passageStore.selectedId);if(p)await correctPassage(p,passageExcluded(p)?'keep':'skip');return;}
   if(action==='page-why'){state.whySource=state.pageSelected;openView('why');return;}
   if(action.startsWith('source-toggle:')){const p=passageStore.byId.get(action.split(':')[1]);if(p)await correctPassage(p,passageExcluded(p)?'keep':'skip');return;}
   if(action==='page-review'){setPageReview(true);return;}
@@ -935,12 +1036,12 @@ async function handleAction(action,el){
   if(action==='teach-skip'||action==='teach-keep'){
    if(state.teaching)return;const v=state.selectionText;if(!v)throw Error('Select article text first.');
    const decision=action==='teach-skip'?'skip':'keep',reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;
-   state.selectionReason=reason;state.teaching=true;state.teachError='';render();
-   try{await teachSemantic(v,decision,reason,state.selectionElement);const p=passageRecord(state.selectionElement);if(p){p.override=decision;p.revision++;syncPassageViews();reconcilePlayback();}endFilterReview();openView('filter');notify('Correction saved.');}
+   const epoch=passageStore.epoch;state.selectionReason=reason;state.teaching=true;state.teachError='';render();
+   try{const p=passageRecord(state.selectionElement);await correctPassage(p,decision,{sample:v,reason,element:state.selectionElement,reportError:true});if(epoch!==passageStore.epoch||state.view!=='teach')return;endFilterReview();openView('filter');notify('Correction saved.');}
    catch(e){state.teachError='Could not save learning. Your selection is preserved. Retry when the model and storage are available.';}
    finally{state.teaching=false;render();}return;
   }
-  if(action==='semantic-reset'){for(const key of trainingVersions.keys())if(key.startsWith(domainKey()+'|'))trainingVersions.set(key,trainingVersions.get(key)+1);for(const x of vectorsForSite())cancelTraining(domainKey(),x.h);delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
+  if(action==='semantic-reset'){await resetSiteLearning();notify('Site learning reset. Current choices retained.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
@@ -957,7 +1058,7 @@ async function handleAction(action,el){
    await saveSettings();render();return;
   }
   if(action==='learning-toggle'){prefs.learningEnabled[domainKey()]=prefs.learningEnabled[domainKey()]===false;await saveSettings();resetSemanticReview();render();return;}
-  if(action==='learning-clear'){delete prefs.learning[domainKey()];await saveSettings();notify('Learning reset for this site.');return;}
+  if(action==='learning-clear'){await resetSiteLearning();notify('Site learning reset.');return;}
   if(action==='site-toggle'){setSiteCleanup(!cleanupEnabled());return;}
   if(action==='nsfw'){prefs.nsfw=!prefs.nsfw;await saveSettings();if(prefs.nsfw)revealReddit();notify(`Reddit NSFW reveal ${prefs.nsfw?'enabled':'disabled'} (reload may be needed to restore original blur).`);render();return;}
   if(action==='camel'){const u=camelURL(location.href);if(u)window.open(u,'_blank','noopener,noreferrer');return;}
@@ -994,7 +1095,7 @@ async function handleAction(action,el){
   if(action==='reader-save'){const v=host.shadowRoot.getElementById('mb-reader-edit')?.value||'';replaceReaderText(v);return;}
   if(action.startsWith('pass-toggle:')){excludePassage(Number(action.split(':')[1]));return;}
  if(action.startsWith('pass-why:')){state.whySource=null;state.whyIndex=Number(action.split(':')[1]);openView('why');return;}
- if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);const source=passageStore.byId.get(p.sourceId);if(source)source.analysis=p.analysis;syncPassageViews();reconcilePlayback();render();return;}
+ if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);const source=passageStore.byId.get(p.sourceId);if(source){source.modelAnalysis=p.analysis;source.analysis=classifyPassage(source,p.analysis);}syncPassageViews();reconcilePlayback();render();return;}
   if(action.startsWith('pass-play:')){await jumpTo(Number(action.split(':')[1]));return;}
   if(action==='prepare'){await prepareReading();return;}
   if(action==='play'){pauseResume();return;}
@@ -1044,6 +1145,7 @@ function installUI(){if(document.querySelector('[data-mb-host]'))return;
  launch.addEventListener('click',e=>{if(Date.now()-lastTouchToggle<850){e.preventDefault();return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}toggleLaunch();});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
+  if(e.target.id==='mb-review-passage'){selectReviewPassage(e.target.value,true);return;}
   if(e.target.id==='mb-reason')state.selectionReason=e.target.value;
   if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){prefs[e.target.id==='mb-threshold'?'semanticThreshold':'semanticSeedThreshold']=Number(e.target.value);saveSettings();resetSemanticReview();if(reading.passages.length)void reclassifyTranscript();render();}
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}

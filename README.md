@@ -5,8 +5,8 @@ A compact Safari Userscripts overlay with shared page/transcript corrections, lo
 ## What changed
 
 - Bundled Defuddle 0.19.5 extracts from a detached document while source IDs map back to original passages. Original wording remains intact; extraction membership alone never deletes prose.
-- **Filter → Review passages on page** closes the drawer and adds temporary Skip/Keep controls. Skipped passages gray in place and update the transcript immediately. Undo reverses the last correction and its prototype learning. Done removes controls. Use Advanced filtering to opt into collapsing skipped passages.
-- One passage store drives page styling, reader inclusion, speech requests and exports. Source text changes invalidate stale reader chunks until re-extraction.
+- **Filter → Review passages on page** closes the drawer and adds temporary Skip/Keep controls. Skipped passages gray in place and update the transcript immediately. Undo reverses page, transcript, or teaching corrections and their prototype learning. Crowded/full-width passages use a native passage chooser rather than overlapping text. Done removes controls. Use Advanced filtering to opt into collapsing skipped passages.
+- One passage store drives page styling, reader inclusion, speech requests and exports. Source text changes invalidate stale reader chunks until re-extraction. Saved CSS exclusions are also excluded from narration. Explicit corrections remain active when automatic filtering is off.
 - Compact Teach view, expandable explanations, consolidated styling, usable touch targets and preserved form drafts.
 - Repair for malformed saved examples, broken mutation observation, duplicate training, transcript tap handling, buffering continuation and skipped queued speech requests.
 
@@ -42,7 +42,7 @@ Read **ALGORITHM_GUIDE.md** and **FRONTEND_GUIDE.md** before making changes. Bui
 
 ## Limitations
 
-DOM and simulated model/audio tests do not establish physical iPhone behavior, real model accuracy or live Azure connectivity. Review controls prefer a margin but use an edge overlay on full-width pages; crowded short blocks need device review. Source mapping is conservative and falls back to retained original blocks. Dynamically changed article content requires re-extraction in an already-open reader. Site-specific media download, Reddit cleanup, consent handling and MP3 export retain the limitations described below.
+DOM and simulated model/audio tests do not establish physical iPhone behavior, real model accuracy or live Azure connectivity. Review controls use page margins when available; full-width or crowded blocks use a complete passage chooser. Actual iPhone touch and keyboard behavior still needs device review. Source mapping is conservative and falls back to retained original blocks. Dynamically changed article content requires re-extraction in an already-open reader. Site-specific media download, Reddit cleanup, consent handling and MP3 export retain the limitations described below.
 
 ---
 

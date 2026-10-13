@@ -9,7 +9,7 @@ Run syntax, unit, Chromium integration, Reddit delayed-prompt and compact Speech
 
 ## Non-negotiable interaction invariants (0.1.3+)
 
-Never re-render a reader transcript without preserving scrollTop and touch focus. Correction buttons do not stop or throw away unrelated prepared audio. Playback must show meaningful current-passage elapsed/duration (unknown is `—:—`, not a fabricated total). All floating targets must be at least 56 CSS px in tap area with an unobtrusive visual disk; distinguish taps from drags on touch screens. Do not add permanent site controls. Temporary passage correction controls in explicit Review passages mode are authorized in 0.2.0.
+Never re-render a reader transcript without preserving scrollTop and touch focus. Correction buttons do not stop or throw away unrelated prepared audio. Playback must show meaningful current-passage elapsed/duration (unknown is `—:—`, not a fabricated total). The floating launcher must have a 56 CSS px tap area; temporary passage controls must have at least 44 CSS px targets with unobtrusive icons; distinguish taps from drags on touch screens. Do not add permanent site controls. Temporary passage correction controls in explicit Review passages mode are authorized in 0.2.0.
 
 On the filter: one-tap enable/disable and temporary **Show all** preview must remain obvious. Teaching or adding rules restores hidden content while inspecting and includes previously hidden neighboring passages in context, then returns to the page's filtered state when finished/canceled. Both the webpage and transcript use explicit Keep/Skip learning. Explain *why* with the model name/source, Skip/Keep/seed similarity scores, actual thresholds and fallback reason. Scores are similarities, NOT probabilities. Provide separate adjustable thresholds for learned and built-in matches. Never train on model predictions or seeking.
 
@@ -21,3 +21,5 @@ Do not allow the open drawer to cover the floating launcher. Test both first and
 ## 0.2.0 implementation standards
 
 Read `ALGORITHM_GUIDE.md` for shared algorithms and comment conventions and `FRONTEND_GUIDE.md` for compact frontend rules. Both are normative. Build includes the pinned Defuddle vendor bundle. Run `npm test` and `python tests/page_review.py` in addition to previous gates. Preserve original wording and source identity; page review and transcript corrections must update one passage store.
+
+The effective decision resolver must include custom CSS exclusions in narration, preserve manual overrides when automatic filtering is off, and use Defuddle membership with corroborating structure rather than as a deletion rule. Crowded page layouts require a complete native passage chooser; never omit correction access or cover prose.

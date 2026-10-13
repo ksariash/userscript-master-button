@@ -5,7 +5,7 @@ const MIME_MP3='audio/mpeg';
 function revokeAudioURL(){if(lastAudioURL){URL.revokeObjectURL(lastAudioURL);lastAudioURL=null;}}
 function chunksForRecord(p){return chunkText(p.text).map(t=>({text:t,sourceId:p.id,element:p.element,excluded:passageExcluded(p),manual:p.override!==null,reason:passageReason(p),analysis:p.analysis,blob:null,status:'idle'}));}
 function detachedPassages(value){
- return chunkText(value).flatMap(t=>{const p={id:'text-'+passageStore.nextId++,text:t,element:null,override:null,revision:0,analysis:{excluded:false,reason:'Edited or selected text',model:'Manual',source:'Your text',score:null}};passageStore.byId.set(p.id,p);return chunksForRecord(p);});
+ return chunkText(value).flatMap(t=>{const p={id:'text-'+passageStore.nextId++,text:t,element:null,override:null,revision:0,analyzedRevision:-1,extraction:'User-provided text',analysis:{excluded:false,reason:'Edited or selected text',model:'Manual',source:'Your text',score:null}};passageStore.byId.set(p.id,p);return chunksForRecord(p);});
 }
 function discoverPassages(){
  refreshPassages();const selection=text(window.getSelection()?.toString()||'');
@@ -64,7 +64,7 @@ async function prepareReading(){
   if(!azureKey){openView('speech');return;}
   if(prefs.semanticAuto&&filterEnabled()){
    try{await loadSemantic();await ensureSemanticSeeds();
-    while(job===reading.generation&&passageStore.records.some(p=>p.analyzedRevision!==semantic.revision)){
+    while(job===reading.generation&&classificationRecords().some(p=>p.analyzedRevision!==semantic.revision)){
      if(semantic.running)await new Promise(resolve=>setTimeout(resolve,30));else if(await runSemanticScan()===false)throw Error('Classification unavailable');
      if(state.filterReview||!prefs.semanticAuto||!filterEnabled())break;
     }}catch(e){notify('Model unavailable. Review passages or turn Local AI off before preparing.');openView('filter');return;}

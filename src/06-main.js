@@ -1,5 +1,6 @@
 async function handleAction(action,el){
  try{
+  if(action==='page-selected-toggle'){const p=passageStore.byId.get(passageStore.selectedId);if(p)await correctPassage(p,passageExcluded(p)?'keep':'skip');return;}
   if(action==='page-why'){state.whySource=state.pageSelected;openView('why');return;}
   if(action.startsWith('source-toggle:')){const p=passageStore.byId.get(action.split(':')[1]);if(p)await correctPassage(p,passageExcluded(p)?'keep':'skip');return;}
   if(action==='page-review'){setPageReview(true);return;}
@@ -40,12 +41,12 @@ async function handleAction(action,el){
   if(action==='teach-skip'||action==='teach-keep'){
    if(state.teaching)return;const v=state.selectionText;if(!v)throw Error('Select article text first.');
    const decision=action==='teach-skip'?'skip':'keep',reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;
-   state.selectionReason=reason;state.teaching=true;state.teachError='';render();
-   try{await teachSemantic(v,decision,reason,state.selectionElement);const p=passageRecord(state.selectionElement);if(p){p.override=decision;p.revision++;syncPassageViews();reconcilePlayback();}endFilterReview();openView('filter');notify('Correction saved.');}
+   const epoch=passageStore.epoch;state.selectionReason=reason;state.teaching=true;state.teachError='';render();
+   try{const p=passageRecord(state.selectionElement);await correctPassage(p,decision,{sample:v,reason,element:state.selectionElement,reportError:true});if(epoch!==passageStore.epoch||state.view!=='teach')return;endFilterReview();openView('filter');notify('Correction saved.');}
    catch(e){state.teachError='Could not save learning. Your selection is preserved. Retry when the model and storage are available.';}
    finally{state.teaching=false;render();}return;
   }
-  if(action==='semantic-reset'){for(const key of trainingVersions.keys())if(key.startsWith(domainKey()+'|'))trainingVersions.set(key,trainingVersions.get(key)+1);for(const x of vectorsForSite())cancelTraining(domainKey(),x.h);delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
+  if(action==='semantic-reset'){await resetSiteLearning();notify('Site learning reset. Current choices retained.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
@@ -62,7 +63,7 @@ async function handleAction(action,el){
    await saveSettings();render();return;
   }
   if(action==='learning-toggle'){prefs.learningEnabled[domainKey()]=prefs.learningEnabled[domainKey()]===false;await saveSettings();resetSemanticReview();render();return;}
-  if(action==='learning-clear'){delete prefs.learning[domainKey()];await saveSettings();notify('Learning reset for this site.');return;}
+  if(action==='learning-clear'){await resetSiteLearning();notify('Site learning reset.');return;}
   if(action==='site-toggle'){setSiteCleanup(!cleanupEnabled());return;}
   if(action==='nsfw'){prefs.nsfw=!prefs.nsfw;await saveSettings();if(prefs.nsfw)revealReddit();notify(`Reddit NSFW reveal ${prefs.nsfw?'enabled':'disabled'} (reload may be needed to restore original blur).`);render();return;}
   if(action==='camel'){const u=camelURL(location.href);if(u)window.open(u,'_blank','noopener,noreferrer');return;}
@@ -99,7 +100,7 @@ async function handleAction(action,el){
   if(action==='reader-save'){const v=host.shadowRoot.getElementById('mb-reader-edit')?.value||'';replaceReaderText(v);return;}
   if(action.startsWith('pass-toggle:')){excludePassage(Number(action.split(':')[1]));return;}
  if(action.startsWith('pass-why:')){state.whySource=null;state.whyIndex=Number(action.split(':')[1]);openView('why');return;}
- if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);const source=passageStore.byId.get(p.sourceId);if(source)source.analysis=p.analysis;syncPassageViews();reconcilePlayback();render();return;}
+ if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);const source=passageStore.byId.get(p.sourceId);if(source){source.modelAnalysis=p.analysis;source.analysis=classifyPassage(source,p.analysis);}syncPassageViews();reconcilePlayback();render();return;}
   if(action.startsWith('pass-play:')){await jumpTo(Number(action.split(':')[1]));return;}
   if(action==='prepare'){await prepareReading();return;}
   if(action==='play'){pauseResume();return;}
@@ -149,6 +150,7 @@ function installUI(){if(document.querySelector('[data-mb-host]'))return;
  launch.addEventListener('click',e=>{if(Date.now()-lastTouchToggle<850){e.preventDefault();return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}toggleLaunch();});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
+  if(e.target.id==='mb-review-passage'){selectReviewPassage(e.target.value,true);return;}
   if(e.target.id==='mb-reason')state.selectionReason=e.target.value;
   if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){prefs[e.target.id==='mb-threshold'?'semanticThreshold':'semanticSeedThreshold']=Number(e.target.value);saveSettings();resetSemanticReview();if(reading.passages.length)void reclassifyTranscript();render();}
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}

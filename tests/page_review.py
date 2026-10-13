@@ -12,7 +12,7 @@ with sync_playwright() as p:
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.set_content(html)
   page.evaluate('''()=>{window.GM={getValue:async(k,d)=>k.endsWith(':azure')?d:{semanticAuto:false},setValue:async()=>{}}}''')
-  page.evaluate(script.replace('\n})();','\nwindow.T={passageStore,reading,semantic,render,state};\n})();'))
+  page.evaluate(script.replace('\n})();','\nwindow.T={passageStore,reading,semantic,render,state,refreshPassages};\n})();'))
   page.evaluate('''()=>{T.semantic.extractor=async xs=>({tolist:()=>xs.map(()=>[1,0])});T.semantic.status='ready';}''')
   page.locator('.mb-launch').tap();assert page.locator('.mb-panel').bounding_box()['height']<=400
   page.screenshot(path=str(ROOT/'dist'/f'menu-02-{scheme}.png'))
@@ -22,6 +22,8 @@ with sync_playwright() as p:
   first=page.locator('.mb-page-toggle').first
   assert first.bounding_box()['width']>=44
   source=first.get_attribute('data-action').split(':')[1]
+  assert page.evaluate("""id=>{const p=T.passageStore.byId.get(id).element.getBoundingClientRect(),b=[...document.querySelector('[data-mb-host]').shadowRoot.querySelectorAll('.mb-page-toggle')].find(x=>x.dataset.sourceId===id).getBoundingClientRect();return b.left>=p.right||b.right<=p.left}""",source)
+  assert first.evaluate('(e)=>{e.focus();const before=e;T.render();return before===document.querySelector("[data-mb-host]").shadowRoot.activeElement}')
   first.click();page.wait_for_function('(id)=>T.passageStore.byId.get(id).override==="skip"',arg=source)
   assert page.evaluate('(id)=>T.passageStore.byId.get(id).element.hasAttribute("data-mb-skipped")',source)
   page.screenshot(path=str(ROOT/'dist'/f'page-review-02-{scheme}.png'))
@@ -31,12 +33,25 @@ with sync_playwright() as p:
   index=page.evaluate('(id)=>T.reading.passages.findIndex(p=>p.sourceId===id)',source)
   page.locator(f'[data-action="pass-toggle:{index}"]').click()
   assert page.evaluate('(id)=>T.passageStore.byId.get(id).override==="skip"',arg=source)
+  assert not page.locator('.mb-launch').is_visible()
   page.screenshot(path=str(ROOT/'dist'/f'reader-02-{scheme}.png'))
   page.locator('[data-action="filter"]').click()
   page.evaluate('''()=>{const r=document.createRange();r.selectNodeContents(document.querySelector('#p1'));getSelection().removeAllRanges();getSelection().addRange(r);}''')
   page.locator('[data-action="select-phrase"]').click()
   assert page.locator('.mb-panel').bounding_box()['height']<=360
   page.screenshot(path=str(ROOT/'dist'/f'teach-02-{scheme}.png'))
+  page.locator('[data-action="back"]').click()
+  page.evaluate("""()=>{const a=document.querySelector('article');a.style.padding='0';a.innerHTML='<ul>'+Array.from({length:16},(_,i)=>'<li>Short passage number '+i+'.</li>').join('')+'</ul>';T.refreshPassages();}""")
+  page.locator('[data-action="page-review"]').click()
+  assert page.locator('#mb-review-passage').is_visible(),'Crowded layout needs a complete passage chooser'
+  assert page.locator('#mb-review-passage option').count()==16
+  chosen=page.locator('#mb-review-passage option').nth(9).get_attribute('value')
+  page.locator('#mb-review-passage').select_option(chosen)
+  page.locator('[data-action="page-selected-toggle"]').click()
+  assert page.evaluate('id=>T.passageStore.byId.get(id).override==="skip"',chosen)
+  page.screenshot(path=str(ROOT/'dist'/f'crowded-review-02-{scheme}.png'))
+  page.locator('[data-action="page-review-end"]').click()
+  assert page.locator('[data-mb-review-target]').count()==0
   assert not errors,errors
   page.close()
  b.close()
