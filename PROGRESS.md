@@ -1,6 +1,6 @@
 # Progress and remaining scope
 
-**Phase 0 review only.** Built fresh from the reset specifications, without retrieving the rejected implementation. Changes are proposed on `rebuild/phase-0-review`; no replacement userscript is released. Full implementation awaits the user's concrete design/architecture review.
+**Implementation authorized; phase 0 evidence retained.** Built fresh from the reset specifications, without retrieving the rejected implementation. Changes are proposed on `rebuild/phase-0-review`; no replacement userscript is released. Implementation continues under the user’s authorization; there is no design/architecture approval gate.
 
 ## Evidence, kept separate
 
@@ -20,7 +20,7 @@ Cached initialization still took 24,679 ms (warm median 62 ms, p95 97 ms). A sep
 
 ## Requirement ledger
 
-Statuses apply to the product, not merely a prototype: **experiment** = bounded proof exists; **deferred** = planned after review; **blocked** = an unmet feasibility/quality gate; **unverified** = implementation or device/service evidence absent. This ledger preserves the full scope in REQUIREMENTS.md.
+Statuses apply to the product, not merely a prototype: **experiment** = bounded proof exists; **deferred** = planned during implementation; **blocked** = an unmet feasibility/quality gate; **unverified** = implementation or device/service evidence absent. This ledger preserves the full scope in REQUIREMENTS.md.
 
 | ID | Requirement coverage | Status / milestone |
 | --- | --- | --- |
@@ -73,8 +73,8 @@ Statuses apply to the product, not merely a prototype: **experiment** = bounded 
 | D02 | Validated migration preserving `master-button:v1`, unrelated preferences and separately stored key; explicit reset/reinstall notices | Deferred phase 3; old implementation not retrieved |
 | D03 | No duplicate instances or remote-code/eval update mechanisms; supported extension update/recovery | Deferred phase 3 |
 | V01 | ≥150 pre-labeled blocks, 8 pages, 4 layouts, page/site-held-out split; narrative exclusions, nuisance precision/recall, abstentions, mapping and latency | Deferred phase 1; current 37-block set is not this benchmark |
-| V02 | User aesthetic approval plus 320/390/landscape/keyboard/large text/long excerpt/errors/clean/busy checks | Review pending; rendered subset only, other layout/device gates unverified |
+| V02 | Visual inspection and user feedback plus 320/390/landscape/keyboard/large text/long excerpt/errors/clean/busy checks | Feedback welcome; rendered subset only, other layout/device checks unverified |
 
 ## Next session
 
-Read REBUILD.md, RESEARCH.md, VALIDATION.md, and this ledger. Obtain review of the concrete study; then prioritize a useful model and physical Safari feasibility before integrating more features. Preserve failed evaluations and avoid tuning on the held-out set. Update status/evidence as each gate actually passes.
+Read REBUILD.md, RESEARCH.md, VALIDATION.md, and this ledger. Prioritize a useful model and physical Safari feasibility before integrating more features. Preserve failed evaluations and avoid tuning on the held-out set. Update status/evidence as each gate actually passes.

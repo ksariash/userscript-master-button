@@ -2,7 +2,7 @@
 
 A discreet Safari utility for reading, reviewing unwanted passages, sharing clean links, and listening to articles on iPhone.
 
-**Status: phase 0, awaiting review.** A fresh Defuddle/local-language-model experiment and a separate interactive mobile design study are available on the review branch. The first model failed nuisance recall. There is no installable replacement userscript or verified iPhone/Azure integration. See [PROGRESS.md](PROGRESS.md) for evidence and the complete remaining scope, and [REBUILD.md](REBUILD.md) for the proposed architecture and choices.
+**Status: implementation in progress.** The user removed review/approval gates and authorized continued implementation on 2026-10-13. A fresh Defuddle/local-language-model experiment and a separate interactive mobile design study established the starting direction. The first model failed nuisance recall. See [PROGRESS.md](PROGRESS.md) for current deliverables, evidence, and the complete remaining scope, and [REBUILD.md](REBUILD.md) for architecture and choices. Physical iPhone and live Azure verification remain separate from automated checks.
 
 ## Start here
 
@@ -35,7 +35,7 @@ Open [prototype/review.html](prototype/review.html) for the self-contained inter
 
 ## Rebuild boundaries
 
-Rebuild from these documents. Choose an architecture and local model on evidence; the former implementation is not a template. Demonstrate filtering and a polished mobile interface before expanding the feature set. Keep unavailable or unverified capabilities explicit.
+Rebuild from these documents. Choose an architecture and local model on evidence; the former implementation is not a template. Demonstrate filtering and a polished mobile interface while implementing the complete feature set. Keep unavailable or unverified capabilities explicit.
 
 The reset is a normal commit that preserves repository history. The last implementation snapshot is commit `a9a28ea5bd75ecf1ab2f8a35e5cdbea9cf8c25aa`; recovery is possible if explicitly requested. Previous `dist/` install and update URLs are withdrawn until a new release is published. Already installed copies are not remotely uninstalled by this reset.
 

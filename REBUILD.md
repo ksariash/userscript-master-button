@@ -1,4 +1,4 @@
-# Proposed direction — review before implementation
+# Implementation direction
 
 ## Architecture
 
@@ -18,7 +18,7 @@ The experimental source identity is stable within a captured document only. Live
 
 ## Phases and gates
 
-1. **Phase 0 — this review:** official research, a runnable real local-model probe, author-labeled realistic cases, separate interactive design study, rendered evidence, and an explicit requirement ledger. No installable release.
+1. **Phase 0 — completed evidence:** official research, a runnable real local-model probe, author-labeled realistic cases, separate interactive design study, rendered evidence, and an explicit requirement ledger. No installable release.
 2. **Phase 1 — prove the slice:** select a useful model on a predeclared calibration/held-out corpus; then prove extraction → inference → original-page Skip/Keep → reader synchronization → reversible teaching/Undo, including races, duplicates, mutations, full-width passages, and navigation. Run physical iPhone CSP/backend/cache tests before claiming Safari support. Gate: visual review plus zero narrative exclusions, ≥95% nuisance precision, ≥85% held-out recall on the agreed finite corpus.
 3. **Phase 2 — speech and export:** direct Azure transport and voice list, secure key adapter, first-segment start, bounded preparation/cache, seek/rate/follow/minimize, cancellation/revision safety; then format-aware MP3 export and transcript/timing snapshots. Mock integration, live Azure, real-player recordings, and physical locked-screen tests are separate gates.
 4. **Phase 3 — the rest:** conservative clean/share/edit URL tools and reviewed model-assisted suggestions; selector picker and consent adapters; all requested site utilities; validated legacy migration; reproducible userscript, matching metadata/build/source, supported update flow and recovery. Every requirement has a ledger row.
@@ -41,4 +41,4 @@ Editorial serif reading text, system-font commands, warm light/cool dark surface
 
 Obsidian informs content hierarchy/typography and actions in both source and reader. Readwise informs local contextual correction and honest matching uncertainty. Apple materials/toolbars guidance informs restraint and command grouping, not a promise of native Liquid Glass. See [RESEARCH.md](RESEARCH.md) and [prototype/README.md](prototype/README.md).
 
-**Review gate:** approve or revise the visual/interaction direction and architectural invariants before phase 1. The model is deliberately unresolved; approving the direction does not certify filtering accuracy or accept retrieval as fine-tuning.
+**Implementation authorization:** the user removed review/approval gates on 2026-10-13. Continue all milestones without waiting for approval. Preserve validation standards and honest limits; do not claim that retrieval updates language-model weights.

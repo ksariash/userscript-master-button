@@ -34,7 +34,7 @@ Record iPhone model, iOS/Safari version, Userscripts app version (`GM.info`), ac
 
 ## Live Azure/audio gate — not run
 
-After phase 1, use the user's speech resource directly and record region, live voice ID, supported output format, request/response conditions, real duration, and provider event provenance. Keep the key out of page storage, URLs, logs, reports, recordings and repository files.
+During speech implementation, use the user's speech resource directly and record region, live voice ID, supported output format, request/response conditions, real duration, and provider event provenance. Keep the key out of page storage, URLs, logs, reports, recordings and repository files.
 
 Verify first-segment start, bounded preparation, caching/retry/429/401 behavior, pause/resume/back/forward/seek/rate, cancellation/stale intent, exact selection rechecks, correction cache reuse, and no demo/article overlap. Test transcript follow/manual return behavior using only real timing. Verify format-aware exports in a real player, including seek, enabled order, size and snapshot invalidation.
 
@@ -42,4 +42,4 @@ On a physical iPhone, lock the screen before and during passage transitions, int
 
 ## Release gate — outstanding
 
-Populate the independent regression corpus and page/site-held-out split; meet the agreed finite-corpus accuracy target or obtain an explicit revision. Complete every ledger row or label a release as partial. Verify migration without deleting unrelated preferences/keys, reproducible source/build/metadata and extension-supported update/reinstall behavior. Obtain user visual review with real content replacing the authored study.
+Populate the independent regression corpus and page/site-held-out split; meet the agreed finite-corpus accuracy target or obtain an explicit revision. Complete every ledger row or label a release as partial. Verify migration without deleting unrelated preferences/keys, reproducible source/build/metadata and extension-supported update/reinstall behavior. Publish visual evidence with real content replacing the authored study and incorporate feedback without pausing implementation.

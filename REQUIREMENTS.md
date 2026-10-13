@@ -82,6 +82,7 @@ Deliver maintainable source and one installable userscript with matching update 
 ## Decisions to resolve before promising completion
 
 1. **Local model:** choose a genuine model and runtime after testing download, inference, latency, memory, CSP, and Safari/Userscripts feasibility. An embedding classifier is a possible proposal, not a mandated substitute for the user's local-LM request.
-2. **Fine-tuning:** the user requested learning/fine-tuning from corrections. Explain whether true weight updates are practical; obtain agreement on an alternative such as retrieval/prototypes if needed. Never relabel it as weight fine-tuning.
+2. **Fine-tuning:** the user requested learning/fine-tuning from corrections. Explain whether true weight updates are practical; clearly identify any alternative such as retrieval/prototypes and its limitations. Never relabel it as weight fine-tuning.
 3. **Smart URL cleaning:** local-model assistance was requested. Validate its value and safety; deterministic preservation checks remain necessary, and risky removals require user review.
 4. **Consent and background audio:** validate platform/site capability and present a practical, honest fallback. Hiding a dialog and providing a recording do not prove consent submission or reliable locked-screen streaming.
+
