@@ -34,3 +34,16 @@ Based on Apple's Human Interface Guidelines for [menus](https://developer.apple.
 ## Visual review before shipping
 
 Does the default drawer fit on an iPhone without scrolling? Are routine settings editable in one touch? Is an icon used consistently? Are actionable controls at least 44px high? Can the user determine whether the on-device model is loaded? Is the selected phrase and its learning reason visible? Are warnings honest? Does the screen remain usable with a keyboard and VoiceOver?
+
+
+## v0.1.3 — touch and reading refinements
+
+- **Discernible tap area:** the launcher has a minimum **56 × 56 CSS-pixel hitbox**, 44px visible disk, clear focus, and an intentional drag threshold (15px). Mobile taps should open on pointer-up; suppress the subsequent emulated click rather than requiring a second tap.
+- **One translucent surface:** do not place a bordered card inside another bordered card unless the inner control is actionable. Prefer grouped contiguous rows with separators and a soft material background. Keep a restrained monochromatic palette with one accent. Use inset separators on grid tools; preserve 44px controls.
+- **Stay anchored:** never let toggling a transcript passage scroll the user to the top. Preserve scrollTop and focus when changing an item, and do not disrupt unrelated playback. Review should keep *all* passages at their original positions and gray excluded text.
+- **Playback state:** show elapsed and duration per **current passage** with monospace/tabular digits; do not fabricate article-wide duration. Distinguish metadata unavailable from zero. Playback controls stay anchored below transcript content.
+- **Filtering is an interaction, not a settings maze:** a compact, obvious on/off switch and **Show all / End preview** are first-class controls. Teach and Pick share the same temporary restoration and cancel semantics. Confirm the preview actually unhides all items owned by this script without erasing saved rules.
+- **Explainability:** all model decisions expose a similarity score plus component scores from learned Skip, learned Keep, and built-in seed examples. Compare against visible thresholds. Label heuristic (non-model) classifications clearly. Present no score where inference has not happened; a dot product is *not* a probability of nuisance content.
+- **Threshold controls:** learned and built-in similarity thresholds must both be persisted per install with conservative defaults; advanced controls may live in Rules & learning. Moving a slider rescans without training on unlabeled content.
+- **Model state:** automatic startup when a relevant article is detected, meaningful loading/progress/error and a manual Retry. Never disguise heuristic operation as downloaded model execution. Keep weights and inference local; network download of external runtime/weights still needs permission and works only when Safari allows it.
+- **Release screenshots and regression:** inspect default drawer, compact Speech, Filter, and Reader screenshots in 390 × 844 Chromium. Run `tests/ux_revision.py`, assert stable scroll after a click and the 56px hitbox. Repeat physical iPhone tests for pointer capture/keyboard, audio and model memory before claiming full parity.

@@ -11,9 +11,9 @@ One floating Safari **Userscripts** drawer with site-aware controls, editable cl
 5. Turn off the original seven userscripts if they are still installed so their independent modifications and overlays do not compete with the master button.
 6. For speech, open **Speech settings**, supply your own Azure Speech resource key and region, save, then **Load voices**. Key is stored via Userscripts extension-specific `GM.setValue`, not `localStorage`.
 
-> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. **The 0.1.1 `document-start` metadata remains unchanged in 0.1.2.** The storage keys remain unchanged, so the script itself does not migrate or intentionally erase settings.
+> Userscripts must run in **content** injection mode because protected storage and cross-origin `GM.xmlHttpRequest` require the grant APIs. Safari website permission is also required. **The 0.1.1 `document-start` metadata remains unchanged in 0.1.3.** The storage keys remain unchanged, so the script itself does not migrate or intentionally erase settings.
 
-## Included in 0.1.2
+## Included in 0.1.3
 
 - Redesigned compact, iPhone-style Shadow DOM drawer with a three-column tools grid, tight site-control rows, persistent draggable button, responsive light/dark appearance, filtered-item count and condensed reader/player controls.
 - Conservative URL cleaner, URL editor and native share/copy fallback; recognizable Amazon ASIN links and regional camelcamelcamel shortcuts.
@@ -49,6 +49,7 @@ node tests/unit.cjs
 python tests/browser.py
 python tests/reddit_delayed.py
 python tests/experience.py
+python tests/ux_revision.py
 ```
 
 Browser tests use local synthetic HTML, a mocked Userscripts grant layer and headless Chromium. They are **not** iPhone/Safari verification or tests on actual Reddit/Instagram servers. Inspect `tests/` before interpreting the assertions. The failed/stale `tests/browser.cjs` prototype is not used.
@@ -63,6 +64,19 @@ python tests/experience.py` simulates a delayed full-screen Reddit app upsell, a
 Edit `src/00-utils.js` through `src/06-main.js`, increase both version constants in `src/00-utils.js` and `build.py`, then run `python build.py` and tests. Commit **both** `dist/master-button.user.js` and `dist/master-button.meta.js`. In Userscripts, use the app's update feature; availability varies by version. If `@grant`, `@connect`, `@match` or other metadata changes, reinstall the `.user.js` file and recheck website access. Settings use `master-button:v1` plus `master-button:v1:azure`, and do not intentionally change across updates.
 
 This project does not run external analytics, relay articles through an untrusted server, or transmit the Azure key to any domain besides the configured Azure Speech endpoint.
+
+## 0.1.3 interaction changes
+
+- **No jumping when correcting transcript passages.** Skipping or including the visible passage keeps the transcript scroll offset and preserves audio already prepared for other passages. Skipping the currently playing passage pauses it and moves to the next prepared passage if possible.
+- **Audio clock.** The reader displays elapsed / duration for the current MP3 passage when metadata is available; an unknown time displays `—:—`. Article-wide total runtime is **not** computed, so do not interpret the right-hand duration as the whole article.
+- **Filtering overview.** Filter opens with per-site Enable, automatic local AI, model status, **Show all** (reversible preview), Teach, Pick and a learned Skip similarity threshold. Advanced Rules & learning includes a separate built-in nuisance threshold. Similarity scores range approximately -1 to 1, are not probabilities, and do not imply a reasoned generative-model explanation. The Why control in the reader reports whether a decision came from MiniLM embeddings or fallback structural rules, the matching sources, and available scores.
+- **Teaching and context.** While choosing a new rule or teaching text, the script temporarily restores hidden elements. It preserves previously hidden neighboring blocks as context for selected-phrase embeddings. Your explicitly pressed Keep/Skip labels drive updates; scores and model predictions never train themselves. A site-scoped record stores numerical vectors, not source article text.
+- **Model startup.** Enabled on-device MiniLM begins loading when an article/main region is detected after initialization. Safari Userscripts may block third-party module loading or allocate too little WASM memory; the filter will display an actionable error and retain non-semantic fallback. It has **not** been verified on the user's iPhone.
+- **Launcher.** A 56px transparent interaction target around a 44px visual disk supports a single touch to open; dragging requires intentional movement. The drawer and settings use one translucent, grouped iOS-inspired surface and consistent typography and iconography.
+
+### Site test priority
+
+On iPhone, visit a normal article and open Filter. Check whether the status advances from *Loading* to *On-device MiniLM ready* or reports an error, then select a nuisance phrase with nearby hidden text, Teach → Skip, and confirm similar content is excluded. In Reader, scroll down, tap × on a mid-article passage, and verify the scroll position stays unchanged. Play prepared audio and confirm the current-passage elapsed and total times update. Preview should show hidden content and return to filtered state on exit. For a clean test, use an article page with no other userscripts running.
 
 ## 0.1.2 design and ML notes
 

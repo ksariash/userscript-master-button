@@ -4,7 +4,8 @@
 // are rounded vectors without article text or URL histories.
 const EMBEDDING_MODEL='Xenova/all-MiniLM-L6-v2';
 const EMBEDDING_RUNTIME='https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/+esm';
-const semantic={status:'idle',detail:'Not loaded',extractor:null,loading:null,queue:Promise.resolve(),running:false,refreshTimer:0,revision:0};
+const semantic={status:'idle',detail:'Not loaded',extractor:null,loading:null,queue:Promise.resolve(),running:false,refreshTimer:0,revision:0,scanned:0,lastError:''};
+const semanticScores=new WeakMap();
 const semanticCategories={related:'Related stories',promotion:'Promotion / newsletter',navigation:'Navigation / page chrome',offtopic:'Breaks article flow',article:'Article prose'};
 const SEMANTIC_SEEDS=[
  ['Related articles you may also like', 'related'],
@@ -35,9 +36,9 @@ async function loadSemantic(){
    const extractor=await pipeline('feature-extraction',EMBEDDING_MODEL,{device:'wasm',dtype:'q8',progress_callback:p=>{
     if(p.status==='progress'&&Number.isFinite(p.progress))semantic.detail=`Loading model · ${Math.round(p.progress)}%`;
    }});
-   semantic.extractor=extractor;semantic.status='ready';semantic.detail='MiniLM embeddings · on device';
+   semantic.extractor=extractor;semantic.status='ready';semantic.lastError='';semantic.detail='MiniLM embeddings · on device';
    render();return extractor;
-  }catch(err){semantic.status='error';semantic.detail=String(err.message||err).slice(0,175);render();throw err;}
+  }catch(err){semantic.status='error';semantic.lastError=String(err.message||err).slice(0,175);semantic.detail=semantic.lastError;render();throw err;}
   finally{semantic.loading=null;}
  })();return semantic.loading;
 }
@@ -52,29 +53,57 @@ async function embedTexts(input){
  return out;
 }
 async function ensureSemanticSeeds(){if(!seedVectors){const v=await embedTexts(SEMANTIC_SEEDS.map(x=>x[0]));seedVectors=v.map((vector,i)=>({vector,reason:SEMANTIC_SEEDS[i][1]}));}return seedVectors;}
-function semanticDecision(vec,domain=domainKey()){
- const items=vectorsForSite(domain);let skip={score:-1},keep={score:-1};
- for(const x of items){if(!Array.isArray(x.v))continue;const score=Math.max(dot(vec,x.v),Array.isArray(x.contextV)?0.97*dot(vec,x.contextV):0);if(x.d==='skip'&&score>skip.score)skip={score,reason:x.reason||'offtopic'};if(x.d==='keep'&&score>keep.score)keep={score};}
- // Explicit keep choices override weak skip similarity.
- if(skip.score>=0.79&&skip.score>keep.score+0.065)return {excluded:true,reason:`Similar to skipped ${semanticCategories[skip.reason]||'content'}`,score:skip.score};
- if(keep.score>=0.74)return {excluded:false,reason:'Kept by your feedback',score:keep.score};
- if(seedVectors){let best={score:0};for(const x of seedVectors){const score=dot(vec,x.vector);if(score>best.score)best={score,reason:x.reason};}
-  if(best.score>=0.89)return {excluded:true,reason:`Likely ${semanticCategories[best.reason]||'distraction'}`,score:best.score};}
- return {excluded:false,reason:'Article text',score:Math.max(skip.score,keep.score)};
+function semanticDecision(vec,domain=domainKey(),contextVector=null){
+ const items=vectorsForSite(domain);let skip={score:-1,reason:'offtopic'},keep={score:-1};
+ for(const x of items){if(!Array.isArray(x.v))continue;
+  const contentScore=dot(vec,x.v);const contextScore=contextVector&&Array.isArray(x.contextV)?dot(contextVector,x.contextV):0;const score=Math.max(contentScore,contextScore?0.82*contentScore+0.18*contextScore:contentScore);
+  if(x.d==='skip'&&score>skip.score)skip={score,reason:x.reason||'offtopic'};
+  if(x.d==='keep'&&score>keep.score)keep={score};
+ }
+ let seed={score:-1,reason:''};if(seedVectors){for(const x of seedVectors){const score=dot(vec,x.vector);if(score>seed.score)seed={score,reason:x.reason};}}
+ const threshold=Number(prefs.semanticThreshold??0.79);
+ const seedThreshold=Number(prefs.semanticSeedThreshold??0.89);
+ let excluded=false,source='no match',reason='No close nuisance match';
+ if(keep.score>=0.74&&keep.score>=skip.score-0.065){source='your Keep example';reason='Similar to article prose you kept';}
+ else if(skip.score>=threshold&&skip.score>keep.score+0.065){excluded=true;source='your Skip example';reason=`Similar to skipped ${semanticCategories[skip.reason]||'content'}`;}
+ else if(seed.score>=seedThreshold&&seed.score>keep.score+0.065){excluded=true;source='built-in examples';reason=`Likely ${semanticCategories[seed.reason]||'distraction'}`;}
+ else if(keep.score>=0.74){source='your Keep example';reason='Kept by your feedback';}
+ return {excluded,reason,score:Math.max(skip.score,seed.score,0),skipScore:skip.score,keepScore:keep.score,seedScore:seed.score,threshold,seedThreshold,source,model:'MiniLM'};
+}
+function resetSemanticReview(){
+ for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');
+ for(const [el,old] of [...hidden])if(old.reason?.startsWith('Similar to')||old.reason?.startsWith('Likely'))showNode(el);
+ scheduleSemanticScan();
+}
+async function analyzePhrase(value,element=null){
+ if(!semantic.extractor)return {excluded:false,reason:semantic.status==='error'?'Model unavailable':'Model not loaded',model:'Unavailable',score:null,source:'no inference'};
+ const [vector]=await embedTexts([value]);const result=semanticDecision(vector);if(element)semanticScores.set(element,result);return result;
+}
+async function inspectSelectedPhrase(){
+ if(!state.selectionText)return;
+ state.selectionScore={model:'Loading',score:null,reason:'Comparing with learned examples…'};render();
+ try{state.selectionScore=await analyzePhrase(state.selectionText,state.selectionElement);}catch(e){state.selectionScore={model:'Unavailable',score:null,reason:String(e.message||e)};}
+ render();
 }
 async function teachSemantic(value,decision,reason='offtopic',el=null){
  const sample=embeddingInput(value);if(sample.length<8)throw Error('Select a longer phrase to teach the model.');
  if(!prefs.semanticExamples)prefs.semanticExamples={};
  const origin=domainKey();
  semantic.detail='Learning from selected text';render();
- learnPassage(sample,decision);const context=el?embeddingInput(el.textContent):'';const contextUseful=context.length>25&&context!==sample&&context.length<650;const vectors=await embedTexts(contextUseful?[sample,context]:[sample]);const vector=vectors[0];
+ learnPassage(sample,decision);// Include nearby *previously hidden* sibling text as context before learning.
+ const neighbors=el?[el.previousElementSibling,el.nextElementSibling].filter(Boolean):[];
+ const oldHidden=state.reviewHidden||hidden;const hiddenNeighbors=neighbors.filter(n=>oldHidden.has(n)||[...oldHidden.keys()].some(h=>h.contains(n)));
+ const nearby=hiddenNeighbors.map(n=>embeddingInput(n.textContent)).filter(t=>t.length>=12).slice(0,2);
+ const context=embeddingInput([el?.textContent||'',...nearby].join(' '));
+ const contextUseful=context.length>25&&context!==sample;
+ const vectors=await embedTexts(contextUseful?[sample,context]:[sample]);const vector=vectors[0];
  const examples=prefs.semanticExamples[origin]||=[];
  const duplicate=examples.findIndex(x=>x.h===tokenHash(sample.toLowerCase()));
  if(duplicate>=0)examples.splice(duplicate,1);
  examples.push({h:tokenHash(sample.toLowerCase()),d:decision,reason:decision==='keep'?'article':reason,v:vector,contextV:contextUseful?vectors[1]:undefined});
  prefs.semanticExamples[origin]=examples.slice(-24);
  await saveSettings();
- if(el&&decision==='skip'&&filterEnabled()&&!protectedNode(el))hideNode(el,'Explicitly skipped: '+(semanticCategories[reason]||reason));
+ if(el&&decision==='skip'&&filterEnabled()&&!state.filterReview&&!protectedNode(el))hideNode(el,'Explicitly skipped: '+(semanticCategories[reason]||reason));
  semantic.detail=`Ready · ${prefs.semanticExamples[origin].length} learned examples`;
  semantic.revision++;render();scheduleSemanticScan();if(reading.passages.length)void reclassifyTranscript().catch(e=>notify(e.message));
  return true;
@@ -88,20 +117,27 @@ function semanticCandidates(){
  }).slice(0,90);
 }
 function scheduleSemanticScan(){
- if(!prefs.semanticAuto||!filterEnabled()||semantic.running||!semantic.extractor||!document.querySelector('article,main,[role="main"]'))return;
+ if(!prefs.semanticAuto||!filterEnabled()||state.filterReview||semantic.running||!semantic.extractor||!document.querySelector('article,main,[role="main"]'))return;
  clearTimeout(semantic.refreshTimer);semantic.refreshTimer=setTimeout(()=>{void runSemanticScan();},850);
 }
 async function runSemanticScan(){
- if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled())return;
+ if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled()||state.filterReview)return;
  const candidates=semanticCandidates().filter(el=>!hidden.has(el)&&!el.hasAttribute('data-mb-semantic-reviewed'));
  if(!candidates.length)return;
  const origin=domainKey();semantic.running=true;try{
-  const embeddings=await embedTexts(candidates.map(el=>text(el.textContent)));
-  if(domainKey()!==origin||!filterEnabled()||!prefs.semanticAuto)return;
+  const inputs=candidates.map(el=>text(el.textContent));
+  const contextual=vectorsForSite(origin).some(x=>Array.isArray(x.contextV));
+  const contextInputs=contextual?candidates.map(el=>{
+   const neighbors=[el.previousElementSibling,el.nextElementSibling].filter(Boolean);
+   return embeddingInput([el.textContent,...neighbors.map(n=>n.textContent)].join(' '));
+  }):[];
+  const vectors=await embedTexts(contextual?[...inputs,...contextInputs]:inputs);
+  const embeddings=vectors.slice(0,candidates.length),contextEmbeddings=contextual?vectors.slice(candidates.length):[];
+  if(domainKey()!==origin||!filterEnabled()||!prefs.semanticAuto||state.filterReview)return;
   for(let i=0;i<candidates.length;i++){
    const el=candidates[i];if(!el.isConnected)continue;
-   const result=semanticDecision(embeddings[i],origin);
-   el.setAttribute('data-mb-semantic-reviewed','');
+   const result=semanticDecision(embeddings[i],origin,contextEmbeddings[i]||null);
+   semanticScores.set(el,result);semantic.scanned++;el.setAttribute('data-mb-semantic-reviewed','');
    if(result.excluded)hideNode(el,result.reason);
   }
  }catch(err){semantic.detail='Model filtering stopped: '+String(err.message||err);}
@@ -114,7 +150,7 @@ async function reclassifyTranscript(){
  for(let i=0;i<items.length;i++){
   const result=semanticDecision(data[i]);const p=items[i];
   // Do not override explicit keep/skip or already-prepared audio.
-  if(p.status==='idle'&&!p.blob){p.excluded=result.excluded;p.reason=result.reason;}
+  p.analysis=result;if(p.status==='idle'&&!p.blob&&!p.manual){p.excluded=result.excluded;p.reason=result.reason;}
  }
  render();
 }

@@ -1,9 +1,9 @@
 async function handleAction(action,el){
  try{
-  if(action==='close'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();state.view='';render();return;}
-  if(action==='back'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();openView('menu');return;}
+  if(action==='close'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();endFilterReview();state.view='';render();return;}
+  if(action==='back'){const old=state.view;if(old==='picker')clearPicker();if(old==='media-picker')endMediaPick();if(old==='why'){openView('reader');return;}if(old==='teach'||old==='select-text'){openView('filter');return;}endFilterReview();openView('menu');return;}
   if(action==='menu'){openView('menu');return;}
-  if(action==='minimize'){state.view='';render();return;}
+  if(action==='minimize'){endFilterReview();state.view='';render();return;}
   if(action==='share-clean'){await shareURL(cleanURL(location.href));return;}
   if(action==='url'){state.urlDraft=location.href;openView('url');return;}
   if(action.startsWith('url-')){
@@ -19,16 +19,25 @@ async function handleAction(action,el){
   if(action==='filter'){openView('filter');if(prefs.semanticAuto&&semantic.status==='idle')void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});return;}
   if(action==='semantic-load'){if(semantic.extractor){for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');scheduleSemanticScan();notify('Rescanning article with local model.');}else{notify('Loading on-device language model…');await loadSemantic();await ensureSemanticSeeds();scheduleSemanticScan();if(reading.passages.length)await reclassifyTranscript();notify('Local MiniLM is ready.');}render();return;}
   if(action==='semantic-toggle'){prefs.semanticAuto=!prefs.semanticAuto;await saveSettings();if(!prefs.semanticAuto){for(const [el,old] of [...hidden])if(String(old.reason).startsWith('Similar to')||String(old.reason).startsWith('Likely'))showNode(el);}else{if(!semantic.extractor)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});else scheduleSemanticScan();}render();return;}
-  if(action==='select-phrase'){rememberSelectedPhrase();openView(state.selectionText?'teach':'select-text');return;}
-  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}openView('teach');return;}
-  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');openView('filter');return;}
+  if(action==='filter-preview'){
+  if(state.filterReview){endFilterReview();notify('Filtering restored.');}
+  else{beginFilterReview();notify('All filtered content shown until you end preview.');}
+  render();return;
+ }
+ if(action==='select-phrase'){
+  rememberSelectedPhrase();beginFilterReview();state.selectionScore=null;
+  openView(state.selectionText?'teach':'select-text');
+  if(state.selectionText)void inspectSelectedPhrase();return;
+ }
+  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}beginFilterReview();openView('teach');void inspectSelectedPhrase();return;}
+  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');endFilterReview();openView('filter');return;}
   if(action==='semantic-reset'){delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
   if(action==='pick-filter'){pickFilter();return;}
   if(action==='preview'){togglePreview();return;}
-  if(action==='picker-cancel'){clearPicker();openView('filter');return;}
+  if(action==='picker-cancel'){clearPicker();endFilterReview();openView('filter');return;}
   if(action==='picker-save'){savePickerRule();return;}
   if(action==='picker-next'){if(!pickerMatches.length)return;const idx=(state.pickerIndex=(state.pickerIndex+1)%pickerMatches.length);pickerMatches[idx].scrollIntoView({block:'center',behavior:'smooth'});return;}
   if(action.startsWith('rule-')){
@@ -75,6 +84,8 @@ async function handleAction(action,el){
   if(action==='reader-abort'){state.readerEditing=false;render();return;}
   if(action==='reader-save'){const v=host.shadowRoot.getElementById('mb-reader-edit')?.value||'';replaceReaderText(v);return;}
   if(action.startsWith('pass-toggle:')){excludePassage(Number(action.split(':')[1]));return;}
+ if(action.startsWith('pass-why:')){state.whyIndex=Number(action.split(':')[1]);openView('why');return;}
+ if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);if(!p.manual&&!p.blob){p.excluded=p.analysis.excluded;p.reason=p.analysis.reason;}render();return;}
   if(action.startsWith('pass-play:')){await jumpTo(Number(action.split(':')[1]));return;}
   if(action==='prepare'){await prepareReading();return;}
   if(action==='play'){pauseResume();return;}
@@ -110,16 +121,21 @@ function rememberSelectedPhrase(){
 }
 function installUI(){if(document.querySelector('[data-mb-host]'))return;
  host=document.createElement('div');host.setAttribute('data-mb-host','');host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:2147483647!important;pointer-events:none!important;';
- const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools">✦<span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
+ const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools"><span class="mb-launch-symbol">✦</span><span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
  document.documentElement.appendChild(host);
  const global=document.createElement('style');global.textContent=globalStyles;global.id='mb-global-style';(document.head||document.documentElement).append(global);
- let drag=null;const launch=shadow.querySelector('.mb-launch');document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
- launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false};launch.setPointerCapture?.(e.pointerId);});
- launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>9)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-54,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min(innerHeight-54,drag.bottom-dy));launch.style.cssText=positionCSS();});
- launch.addEventListener('pointerup',()=>{if(!drag)return;ignoreClick=drag.moved;if(drag.moved)saveSettings();drag=null;});
- launch.addEventListener('click',e=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
+ let drag=null,lastTouchToggle=0;
+ const launch=shadow.querySelector('.mb-launch');
+ const toggleLaunch=()=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');void inspectSelectedPhrase();return;}if(state.view)endFilterReview();openView(state.view?'':reading.playing?'mini':'menu');};
+ document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
+ launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false,type:e.pointerType};try{launch.setPointerCapture(e.pointerId);}catch{}});
+ launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.max(Math.abs(dx),Math.abs(dy))>15)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-66,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min((visualViewport?.height||innerHeight)-66,drag.bottom-dy));launch.style.cssText=positionCSS();});
+ launch.addEventListener('pointerup',e=>{if(!drag)return;const moved=drag.moved,type=drag.type;drag=null;if(moved){ignoreClick=true;void saveSettings();}else if(type==='touch'||type==='pen'){lastTouchToggle=Date.now();toggleLaunch();}});
+ launch.addEventListener('pointercancel',()=>{drag=null;});
+ launch.addEventListener('click',e=>{if(Date.now()-lastTouchToggle<850){e.preventDefault();return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}toggleLaunch();});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
+  if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){prefs[e.target.id==='mb-threshold'?'semanticThreshold':'semanticSeedThreshold']=Number(e.target.value);saveSettings();resetSemanticReview();if(reading.passages.length)void reclassifyTranscript();render();}
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}
   if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;reading.sampleCache.clear();saveSettings();}
   if(e.target.id==='mb-region'){prefs.azure.region=e.target.value;state.voices=[];state.voicesRegion='';state.voicesError='';saveSettings();render();if(azureKey)void loadVoices().catch(x=>notify(x.message));}
@@ -127,8 +143,8 @@ function installUI(){if(document.querySelector('[data-mb-host]'))return;
   if(e.target.id==='mb-rate'){prefs.playbackRate=Number(e.target.value);audio.playbackRate=prefs.playbackRate;saveSettings();}
   if(e.target.matches('[data-audio-seek]')&&Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,Number(e.target.value));
  });
- shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
- addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-54);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-54);render();});
+ shadow.addEventListener('input',e=>{if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){const output=host.shadowRoot.getElementById(e.target.id+'-value');if(output)output.textContent=Number(e.target.value).toFixed(2);}if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
+ addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-66);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-66);render();});
  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const keyboard=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);launch.style.bottom=Math.max(prefs.position.bottom,keyboard+14)+'px';});
  render();
 }
@@ -152,7 +168,10 @@ function monitorDOM(){
 async function boot(){
  if(document.querySelector('[data-mb-host]'))return;
  await readSettings();autoMapRedirect();if(!document.documentElement)return;if(siteName()==='reddit')toggleRedditCSS(cleanupEnabled());
- installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');if(prefs.semanticAuto&&document.querySelector('article,main,[role="main"]'))setTimeout(()=>{if(prefs.semanticAuto)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});},2200);
+ installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');// Auto-start for article pages; never report 'ready' until the pretrained weights load.
+ if(prefs.semanticAuto&&filterEnabled())setTimeout(()=>{
+  if(prefs.semanticAuto&&filterEnabled()&&document.querySelector('article,main,[role="main"]'))void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{render();});
+ },250);
 }
 // Hide known Reddit interstitials before the first asynchronous settings read.
 // The persisted per-site setting is applied by boot() as soon as it resolves.

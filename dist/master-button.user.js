@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         iPhone Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
-// @version      0.1.2
+// @version      0.1.3
 // @description  A single floating drawer for clean links, nuisance filtering, media, and Azure narration
 // @author       ksariash
 // @match        *://*/*
@@ -31,7 +31,7 @@
 
 ;(()=>{
 'use strict';
-const VERSION = '0.1.2';
+const VERSION = '0.1.3';
 const URL_BLACKLIST = new Set(['fbclid','gclid','dclid','gbraid','wbraid','msclkid','mc_cid','mc_eid','igshid','vero_id','oly_enc_id','oly_anon_id','_hsenc','_hsmi','__hsfp','ref_src','spm','yclid']);
 const text = v => String(v == null ? '' : v).replace(/\s+/g,' ').trim();
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -78,7 +78,7 @@ function chunkText(input,max=1550){
 const libTest = {cleanURL,amazonData,camelURL,appleMapsURL,tokens,tokenHash,chunkText,siteName};
 
 const STORAGE='master-button:v1';
-const defaults=()=>({position:{right:14,bottom:105}, filter:{}, siteCleanup:{}, nsfw:true, autoMaps:true, playbackRate:1,fontSize:17, azure:{region:'eastus',voice:'en-US-JennyNeural',quality:'compact'}, rules:{}, learning:{}, learningEnabled:{}, semanticAuto:true, semanticExamples:{}});
+const defaults=()=>({position:{right:14,bottom:105}, filter:{}, siteCleanup:{}, nsfw:true, autoMaps:true, playbackRate:1,fontSize:17, azure:{region:'eastus',voice:'en-US-JennyNeural',quality:'compact'}, rules:{}, learning:{}, learningEnabled:{}, semanticAuto:true, semanticExamples:{}, semanticThreshold:0.79, semanticSeedThreshold:0.89});
 let prefs=defaults(), azureKey='', storageOK=false;
 async function gmGet(k, def){if(typeof GM==='undefined'||typeof GM.getValue!=='function')return def;return await GM.getValue(k,def);}
 async function gmSet(k,v){if(typeof GM==='undefined'||typeof GM.setValue!=='function')throw Error('Protected Userscripts storage unavailable');await GM.setValue(k,v);}
@@ -99,7 +99,17 @@ function showAll(){for(const e of [...hidden.keys()])showNode(e);}
 function updateCount(){if(!host)return;for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String([...hidden.keys()].filter(e=>e.isConnected&&!([...hidden.keys()].some(other=>other!==e&&other.contains(e)))).length);}
 function activeRules(){return (prefs.rules[domainKey()]||[]).filter(r=>r.enabled!==false);}
 function safeMatches(sel){try{return [...document.querySelectorAll(sel)].slice(0,350);}catch{return [];}}
-function appliedFilter(){if(!filterEnabled())return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
+function appliedFilter(){if(!filterEnabled()||state.filterReview)return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
+function beginFilterReview(){
+ if(state.filterReview)return;
+ state.reviewHidden=new Map(hidden);state.filterReview=true;showAll();render();
+}
+function endFilterReview(){
+ if(!state.filterReview)return;
+ state.filterReview=false;state.reviewHidden=null;
+ if(filterEnabled()){appliedFilter();resetSemanticReview();}
+ render();
+}
 function setFiltering(enabled){prefs.filter[domainKey()]=enabled;saveSettings();if(!enabled){showAll();}else appliedFilter();render();}
 function nodeSelector(el){
   if(el.id&&/^[a-zA-Z][\w:-]{2,75}$/.test(el.id)&&!/\d{5,}/.test(el.id))return '#'+CSS.escape(el.id);
@@ -108,11 +118,11 @@ function nodeSelector(el){
   const ancestor=el.parentElement;if(ancestor?.id&&/^[a-zA-Z][\w:-]{2,75}$/.test(ancestor.id))s='#'+CSS.escape(ancestor.id)+' > '+s;
   return s;
 }
-function clearPicker(){if(!picker)return;document.removeEventListener('click',picker,true);picker=null;stopPreview();render();}
+function clearPicker(){if(picker)document.removeEventListener('click',picker,true);picker=null;stopPreview();render();}
 function stopPreview(){for(const e of pickerMatches){e.removeAttribute('data-mb-preview');e.removeAttribute('data-mb-preview-hide');}pickerMatches=[];preview=false;}
-function pickFilter(){clearPicker();openView('picker');picker=function(e){if(e.target.closest?.('[data-mb-host]'))return;e.preventDefault();e.stopImmediatePropagation();const target=e.target.closest?.('aside,[role="complementary"],section,div,figure,li,p')||e.target;if(!target||protectedNode(target)){notify('Select a smaller part of the page.');return;}stopPreview();const selector=nodeSelector(target);let ms=safeMatches(selector);if(ms.length>80||ms.length>document.querySelectorAll('p,div,li,section,article').length*.2){notify('Selector is too broad; choose a more specific element.');return;}pickerMatches=ms.filter(n=>!protectedNode(n));for(const n of pickerMatches)n.setAttribute('data-mb-preview','');state.pickerSelector=selector;render();};document.addEventListener('click',picker,true);}
+function pickFilter(){clearPicker();beginFilterReview();openView('picker');picker=function(e){if(e.target.closest?.('[data-mb-host]'))return;e.preventDefault();e.stopImmediatePropagation();const target=e.target.closest?.('aside,[role="complementary"],section,div,figure,li,p')||e.target;if(!target||protectedNode(target)){notify('Select a smaller part of the page.');return;}stopPreview();const selector=nodeSelector(target);let ms=safeMatches(selector);if(ms.length>80||ms.length>document.querySelectorAll('p,div,li,section,article').length*.2){notify('Selector is too broad; choose a more specific element.');return;}pickerMatches=ms.filter(n=>!protectedNode(n));for(const n of pickerMatches)n.setAttribute('data-mb-preview','');state.pickerSelector=selector;render();};document.addEventListener('click',picker,true);}
 function togglePreview(){preview=!preview;for(const n of pickerMatches){if(preview)n.setAttribute('data-mb-preview-hide','');else n.removeAttribute('data-mb-preview-hide');}render();}
-function savePickerRule(){const selector=state.pickerSelector;if(!selector||!pickerMatches.length)return;const arr=prefs.rules[domainKey()]||=[];arr.push({id:Date.now().toString(36),selector,type:'css',enabled:true});stopPreview();clearPicker();saveSettings();appliedFilter();openView('rules');}
+function savePickerRule(){const selector=state.pickerSelector;if(!selector||!pickerMatches.length)return;const arr=prefs.rules[domainKey()]||(prefs.rules[domainKey()]=[]);arr.push({id:Date.now().toString(36),selector,type:'css',enabled:true});stopPreview();clearPicker();endFilterReview();saveSettings();appliedFilter();openView('rules');}
 // Anonymous, site-scoped token statistics; hash counts only, no text/body/history.
 function classificationScore(v,domain=domainKey()){
  const terms=[...new Set(tokens(v))],model=prefs.learning[domain]||{};let val=0,hits=0;
@@ -137,7 +147,8 @@ function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!
 // are rounded vectors without article text or URL histories.
 const EMBEDDING_MODEL='Xenova/all-MiniLM-L6-v2';
 const EMBEDDING_RUNTIME='https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/+esm';
-const semantic={status:'idle',detail:'Not loaded',extractor:null,loading:null,queue:Promise.resolve(),running:false,refreshTimer:0,revision:0};
+const semantic={status:'idle',detail:'Not loaded',extractor:null,loading:null,queue:Promise.resolve(),running:false,refreshTimer:0,revision:0,scanned:0,lastError:''};
+const semanticScores=new WeakMap();
 const semanticCategories={related:'Related stories',promotion:'Promotion / newsletter',navigation:'Navigation / page chrome',offtopic:'Breaks article flow',article:'Article prose'};
 const SEMANTIC_SEEDS=[
  ['Related articles you may also like', 'related'],
@@ -168,9 +179,9 @@ async function loadSemantic(){
    const extractor=await pipeline('feature-extraction',EMBEDDING_MODEL,{device:'wasm',dtype:'q8',progress_callback:p=>{
     if(p.status==='progress'&&Number.isFinite(p.progress))semantic.detail=`Loading model · ${Math.round(p.progress)}%`;
    }});
-   semantic.extractor=extractor;semantic.status='ready';semantic.detail='MiniLM embeddings · on device';
+   semantic.extractor=extractor;semantic.status='ready';semantic.lastError='';semantic.detail='MiniLM embeddings · on device';
    render();return extractor;
-  }catch(err){semantic.status='error';semantic.detail=String(err.message||err).slice(0,175);render();throw err;}
+  }catch(err){semantic.status='error';semantic.lastError=String(err.message||err).slice(0,175);semantic.detail=semantic.lastError;render();throw err;}
   finally{semantic.loading=null;}
  })();return semantic.loading;
 }
@@ -185,29 +196,57 @@ async function embedTexts(input){
  return out;
 }
 async function ensureSemanticSeeds(){if(!seedVectors){const v=await embedTexts(SEMANTIC_SEEDS.map(x=>x[0]));seedVectors=v.map((vector,i)=>({vector,reason:SEMANTIC_SEEDS[i][1]}));}return seedVectors;}
-function semanticDecision(vec,domain=domainKey()){
- const items=vectorsForSite(domain);let skip={score:-1},keep={score:-1};
- for(const x of items){if(!Array.isArray(x.v))continue;const score=Math.max(dot(vec,x.v),Array.isArray(x.contextV)?0.97*dot(vec,x.contextV):0);if(x.d==='skip'&&score>skip.score)skip={score,reason:x.reason||'offtopic'};if(x.d==='keep'&&score>keep.score)keep={score};}
- // Explicit keep choices override weak skip similarity.
- if(skip.score>=0.79&&skip.score>keep.score+0.065)return {excluded:true,reason:`Similar to skipped ${semanticCategories[skip.reason]||'content'}`,score:skip.score};
- if(keep.score>=0.74)return {excluded:false,reason:'Kept by your feedback',score:keep.score};
- if(seedVectors){let best={score:0};for(const x of seedVectors){const score=dot(vec,x.vector);if(score>best.score)best={score,reason:x.reason};}
-  if(best.score>=0.89)return {excluded:true,reason:`Likely ${semanticCategories[best.reason]||'distraction'}`,score:best.score};}
- return {excluded:false,reason:'Article text',score:Math.max(skip.score,keep.score)};
+function semanticDecision(vec,domain=domainKey(),contextVector=null){
+ const items=vectorsForSite(domain);let skip={score:-1,reason:'offtopic'},keep={score:-1};
+ for(const x of items){if(!Array.isArray(x.v))continue;
+  const contentScore=dot(vec,x.v);const contextScore=contextVector&&Array.isArray(x.contextV)?dot(contextVector,x.contextV):0;const score=Math.max(contentScore,contextScore?0.82*contentScore+0.18*contextScore:contentScore);
+  if(x.d==='skip'&&score>skip.score)skip={score,reason:x.reason||'offtopic'};
+  if(x.d==='keep'&&score>keep.score)keep={score};
+ }
+ let seed={score:-1,reason:''};if(seedVectors){for(const x of seedVectors){const score=dot(vec,x.vector);if(score>seed.score)seed={score,reason:x.reason};}}
+ const threshold=Number(prefs.semanticThreshold??0.79);
+ const seedThreshold=Number(prefs.semanticSeedThreshold??0.89);
+ let excluded=false,source='no match',reason='No close nuisance match';
+ if(keep.score>=0.74&&keep.score>=skip.score-0.065){source='your Keep example';reason='Similar to article prose you kept';}
+ else if(skip.score>=threshold&&skip.score>keep.score+0.065){excluded=true;source='your Skip example';reason=`Similar to skipped ${semanticCategories[skip.reason]||'content'}`;}
+ else if(seed.score>=seedThreshold&&seed.score>keep.score+0.065){excluded=true;source='built-in examples';reason=`Likely ${semanticCategories[seed.reason]||'distraction'}`;}
+ else if(keep.score>=0.74){source='your Keep example';reason='Kept by your feedback';}
+ return {excluded,reason,score:Math.max(skip.score,seed.score,0),skipScore:skip.score,keepScore:keep.score,seedScore:seed.score,threshold,seedThreshold,source,model:'MiniLM'};
+}
+function resetSemanticReview(){
+ for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');
+ for(const [el,old] of [...hidden])if(old.reason?.startsWith('Similar to')||old.reason?.startsWith('Likely'))showNode(el);
+ scheduleSemanticScan();
+}
+async function analyzePhrase(value,element=null){
+ if(!semantic.extractor)return {excluded:false,reason:semantic.status==='error'?'Model unavailable':'Model not loaded',model:'Unavailable',score:null,source:'no inference'};
+ const [vector]=await embedTexts([value]);const result=semanticDecision(vector);if(element)semanticScores.set(element,result);return result;
+}
+async function inspectSelectedPhrase(){
+ if(!state.selectionText)return;
+ state.selectionScore={model:'Loading',score:null,reason:'Comparing with learned examples…'};render();
+ try{state.selectionScore=await analyzePhrase(state.selectionText,state.selectionElement);}catch(e){state.selectionScore={model:'Unavailable',score:null,reason:String(e.message||e)};}
+ render();
 }
 async function teachSemantic(value,decision,reason='offtopic',el=null){
  const sample=embeddingInput(value);if(sample.length<8)throw Error('Select a longer phrase to teach the model.');
  if(!prefs.semanticExamples)prefs.semanticExamples={};
  const origin=domainKey();
  semantic.detail='Learning from selected text';render();
- learnPassage(sample,decision);const context=el?embeddingInput(el.textContent):'';const contextUseful=context.length>25&&context!==sample&&context.length<650;const vectors=await embedTexts(contextUseful?[sample,context]:[sample]);const vector=vectors[0];
+ learnPassage(sample,decision);// Include nearby *previously hidden* sibling text as context before learning.
+ const neighbors=el?[el.previousElementSibling,el.nextElementSibling].filter(Boolean):[];
+ const oldHidden=state.reviewHidden||hidden;const hiddenNeighbors=neighbors.filter(n=>oldHidden.has(n)||[...oldHidden.keys()].some(h=>h.contains(n)));
+ const nearby=hiddenNeighbors.map(n=>embeddingInput(n.textContent)).filter(t=>t.length>=12).slice(0,2);
+ const context=embeddingInput([el?.textContent||'',...nearby].join(' '));
+ const contextUseful=context.length>25&&context!==sample;
+ const vectors=await embedTexts(contextUseful?[sample,context]:[sample]);const vector=vectors[0];
  const examples=prefs.semanticExamples[origin]||=[];
  const duplicate=examples.findIndex(x=>x.h===tokenHash(sample.toLowerCase()));
  if(duplicate>=0)examples.splice(duplicate,1);
  examples.push({h:tokenHash(sample.toLowerCase()),d:decision,reason:decision==='keep'?'article':reason,v:vector,contextV:contextUseful?vectors[1]:undefined});
  prefs.semanticExamples[origin]=examples.slice(-24);
  await saveSettings();
- if(el&&decision==='skip'&&filterEnabled()&&!protectedNode(el))hideNode(el,'Explicitly skipped: '+(semanticCategories[reason]||reason));
+ if(el&&decision==='skip'&&filterEnabled()&&!state.filterReview&&!protectedNode(el))hideNode(el,'Explicitly skipped: '+(semanticCategories[reason]||reason));
  semantic.detail=`Ready · ${prefs.semanticExamples[origin].length} learned examples`;
  semantic.revision++;render();scheduleSemanticScan();if(reading.passages.length)void reclassifyTranscript().catch(e=>notify(e.message));
  return true;
@@ -221,20 +260,27 @@ function semanticCandidates(){
  }).slice(0,90);
 }
 function scheduleSemanticScan(){
- if(!prefs.semanticAuto||!filterEnabled()||semantic.running||!semantic.extractor||!document.querySelector('article,main,[role="main"]'))return;
+ if(!prefs.semanticAuto||!filterEnabled()||state.filterReview||semantic.running||!semantic.extractor||!document.querySelector('article,main,[role="main"]'))return;
  clearTimeout(semantic.refreshTimer);semantic.refreshTimer=setTimeout(()=>{void runSemanticScan();},850);
 }
 async function runSemanticScan(){
- if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled())return;
+ if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled()||state.filterReview)return;
  const candidates=semanticCandidates().filter(el=>!hidden.has(el)&&!el.hasAttribute('data-mb-semantic-reviewed'));
  if(!candidates.length)return;
  const origin=domainKey();semantic.running=true;try{
-  const embeddings=await embedTexts(candidates.map(el=>text(el.textContent)));
-  if(domainKey()!==origin||!filterEnabled()||!prefs.semanticAuto)return;
+  const inputs=candidates.map(el=>text(el.textContent));
+  const contextual=vectorsForSite(origin).some(x=>Array.isArray(x.contextV));
+  const contextInputs=contextual?candidates.map(el=>{
+   const neighbors=[el.previousElementSibling,el.nextElementSibling].filter(Boolean);
+   return embeddingInput([el.textContent,...neighbors.map(n=>n.textContent)].join(' '));
+  }):[];
+  const vectors=await embedTexts(contextual?[...inputs,...contextInputs]:inputs);
+  const embeddings=vectors.slice(0,candidates.length),contextEmbeddings=contextual?vectors.slice(candidates.length):[];
+  if(domainKey()!==origin||!filterEnabled()||!prefs.semanticAuto||state.filterReview)return;
   for(let i=0;i<candidates.length;i++){
    const el=candidates[i];if(!el.isConnected)continue;
-   const result=semanticDecision(embeddings[i],origin);
-   el.setAttribute('data-mb-semantic-reviewed','');
+   const result=semanticDecision(embeddings[i],origin,contextEmbeddings[i]||null);
+   semanticScores.set(el,result);semantic.scanned++;el.setAttribute('data-mb-semantic-reviewed','');
    if(result.excluded)hideNode(el,result.reason);
   }
  }catch(err){semantic.detail='Model filtering stopped: '+String(err.message||err);}
@@ -247,7 +293,7 @@ async function reclassifyTranscript(){
  for(let i=0;i<items.length;i++){
   const result=semanticDecision(data[i]);const p=items[i];
   // Do not override explicit keep/skip or already-prepared audio.
-  if(p.status==='idle'&&!p.blob){p.excluded=result.excluded;p.reason=result.reason;}
+  p.analysis=result;if(p.status==='idle'&&!p.blob&&!p.manual){p.excluded=result.excluded;p.reason=result.reason;}
  }
  render();
 }
@@ -433,14 +479,23 @@ function discoverPassages(){
  for(const n of nodes.slice(0,350)){
   const str=text(n.textContent);if(seen.has(str))continue;seen.add(str);
   const excluded=hidden.has(n)||[...hidden.keys()].some(e=>e.contains(n));const classification=inspectPassage(str,n);
-  for(const t of chunkText(str)){result.push({text:t,element:n,excluded:excluded||classification.excluded,reason:excluded?'Hidden on page':classification.reason,blob:null,status:'idle'});}
+  for(const t of chunkText(str)){result.push({text:t,element:n,excluded:excluded||classification.excluded,reason:excluded?'Hidden on page':classification.reason,analysis:{model:'Heuristic',excluded:excluded||classification.excluded,reason:excluded?'Hidden by website rule':classification.reason,source:'DOM and site rules',score:null},blob:null,status:'idle'});}
  }
  return result;
 }
 function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');if(semantic.extractor)void reclassifyTranscript().catch(e=>notify(e.message));}
 function readerPlain(){return reading.passages.filter(p=>!p.excluded).map(p=>p.text).join('\n\n');}
 function replaceReaderText(v){stopPlayback(true);reading.passages=chunkText(v).map(t=>({text:t,element:null,excluded:false,reason:'Edited text',blob:null,status:'idle'}));reading.index=0;state.readerEditing=false;render();}
-function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');void teachSemantic(p.text,p.excluded?'skip':'keep',p.excluded?'offtopic':'article',p.element).catch(e=>notify('Local model: '+e.message));reading.passages.forEach(t=>{t.status='idle';});render();}
+function excludePassage(i){
+ const p=reading.passages[i];if(!p)return;
+ const excluding=!p.excluded;
+ // Do not interrupt other audio or destroy all prepared audio when correcting one passage.
+ if(excluding&&i===reading.index&&!audio.paused){audio.pause();const next=nextEnabled(i+1);if(next>=0&&reading.passages[next].blob)void playPassage(next).catch(()=>{});}
+ p.excluded=excluding;p.manual=true;p.reason=excluding?'You skipped this passage':'You kept this passage';
+ learnPassage(p.text,excluding?'skip':'keep');
+ void teachSemantic(p.text,excluding?'skip':'keep',excluding?'offtopic':'article',p.element).catch(e=>notify('Local learning: '+e.message));
+ render();
+}
 async function requestGM(url,opts={}){
  if(!/^https:/.test(url))throw Error('Only HTTPS requests are allowed.');
  if(typeof GM==='undefined'||typeof GM.xmlHttpRequest!=='function')throw Error('Userscripts GM.xmlHttpRequest is unavailable. Check the script grants and extension permissions.');
@@ -492,7 +547,21 @@ async function playPassage(i){audioMode='article';const p=reading.passages[i];if
 audio.addEventListener('ended',()=>{reading.playing=false;if(audioMode==='demo'){render();return;}const n=nextEnabled(reading.index+1);if(n>=0){if(reading.passages[n].blob)playPassage(n).catch(()=>{});else notify('Buffering next passage. Unlock Safari and tap Play if needed.');}else notify('Finished reading.');render();});
 audio.addEventListener('pause',()=>{reading.playing=false;render();});
 audio.addEventListener('play',()=>{reading.playing=true;render();});
-audio.addEventListener('timeupdate',()=>{const s=host?.shadowRoot?.querySelector('[data-audio-seek]');if(s&&Number.isFinite(audio.duration)&&audio.duration>0){s.max=String(audio.duration);s.value=String(audio.currentTime);} });
+function playbackClock(t){if(!Number.isFinite(t)||t<0)return '—:—';const n=Math.floor(t);return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
+function updateAudioProgress(){
+ const root=host?.shadowRoot;if(!root)return;
+ const s=root.querySelector('[data-audio-seek]');
+ const d=audio.duration,valid=Number.isFinite(d)&&d>0;
+ if(s&&!s.matches(':active')){s.max=valid?String(d):'100';s.value=valid?String(audio.currentTime):'0';}
+ const now=root.querySelector('[data-audio-now]'),total=root.querySelector('[data-audio-total]');
+ if(now)now.textContent=playbackClock(audio.currentTime);
+ if(total)total.textContent=playbackClock(d);
+ const p=reading.passages[reading.index];if(valid&&p&&audioMode==='article')p.duration=d;
+ const segments=root.querySelector('[data-audio-segments]');if(segments)segments.textContent=`${reading.index+1}/${reading.passages.length} passages`;
+}
+audio.addEventListener('loadedmetadata',updateAudioProgress);
+audio.addEventListener('durationchange',updateAudioProgress);
+audio.addEventListener('timeupdate',updateAudioProgress);
 function pauseResume(){if(audio.paused){if(audio.src)audio.play().catch(e=>notify('Tap again to allow playback: '+e.message));else{const i=nextEnabled(reading.index);if(i>=0&&reading.passages[i].blob)playPassage(i).catch(e=>notify(e.message));else prepareReading();}}else audio.pause();}
 async function jumpTo(i){const p=reading.passages[i];if(!p||p.excluded)return;if(p.blob){await playPassage(i);}else notify('Passage still preparing.');}
 function transcriptFile(withTimings=false){let v='';for(const [i,p] of reading.passages.entries()){if(p.excluded)continue;v+=withTimings?`[Passage ${i+1}${Number.isFinite(p.duration)?' · '+Math.round(p.duration)+'s':''}]\n`:'';v+=p.text+'\n\n';}return new Blob([v],{type:'text/plain;charset=utf-8'});}
@@ -509,13 +578,16 @@ function setMediaSession(){if(!('mediaSession' in navigator))return;try{navigato
 setMediaSession();
 
 let host=null,toastTimer=0,observer=null,observerTimer=0,lastLocation=location.href,ignoreClick=false;
-const state={view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false,voicesRegion:'',voicesLoading:false,voicesError:'',voiceQuery:'',selectionText:'',selectionElement:null,selectionReason:'related',selectionMode:false};
+const state={filterReview:false,filterPreview:false,selectionScore:null,whyIndex:-1,view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false,voicesRegion:'',voicesLoading:false,voicesError:'',voiceQuery:'',selectionText:'',selectionElement:null,selectionReason:'related',selectionMode:false};
 const button=(action,icon,label,extra='')=>`<button type="button" data-action="${esc(action)}" class="mb-action" ${extra}><span aria-hidden="true">${icon}</span><span>${esc(label)}</span></button>`;
 function notify(message){if(!host)return;const el=host.shadowRoot.querySelector('.mb-toast');if(!el)return;el.textContent=String(message);el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(el.isConnected)el.hidden=true;},4500);}
 async function shareURL(u){try{if(navigator.share){await navigator.share({url:u});return;}}catch(e){if(e.name==='AbortError')return;}await copyText(u);notify('Copied link.');}
 async function copyText(v){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(v);return;}catch{}}if(typeof GM!=='undefined'&&typeof GM.setClipboard==='function'){await GM.setClipboard(v);return;}throw Error('No clipboard permission; use the URL editor to copy manually.');}
-function openView(v){state.view=v;render();}
-function positionCSS(){const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;return `left:${Math.max(5,(vv?.offsetLeft||0)+w-43-Math.max(5,Math.min(w-54,prefs.position.right)))}px;top:${Math.max(5,(vv?.offsetTop||0)+(vv?.height||innerHeight)-43-Math.max(8,Math.min((vv?.height||innerHeight)-54,prefs.position.bottom)))}px;bottom:auto;right:auto;`;}
+function openView(v){
+ if(state.filterReview&&!['teach','select-text','picker','filter','why'].includes(v))endFilterReview();
+ state.view=v;render();
+}
+function positionCSS(){const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;return `left:${Math.max(5,(vv?.offsetLeft||0)+w-56-Math.max(5,Math.min(w-66,prefs.position.right)))}px;top:${Math.max(5,(vv?.offsetTop||0)+(vv?.height||innerHeight)-56-Math.max(8,Math.min((vv?.height||innerHeight)-66,prefs.position.bottom)))}px;bottom:auto;right:auto;`;}
 // Inline, consistent stroke icons; no external assets or webfonts.
 const iconPaths={
  'share':'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.6 6.6-4.1m-6.6 9 6.6 4"/>',
@@ -525,6 +597,7 @@ const iconPaths={
  'sliders':'<path d="M4 6h7m4 0h5M4 12h2m4 0h10M4 18h11m4 0h1"/><circle cx="13" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
  'wave':'<path d="M2 10v4m4-8v12m4-15v18m4-14v10m4-7v4m4-7v10"/>',
  'images':'<rect x="3" y="3" width="15" height="15" rx="2"/><path d="m3 14 4-4 4 4 3-3 4 4M8 7h.01M9 21h11a1 1 0 0 0 1-1V8"/>',
+ 'eye':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
  'pointer':'<path d="m4 3 7 18 2.2-7.6L21 11z"/>',
  'shield':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
  'eye':'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
@@ -634,6 +707,58 @@ button{cursor:pointer;}button:focus-visible,input:focus-visible,select:focus-vis
 .mb-controls{padding:7px 11px calc(8px + env(safe-area-inset-bottom));gap:6px;}
 .mb-pill{border-radius:6px;}
 @media(prefers-reduced-motion:no-preference){.mb-panel:not(.reader){animation:mb-in .15s cubic-bezier(.2,.8,.2,1);}@keyframes mb-in{from{opacity:.85;transform:translateY(5px) scale(.99)}to{opacity:1;transform:none}}}
+.mb-panel.view-speech .mb-body{gap:6px;padding:7px 10px 8px;}
+.mb-panel.view-speech .mb-setting{min-height:44px;}
+.mb-panel.view-speech .mb-row{min-height:36px;}
+.mb-panel.view-speech .mb-caption{margin:0;}
+/* 0.1.3 cohesive touch-first revision: one translucent sheet, grouped surfaces,
+   quiet explanations, full-size gesture targets and stable reader layout. */
+.mb-launch{width:56px;height:56px;border:0;background:transparent;box-shadow:none;color:#fff;font-size:23px;isolation:isolate;}
+.mb-launch::before{content:"";position:absolute;inset:6px;background:rgba(29,35,48,.91);border:1px solid rgba(255,255,255,.22);border-radius:50%;box-shadow:0 4px 16px #0005;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:-1;}
+.mb-launch-symbol{position:relative;pointer-events:none;}.mb-count{top:2px;right:2px;}
+.mb-panel{--fg:#171b24;--muted:#667085;--bg:rgba(248,249,252,.96);--surface:rgba(255,255,255,.96);--tile:transparent;--bd:rgba(24,34,56,.10);--accent:#366be5;--tint:rgba(56,106,229,.08);width:min(352px,calc(100vw - 20px));border-radius:23px;border:1px solid rgba(255,255,255,.68);box-shadow:0 20px 70px #10172840,0 1px 8px #10172814;-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);overflow:auto;}
+@media(prefers-color-scheme:dark){.mb-panel{--fg:#f4f6fa;--muted:#a1a8b7;--bg:rgba(24,28,36,.97);--surface:#282d38;--tile:transparent;--bd:rgba(255,255,255,.09);--accent:#a0baff;--tint:rgba(126,160,255,.14);border-color:#454957;}}
+.mb-head{min-height:48px;padding:6px 10px;gap:8px;border-color:var(--bd);background:transparent;}
+.mb-head h2{font-size:15px;font-weight:750;letter-spacing:-.35px;}
+.mb-icon-btn{background:var(--surface);border-radius:13px;min-height:44px;min-width:44px;}
+.mb-body{gap:10px;padding:10px 12px 11px;}
+.mb-kicker,.mb-section-title{font-weight:720;font-size:10px;letter-spacing:.7px;}
+.mb-tiles{gap:0;border-radius:15px;background:var(--surface);border:1px solid var(--bd);overflow:hidden;}
+.mb-tile{min-height:66px;border:0;border-radius:0;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:transparent;gap:5px;}
+.mb-tile:nth-child(3n){border-right:0;}.mb-tile:nth-last-child(-n+3){border-bottom:0;}.mb-tile:active{background:var(--tint);}
+.mb-compact-grid{gap:0;border-radius:15px;overflow:hidden;border:1px solid var(--bd);background:var(--surface);}
+.mb-compact{border:0;border-radius:0;min-height:46px;background:transparent;border-bottom:1px solid var(--bd);padding:9px 10px;}
+.mb-compact:nth-child(odd){border-right:1px solid var(--bd);}.mb-compact:nth-last-child(-n+2){border-bottom:0;}
+.mb-settings-group{border:1px solid var(--bd);border-radius:15px;background:var(--surface);overflow:hidden;}
+.mb-setting{min-height:48px;padding:5px 11px;border-bottom:1px solid var(--bd);gap:7px;}
+.mb-setting:last-child{border-bottom:0;}
+.mb-select{border:0;background:transparent;max-width:100%;text-align:right;font-weight:600;}
+.mb-voice-search{background:var(--surface);border:0;border-bottom:1px solid var(--bd);}
+.mb-action{border-radius:13px;background:var(--surface);min-height:44px;}
+.mb-semantic-status{display:flex;gap:8px;align-items:center;padding:10px 11px;border:1px solid var(--bd);border-radius:14px;background:var(--surface);flex-wrap:wrap;}
+.mb-status-copy{display:grid;gap:2px;flex:1;}.mb-status-copy strong{font-size:12px;}.mb-status-copy small{color:var(--muted);font-size:10px;}.mb-warn{width:100%;font-size:11px;color:#cc7744;overflow-wrap:anywhere;}
+.mb-action-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}.mb-strip-action{display:flex;justify-content:center;align-items:center;gap:5px;min-height:45px;background:var(--surface);border:1px solid var(--bd);border-radius:13px;color:var(--fg);font-size:11px;font-weight:650;}.mb-strip-action.selected{color:var(--accent);border-color:var(--accent);}
+.mb-switch{min-width:50px;width:50px;height:32px;border:0;border-radius:18px;background:#c9cfda;position:relative;padding:3px;}
+.mb-switch span{display:block;background:white;width:26px;height:26px;border-radius:50%;box-shadow:0 1px 3px #0003;transition:transform .16s;}.mb-switch.is-on{background:#366be5;}.mb-switch.is-on span{transform:translateX(18px);}
+.mb-range-setting{min-height:35px;border:0;}.mb-range-setting label{font-weight:640;font-size:12px;}.mb-range-setting output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:760;}
+#mb-threshold,#mb-seed-threshold{width:calc(100% - 22px);margin:3px 11px 10px;accent-color:var(--accent);}
+.mb-hint-row{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;padding:0 4px;margin-top:-4px;}
+.mb-score-card{padding:11px;background:var(--surface);border:1px solid var(--bd);border-radius:14px;}
+.mb-score-header{display:flex;align-items:center;justify-content:space-between;}.mb-score-number{font:730 20px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent);font-variant-numeric:tabular-nums;}
+.mb-score-bars{display:grid;gap:5px;margin:10px 0;}.mb-score-bars>div{display:flex;justify-content:space-between;align-items:center;gap:9px;color:var(--muted);font-size:11px;}.mb-score-bars b{color:var(--fg);font-variant-numeric:tabular-nums;}
+.mb-selection{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:10px;}.mb-selection blockquote{font-size:13px;line-height:1.5;max-height:26vh;overflow:auto;margin:5px 0 0;}
+.mb-panel.reader{border-radius:0;background:var(--bg);}.mb-panel.reader .mb-head{min-height:50px;}.mb-transcript{padding:4px 15px 16px;scrollbar-width:thin;}
+.mb-paragraph{gap:9px;padding:13px 0;line-height:1.55;border-color:var(--bd);}.mb-paragraph.current{background:var(--tint);margin:0 -9px;padding:13px 9px;}
+.mb-paragraph.excluded{opacity:.55;}.mb-pass-toggle{width:44px;min-width:44px;height:44px;min-height:44px;border-radius:13px!important;background:var(--surface)!important;display:grid;place-items:center;color:var(--fg);}
+.mb-pass-content{flex:1;min-width:0;}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;margin:0 0 5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
+.mb-why-btn{font:650 10px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent)!important;border:0!important;display:inline-flex;align-items:center;gap:2px;min-height:36px!important;padding:4px 7px!important;background:transparent!important;}
+.mb-pass-text{line-height:1.58;letter-spacing:-.1px;overflow-wrap:anywhere;}
+.mb-controls{padding:8px 14px calc(10px + env(safe-area-inset-bottom));gap:7px;box-shadow:0 -5px 22px #00000008;}
+.mb-timeline{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:680;color:var(--muted);font-variant-numeric:tabular-nums;}
+.mb-timeline span:first-child,.mb-timeline span:last-child{min-width:46px;}.mb-timeline span:last-child{text-align:right;}.mb-timeline span:nth-child(2){font-weight:500;}
+.mb-range{height:15px;margin:0;}.mb-player-extra .mb-action{background:var(--surface);border:1px solid var(--bd);}.mb-primary-play{border-radius:50%;height:48px;min-width:48px!important;}
+@media(prefers-reduced-motion:reduce){.mb-switch span{transition:none;}}
+
 `;
 const globalStyles=`[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
 function head(title){const menu=state.view==='menu';return `<header class="mb-head">${menu?'<span class="mb-brand" aria-hidden="true">✦</span>':`<button type="button" class="mb-small mb-icon-btn" data-action="back" aria-label="Back">${ico('back',19)}</button>`}<h2>${esc(title)}</h2><button type="button" class="mb-small mb-icon-btn" data-action="close" aria-label="Close drawer">${ico('close',16)}</button></header>`;}
@@ -654,27 +779,46 @@ function renderMenu(){
  <div class="mb-row"><span class="mb-footer">v${VERSION} · <span data-count>0</span> hidden items</span><button type="button" class="mb-small" data-action="updates">${ico('refresh',13)} Updates</button></div></div>`;
 }
 function renderURL(){return `${head('Edit URL')}<div class="mb-body"><label class="mb-field">Destination URL<textarea class="mb-textarea" rows="3" id="mb-url">${esc(state.urlDraft||location.href)}</textarea></label><div class="mb-grid">${button('url-clean','✦','Clean URL')}${button('url-copy','▣','Copy')}${button('url-share','↗','Share')}${button('url-open','↗','Open URL')}</div><p class="mb-muted">Only confirmed tracking parameters are removed. Other parameters and fragments are preserved.</p></div>`;}
-function semanticStatus(){const n=vectorsForSite().length;return `<div class="mb-status"><span class="mb-dot ${esc(semantic.status)}"></span><span class="mb-status-text">${esc(semantic.status==='ready'?'MiniLM running locally':semantic.status==='loading'?'Loading local model…':semantic.status==='error'?'Local model unavailable':'Local model not started')} · ${n} examples</span></div>`;}
-function renderFilter(){return `${head('Article filter')}<div class="mb-body">
- <section class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Page filter</span><span class="mb-setting-value">${filterEnabled()?'On':'Off'}</span><button class="mb-minor" data-action="filter-toggle">${filterEnabled()?'Disable':'Enable'}</button></div>
- <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'On':'Off'}</span><button class="mb-minor" data-action="semantic-toggle">${prefs.semanticAuto?'Disable':'Enable'}</button></div></section>
+function semanticStatus(){const n=vectorsForSite().length;
+ const active=filterEnabled()&&prefs.semanticAuto;
+ const status=semantic.status==='ready'?'On-device MiniLM ready':semantic.status==='loading'?'Loading on-device model':semantic.status==='error'?'Model could not load':active?'Waiting to start':'Semantic filter paused';
+ const detail=semantic.status==='error'?`<div class="mb-warn">${esc(semantic.lastError||semantic.detail)}</div>`:'';
+ return `<div class="mb-semantic-status"><span class="mb-dot ${esc(semantic.status)}"></span><div class="mb-status-copy"><strong>${esc(status)}</strong><small>${n} taught examples · ${semantic.scanned} blocks scanned</small></div>${detail}</div>`;
+}
+function formatScore(s){return Number.isFinite(s)&&s>=0?s.toFixed(2):'—';}
+function renderScoreDetails(a){
+ if(!a)return '<p class="mb-caption">No analysis yet. The local model must load before scores become available.</p>';
+ if(a.model!=='MiniLM')return `<p class="mb-caption">${esc(a.reason||'Waiting for a local model.')} · ${esc(a.source||a.model)}. No local model similarity score is available.</p>`;
+ return `<div class="mb-score-header"><strong>${a.excluded?'Excluded':'Kept'}</strong><span class="mb-score-number">${formatScore(a.score)}</span></div>
+ <div class="mb-score-bars"><div><span>Learned skip match</span><b>${formatScore(a.skipScore)}</b></div><div><span>Learned keep match</span><b>${formatScore(a.keepScore)}</b></div><div><span>Built-in nuisance match</span><b>${formatScore(a.seedScore)}</b></div></div>
+ <p class="mb-caption">${esc(a.reason)} · ${esc(a.source)}. Learned threshold ${Number(a.threshold).toFixed(2)}; built-in threshold ${Number(a.seedThreshold).toFixed(2)}. Similarity is not a probability.</p>`;
+}
+function renderFilter(){return `${head('Filter')}<div class="mb-body mb-filter-view">
+ <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Filter this site</span><span class="mb-setting-value">${filterEnabled()?'Active':'Off'}</span><button class="mb-switch ${filterEnabled()?'is-on':''}" role="switch" aria-checked="${filterEnabled()}" aria-label="Filter this site" data-action="filter-toggle"><span></span></button></div>
+ <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'Automatic':'Off'}</span><button class="mb-switch ${prefs.semanticAuto?'is-on':''}" role="switch" aria-checked="${prefs.semanticAuto}" aria-label="Enable local semantic filter" data-action="semantic-toggle"><span></span></button></div></div>
  ${semanticStatus()}
- <div class="mb-grid">${button('semantic-load',ico('wave',17),semantic.status==='ready'?'Rescan article':'Load local model')}${button('select-phrase',ico('pointer',17),'Teach a phrase')}</div>
- <div class="mb-grid">${button('pick-filter',ico('filter',17),'Hide an element')}${button('rules',ico('sliders',17),'Rules & learning')}</div>
- <button class="mb-minor" data-action="restore-hidden">Restore hidden content · <span data-count>0</span> items</button>
- <p class="mb-caption">Select article text, then teach Skip or Keep. Model downloads once when permitted; articles are processed on your device. Learning stores embeddings, not text.</p>
+ <div class="mb-action-strip"><button data-action="filter-preview" class="mb-strip-action ${state.filterReview?'selected':''}">${ico('eye',17)} <span>${state.filterReview?'End preview':'Show all'}</span></button><button data-action="select-phrase" class="mb-strip-action">${ico('pointer',17)} <span>Teach</span></button><button data-action="pick-filter" class="mb-strip-action">${ico('filter',17)} <span>Pick</span></button></div>
+ <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-threshold">Learned match sensitivity</label><output id="mb-threshold-value">${Number(prefs.semanticThreshold??.79).toFixed(2)}</output></div><input type="range" id="mb-threshold" min="0.60" max="0.96" step="0.01" value="${prefs.semanticThreshold??.79}" aria-label="Learned match threshold"></div>
+ <div class="mb-hint-row"><span>Lower = filters more</span><span>Higher = safer</span></div>
+ <div class="mb-row"><button data-action="semantic-load" class="mb-minor">${ico('refresh',14)} ${semantic.status==='ready'?'Rescan':'Retry model'}</button><button data-action="rules" class="mb-minor">Rules & scores ${ico('chevron',14)}</button></div>
+ <p class="mb-caption">${state.filterReview?'All filtered elements are visible for inspection. Tap End preview to reapply your rules.':'Corrections on the page or in the reader train the same local classifier.'}</p>
  </div>`;}
-function renderTeach(){return `${head('Teach the filter')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">Selected passage</span><blockquote>${esc(state.selectionText||'Select text in the article, then open this menu.')}</blockquote></div>
- <label class="mb-field">Why does it interrupt the article?<select class="mb-select" id="mb-reason">${Object.entries(semanticCategories).filter(([key])=>key!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></label>
- <div class="mb-grid">${button('teach-skip',ico('minus',17),'Skip similar')}${button('teach-keep',ico('check',17),'Keep similar')}</div>
- ${semanticStatus()}<p class="mb-caption">Your correction trains a local similarity classifier. It does not fine-tune the model weights. Only explicitly corrected passages become training examples.</p>
- ${button('select-phrase',ico('pointer',16),'Select another passage')}
- </div>`;}
+function renderTeach(){return `${head('Teach filter')}<div class="mb-body">
+ <div class="mb-selection"><span class="mb-kicker">Selected words</span><blockquote>${esc(state.selectionText||'Select text from the article to teach.')}</blockquote></div>
+ <div class="mb-settings-group"><div class="mb-setting"><label class="mb-setting-label" for="mb-reason">Reason</label><div class="mb-setting-value"><select id="mb-reason" class="mb-select">${Object.entries(semanticCategories).filter(([k])=>k!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div></div></div>
+ <div class="mb-grid">${button('teach-skip',ico('close',16),'Skip like this')}${button('teach-keep',ico('check',16),'Keep like this')}</div>
+ ${state.selectionScore?`<div class="mb-score-card">${renderScoreDetails(state.selectionScore)}</div>`:''}
+ ${semanticStatus()}<p class="mb-caption">Page content is visible while teaching; nearby previously hidden passages are included as context for the new example. Only embeddings are saved.</p>
+ <button data-action="select-phrase" class="mb-minor">Change selected text</button></div>`;}
+function renderWhy(){const p=reading.passages[state.whyIndex];return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
+ <div class="mb-score-card">${renderScoreDetails(p?.analysis)}</div><div class="mb-row">${button('pass-toggle:'+state.whyIndex,ico('check',17),p?.excluded?'Include this':'Skip this')}${button('pass-analyze:'+state.whyIndex,ico('refresh',17),'Analyze again')}</div>
+ ${button('filter',ico('sliders',16),'Filter thresholds')}</div>`;}
 function renderSelectText(){return `${head('Select text')}<div class="mb-body"><p class="mb-caption">Long-press and highlight a phrase on the webpage. Then tap ✦ or “Use selection”. Do not select entire articles.</p>${button('selection-use',ico('check',17),'Use highlighted text')}${button('teach-skip',ico('minus',17),'Skip cached selection')}</div>`;}
 function renderPicker(){return `${head('Select nuisance element')}<div class="mb-body"><p>Tap an unwanted element on the webpage. Its matching elements will be outlined before you save anything.</p><div class="mb-rule"><strong>${esc(state.pickerSelector||'No element selected')}</strong><span class="mb-muted">${pickerMatches.length} matching elements highlighted</span>${pickerMatches.length?`<div class="mb-grid">${button('preview',preview?'◉':'◎',preview?'Undo preview':'Preview hiding')}${button('picker-save','✓','Save rule')}</div>${button('picker-next','↓','Show next match')}`:''}</div>${button('picker-cancel','×','Cancel and restore')}</div>`;}
 function renderRules(){const rules=prefs.rules[domainKey()]||[];return `${head('Rules & learning')}<div class="mb-body">
  ${semanticStatus()}<div class="mb-grid">${button('select-phrase',ico('pointer',17),'Teach text')}${button('pick-filter',ico('filter',17),'Visual rule')}</div>
  ${rules.length?rules.map((r,i)=>`<div class="mb-rule"><strong>${esc(r.selector)}</strong><span class="mb-muted">${safeMatches(r.selector).length} matches · ${r.enabled?'Enabled':'Disabled'}</span><div class="mb-grid">${button('rule-toggle:'+i,r.enabled?'✓':'○',r.enabled?'Disable':'Enable')}${button('rule-edit:'+i,'✎','Edit')}${button('rule-delete:'+i,'⌫','Delete')}</div></div>`).join(''):'<p class="mb-caption">No CSS rules yet. Phrase learning does not require CSS selectors.</p>'}
+ <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-seed-threshold">Built-in nuisance sensitivity</label><output id="mb-seed-threshold-value">${Number(prefs.semanticSeedThreshold??0.89).toFixed(2)}</output></div><input type="range" id="mb-seed-threshold" min="0.70" max="0.98" step="0.01" value="${prefs.semanticSeedThreshold??0.89}"></div>
  <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Token fallback</span><span class="mb-setting-value">${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}</span><button class="mb-minor" data-action="learning-toggle">Toggle</button></div>
  <div class="mb-setting"><span class="mb-setting-label">Learning</span><span class="mb-setting-value">${vectorsForSite().length} examples</span><button class="mb-minor" data-action="semantic-reset">Reset</button></div></div>
  <p class="mb-caption">Only your explicit selections and transcript Skip/Keep choices train the filter. No page histories are saved.</p></div>`;}
@@ -693,9 +837,9 @@ function renderSpeech(){const count=state.voicesRegion===prefs.azure.region?stat
  <p class="mb-caption">Key stays in extension storage. Enabled narration text is sent directly to Azure.</p></div>`;}
 function renderReader(){
  const total=reading.passages.length,ready=reading.passages.filter(p=>p.blob&&!p.excluded).length,enabled=enabledIndices().length;
- const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${p.excluded?'＋':'−'}</button><div><small>${i+1}/${total} · ${esc(p.status||'idle')}${p.reason&&p.excluded?' · '+esc(p.reason):''}</small><div style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
+ const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button class="mb-pass-toggle" type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${ico(p.excluded?'check':'close',18)}</button><div class="mb-pass-content"><div class="mb-pass-meta"><span>${String(i+1).padStart(2,'0')} · ${esc(p.excluded?'Skipped':p.status==='ready'?'Ready':'Included')}</span><button type="button" data-action="pass-why:${i}" class="mb-why-btn">${esc(p.analysis?.model==='MiniLM'?formatScore(p.analysis.score):'Why?')} ${ico('chevron',12)}</button></div><div class="mb-pass-text" style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
  return `${head('Article reader')}<div class="mb-body" style="flex:none;padding-bottom:5px"><div class="mb-row"><span class="mb-muted">${ready}/${enabled} ready${reading.preparing?' · Preparing…':''}</span><button class="mb-small" data-action="reader-edit">${ico('file',14)} Edit text</button></div></div>${editor}
- <section class="mb-controls"><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.playing?'Pause':'Play'}">${ico(reading.playing?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
+ <section class="mb-controls"><div class="mb-timeline"><span data-audio-now>0:00</span><span data-audio-segments>${reading.index+1}/${reading.passages.length} passages</span><span data-audio-total>—:—</span></div><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.playing?'Pause':'Play'}">${ico(reading.playing?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
  <div class="mb-player-extra">${button('prepare',ico('wave',17),reading.preparing?'Preparing':'Prepare')}${button('export-mp3',ico('download',17),'MP3')}${button('export-text',ico('file',17),'Transcript')}${button('filter',ico('sliders',17),'Filter')}</div>
  <div class="mb-row"><button class="mb-small" data-action="stop">${ico('close',13)} Stop</button><button class="mb-small" data-action="reader-new">${ico('refresh',13)} Re-extract</button><button class="mb-small" data-action="minimize">${ico('minus',13)} Minimize</button></div></section>`;
 }
@@ -703,15 +847,25 @@ function renderMini(){return `${head('Now playing')}<div class="mb-body"><p clas
 function renderMedia(){state.siteMedia=mediaItems();const i=Math.min(state.mediaIndex,state.siteMedia.length-1),it=state.selectedMedia||state.siteMedia[Math.max(0,i)];return `${head('Media · '+siteName())}<div class="mb-body"><p class="mb-muted">Choose the currently displayed item, or select one directly on the webpage. Downloads require accessible direct files.</p><div class="mb-row"><strong>${state.siteMedia.length} detected items</strong><button class="mb-small" data-action="media-refresh">Refresh</button></div>${state.siteMedia.length?`<select id="mb-media" class="mb-select">${state.siteMedia.map((x,j)=>`<option value="${j}" ${i===j?'selected':''}>${esc(x.kind+' '+(j+1)+' · '+x.label)}</option>`).join('')}</select>`:''}${it?`<div class="mb-preview">${it.kind==='image'?`<img src="${esc(it.url)}" alt="Selected media preview">`:'<span>Video selected</span>'}</div><p class="mb-muted">${esc(it.kind)} · ${esc(it.url.slice(0,110))}</p>`:''}
  <div class="mb-grid">${button('media-picker','◎','Select on page')}${button('media-share','↗','Share file')}${button('media-download','⇩','Download file')}${button('media-open','↗','Open source')}</div></div>`;}
 function renderMediaPicker(){return `${head('Tap page media')}<div class="mb-body"><p>Tap an image or video on the website. The tap will select it rather than open the post.</p>${button('media-cancel','×','Cancel selection')}</div>`;}
-function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
- shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'');const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content)panel.innerHTML=content;updateCount();}
+function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='why'?renderWhy():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
+ shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'')+' view-'+state.view;const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content){
+  // Preserve reader scroll and focused passage even when applying Skip/Keep or playing audio.
+  const oldTranscript=panel.querySelector('[data-transcript]');
+  const savedScroll=oldTranscript?.scrollTop;
+  const hadTranscript=!!oldTranscript&&state.view==='reader'&&!state.readerEditing;
+  const savedFocus=shadow.activeElement?.getAttribute?.('data-action');
+  panel.innerHTML=content;
+  if(hadTranscript){const next=panel.querySelector('[data-transcript]');if(next)next.scrollTop=savedScroll;}
+  if(savedFocus?.startsWith('pass-')&&state.view==='reader')panel.querySelector(`[data-action="${savedFocus}"]`)?.focus({preventScroll:true});
+ }
+ if(state.view==='reader')updateAudioProgress();updateCount();}
 
 async function handleAction(action,el){
  try{
-  if(action==='close'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();state.view='';render();return;}
-  if(action==='back'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();openView('menu');return;}
+  if(action==='close'){if(state.view==='picker')clearPicker();if(state.view==='media-picker')endMediaPick();endFilterReview();state.view='';render();return;}
+  if(action==='back'){const old=state.view;if(old==='picker')clearPicker();if(old==='media-picker')endMediaPick();if(old==='why'){openView('reader');return;}if(old==='teach'||old==='select-text'){openView('filter');return;}endFilterReview();openView('menu');return;}
   if(action==='menu'){openView('menu');return;}
-  if(action==='minimize'){state.view='';render();return;}
+  if(action==='minimize'){endFilterReview();state.view='';render();return;}
   if(action==='share-clean'){await shareURL(cleanURL(location.href));return;}
   if(action==='url'){state.urlDraft=location.href;openView('url');return;}
   if(action.startsWith('url-')){
@@ -727,16 +881,25 @@ async function handleAction(action,el){
   if(action==='filter'){openView('filter');if(prefs.semanticAuto&&semantic.status==='idle')void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});return;}
   if(action==='semantic-load'){if(semantic.extractor){for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');scheduleSemanticScan();notify('Rescanning article with local model.');}else{notify('Loading on-device language model…');await loadSemantic();await ensureSemanticSeeds();scheduleSemanticScan();if(reading.passages.length)await reclassifyTranscript();notify('Local MiniLM is ready.');}render();return;}
   if(action==='semantic-toggle'){prefs.semanticAuto=!prefs.semanticAuto;await saveSettings();if(!prefs.semanticAuto){for(const [el,old] of [...hidden])if(String(old.reason).startsWith('Similar to')||String(old.reason).startsWith('Likely'))showNode(el);}else{if(!semantic.extractor)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});else scheduleSemanticScan();}render();return;}
-  if(action==='select-phrase'){rememberSelectedPhrase();openView(state.selectionText?'teach':'select-text');return;}
-  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}openView('teach');return;}
-  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');openView('filter');return;}
+  if(action==='filter-preview'){
+  if(state.filterReview){endFilterReview();notify('Filtering restored.');}
+  else{beginFilterReview();notify('All filtered content shown until you end preview.');}
+  render();return;
+ }
+ if(action==='select-phrase'){
+  rememberSelectedPhrase();beginFilterReview();state.selectionScore=null;
+  openView(state.selectionText?'teach':'select-text');
+  if(state.selectionText)void inspectSelectedPhrase();return;
+ }
+  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}beginFilterReview();openView('teach');void inspectSelectedPhrase();return;}
+  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');endFilterReview();openView('filter');return;}
   if(action==='semantic-reset'){delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
   if(action==='pick-filter'){pickFilter();return;}
   if(action==='preview'){togglePreview();return;}
-  if(action==='picker-cancel'){clearPicker();openView('filter');return;}
+  if(action==='picker-cancel'){clearPicker();endFilterReview();openView('filter');return;}
   if(action==='picker-save'){savePickerRule();return;}
   if(action==='picker-next'){if(!pickerMatches.length)return;const idx=(state.pickerIndex=(state.pickerIndex+1)%pickerMatches.length);pickerMatches[idx].scrollIntoView({block:'center',behavior:'smooth'});return;}
   if(action.startsWith('rule-')){
@@ -783,6 +946,8 @@ async function handleAction(action,el){
   if(action==='reader-abort'){state.readerEditing=false;render();return;}
   if(action==='reader-save'){const v=host.shadowRoot.getElementById('mb-reader-edit')?.value||'';replaceReaderText(v);return;}
   if(action.startsWith('pass-toggle:')){excludePassage(Number(action.split(':')[1]));return;}
+ if(action.startsWith('pass-why:')){state.whyIndex=Number(action.split(':')[1]);openView('why');return;}
+ if(action.startsWith('pass-analyze:')){const i=Number(action.split(':')[1]),p=reading.passages[i];if(!p)return;notify('Analyzing passage locally…');p.analysis=await analyzePhrase(p.text,p.element);if(!p.manual&&!p.blob){p.excluded=p.analysis.excluded;p.reason=p.analysis.reason;}render();return;}
   if(action.startsWith('pass-play:')){await jumpTo(Number(action.split(':')[1]));return;}
   if(action==='prepare'){await prepareReading();return;}
   if(action==='play'){pauseResume();return;}
@@ -818,16 +983,21 @@ function rememberSelectedPhrase(){
 }
 function installUI(){if(document.querySelector('[data-mb-host]'))return;
  host=document.createElement('div');host.setAttribute('data-mb-host','');host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:2147483647!important;pointer-events:none!important;';
- const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools">✦<span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
+ const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools"><span class="mb-launch-symbol">✦</span><span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
  document.documentElement.appendChild(host);
  const global=document.createElement('style');global.textContent=globalStyles;global.id='mb-global-style';(document.head||document.documentElement).append(global);
- let drag=null;const launch=shadow.querySelector('.mb-launch');document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
- launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false};launch.setPointerCapture?.(e.pointerId);});
- launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>9)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-54,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min(innerHeight-54,drag.bottom-dy));launch.style.cssText=positionCSS();});
- launch.addEventListener('pointerup',()=>{if(!drag)return;ignoreClick=drag.moved;if(drag.moved)saveSettings();drag=null;});
- launch.addEventListener('click',e=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
+ let drag=null,lastTouchToggle=0;
+ const launch=shadow.querySelector('.mb-launch');
+ const toggleLaunch=()=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');void inspectSelectedPhrase();return;}if(state.view)endFilterReview();openView(state.view?'':reading.playing?'mini':'menu');};
+ document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
+ launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false,type:e.pointerType};try{launch.setPointerCapture(e.pointerId);}catch{}});
+ launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.max(Math.abs(dx),Math.abs(dy))>15)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-66,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min((visualViewport?.height||innerHeight)-66,drag.bottom-dy));launch.style.cssText=positionCSS();});
+ launch.addEventListener('pointerup',e=>{if(!drag)return;const moved=drag.moved,type=drag.type;drag=null;if(moved){ignoreClick=true;void saveSettings();}else if(type==='touch'||type==='pen'){lastTouchToggle=Date.now();toggleLaunch();}});
+ launch.addEventListener('pointercancel',()=>{drag=null;});
+ launch.addEventListener('click',e=>{if(Date.now()-lastTouchToggle<850){e.preventDefault();return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}toggleLaunch();});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
+  if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){prefs[e.target.id==='mb-threshold'?'semanticThreshold':'semanticSeedThreshold']=Number(e.target.value);saveSettings();resetSemanticReview();if(reading.passages.length)void reclassifyTranscript();render();}
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}
   if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;reading.sampleCache.clear();saveSettings();}
   if(e.target.id==='mb-region'){prefs.azure.region=e.target.value;state.voices=[];state.voicesRegion='';state.voicesError='';saveSettings();render();if(azureKey)void loadVoices().catch(x=>notify(x.message));}
@@ -835,8 +1005,8 @@ function installUI(){if(document.querySelector('[data-mb-host]'))return;
   if(e.target.id==='mb-rate'){prefs.playbackRate=Number(e.target.value);audio.playbackRate=prefs.playbackRate;saveSettings();}
   if(e.target.matches('[data-audio-seek]')&&Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,Number(e.target.value));
  });
- shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
- addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-54);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-54);render();});
+ shadow.addEventListener('input',e=>{if(e.target.id==='mb-threshold'||e.target.id==='mb-seed-threshold'){const output=host.shadowRoot.getElementById(e.target.id+'-value');if(output)output.textContent=Number(e.target.value).toFixed(2);}if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
+ addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-66);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-66);render();});
  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const keyboard=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);launch.style.bottom=Math.max(prefs.position.bottom,keyboard+14)+'px';});
  render();
 }
@@ -860,7 +1030,10 @@ function monitorDOM(){
 async function boot(){
  if(document.querySelector('[data-mb-host]'))return;
  await readSettings();autoMapRedirect();if(!document.documentElement)return;if(siteName()==='reddit')toggleRedditCSS(cleanupEnabled());
- installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');if(prefs.semanticAuto&&document.querySelector('article,main,[role="main"]'))setTimeout(()=>{if(prefs.semanticAuto)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});},2200);
+ installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');// Auto-start for article pages; never report 'ready' until the pretrained weights load.
+ if(prefs.semanticAuto&&filterEnabled())setTimeout(()=>{
+  if(prefs.semanticAuto&&filterEnabled()&&document.querySelector('article,main,[role="main"]'))void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{render();});
+ },250);
 }
 // Hide known Reddit interstitials before the first asynchronous settings read.
 // The persisted per-site setting is applied by boot() as soon as it resolves.

@@ -19,14 +19,23 @@ function discoverPassages(){
  for(const n of nodes.slice(0,350)){
   const str=text(n.textContent);if(seen.has(str))continue;seen.add(str);
   const excluded=hidden.has(n)||[...hidden.keys()].some(e=>e.contains(n));const classification=inspectPassage(str,n);
-  for(const t of chunkText(str)){result.push({text:t,element:n,excluded:excluded||classification.excluded,reason:excluded?'Hidden on page':classification.reason,blob:null,status:'idle'});}
+  for(const t of chunkText(str)){result.push({text:t,element:n,excluded:excluded||classification.excluded,reason:excluded?'Hidden on page':classification.reason,analysis:{model:'Heuristic',excluded:excluded||classification.excluded,reason:excluded?'Hidden by website rule':classification.reason,source:'DOM and site rules',score:null},blob:null,status:'idle'});}
  }
  return result;
 }
 function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');if(semantic.extractor)void reclassifyTranscript().catch(e=>notify(e.message));}
 function readerPlain(){return reading.passages.filter(p=>!p.excluded).map(p=>p.text).join('\n\n');}
 function replaceReaderText(v){stopPlayback(true);reading.passages=chunkText(v).map(t=>({text:t,element:null,excluded:false,reason:'Edited text',blob:null,status:'idle'}));reading.index=0;state.readerEditing=false;render();}
-function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');void teachSemantic(p.text,p.excluded?'skip':'keep',p.excluded?'offtopic':'article',p.element).catch(e=>notify('Local model: '+e.message));reading.passages.forEach(t=>{t.status='idle';});render();}
+function excludePassage(i){
+ const p=reading.passages[i];if(!p)return;
+ const excluding=!p.excluded;
+ // Do not interrupt other audio or destroy all prepared audio when correcting one passage.
+ if(excluding&&i===reading.index&&!audio.paused){audio.pause();const next=nextEnabled(i+1);if(next>=0&&reading.passages[next].blob)void playPassage(next).catch(()=>{});}
+ p.excluded=excluding;p.manual=true;p.reason=excluding?'You skipped this passage':'You kept this passage';
+ learnPassage(p.text,excluding?'skip':'keep');
+ void teachSemantic(p.text,excluding?'skip':'keep',excluding?'offtopic':'article',p.element).catch(e=>notify('Local learning: '+e.message));
+ render();
+}
 async function requestGM(url,opts={}){
  if(!/^https:/.test(url))throw Error('Only HTTPS requests are allowed.');
  if(typeof GM==='undefined'||typeof GM.xmlHttpRequest!=='function')throw Error('Userscripts GM.xmlHttpRequest is unavailable. Check the script grants and extension permissions.');
@@ -78,7 +87,21 @@ async function playPassage(i){audioMode='article';const p=reading.passages[i];if
 audio.addEventListener('ended',()=>{reading.playing=false;if(audioMode==='demo'){render();return;}const n=nextEnabled(reading.index+1);if(n>=0){if(reading.passages[n].blob)playPassage(n).catch(()=>{});else notify('Buffering next passage. Unlock Safari and tap Play if needed.');}else notify('Finished reading.');render();});
 audio.addEventListener('pause',()=>{reading.playing=false;render();});
 audio.addEventListener('play',()=>{reading.playing=true;render();});
-audio.addEventListener('timeupdate',()=>{const s=host?.shadowRoot?.querySelector('[data-audio-seek]');if(s&&Number.isFinite(audio.duration)&&audio.duration>0){s.max=String(audio.duration);s.value=String(audio.currentTime);} });
+function playbackClock(t){if(!Number.isFinite(t)||t<0)return '—:—';const n=Math.floor(t);return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
+function updateAudioProgress(){
+ const root=host?.shadowRoot;if(!root)return;
+ const s=root.querySelector('[data-audio-seek]');
+ const d=audio.duration,valid=Number.isFinite(d)&&d>0;
+ if(s&&!s.matches(':active')){s.max=valid?String(d):'100';s.value=valid?String(audio.currentTime):'0';}
+ const now=root.querySelector('[data-audio-now]'),total=root.querySelector('[data-audio-total]');
+ if(now)now.textContent=playbackClock(audio.currentTime);
+ if(total)total.textContent=playbackClock(d);
+ const p=reading.passages[reading.index];if(valid&&p&&audioMode==='article')p.duration=d;
+ const segments=root.querySelector('[data-audio-segments]');if(segments)segments.textContent=`${reading.index+1}/${reading.passages.length} passages`;
+}
+audio.addEventListener('loadedmetadata',updateAudioProgress);
+audio.addEventListener('durationchange',updateAudioProgress);
+audio.addEventListener('timeupdate',updateAudioProgress);
 function pauseResume(){if(audio.paused){if(audio.src)audio.play().catch(e=>notify('Tap again to allow playback: '+e.message));else{const i=nextEnabled(reading.index);if(i>=0&&reading.passages[i].blob)playPassage(i).catch(e=>notify(e.message));else prepareReading();}}else audio.pause();}
 async function jumpTo(i){const p=reading.passages[i];if(!p||p.excluded)return;if(p.blob){await playPassage(i);}else notify('Passage still preparing.');}
 function transcriptFile(withTimings=false){let v='';for(const [i,p] of reading.passages.entries()){if(p.excluded)continue;v+=withTimings?`[Passage ${i+1}${Number.isFinite(p.duration)?' · '+Math.round(p.duration)+'s':''}]\n`:'';v+=p.text+'\n\n';}return new Blob([v],{type:'text/plain;charset=utf-8'});}

@@ -1,11 +1,14 @@
 let host=null,toastTimer=0,observer=null,observerTimer=0,lastLocation=location.href,ignoreClick=false;
-const state={view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false,voicesRegion:'',voicesLoading:false,voicesError:'',voiceQuery:'',selectionText:'',selectionElement:null,selectionReason:'related',selectionMode:false};
+const state={filterReview:false,filterPreview:false,selectionScore:null,whyIndex:-1,view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false,voicesRegion:'',voicesLoading:false,voicesError:'',voiceQuery:'',selectionText:'',selectionElement:null,selectionReason:'related',selectionMode:false};
 const button=(action,icon,label,extra='')=>`<button type="button" data-action="${esc(action)}" class="mb-action" ${extra}><span aria-hidden="true">${icon}</span><span>${esc(label)}</span></button>`;
 function notify(message){if(!host)return;const el=host.shadowRoot.querySelector('.mb-toast');if(!el)return;el.textContent=String(message);el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(el.isConnected)el.hidden=true;},4500);}
 async function shareURL(u){try{if(navigator.share){await navigator.share({url:u});return;}}catch(e){if(e.name==='AbortError')return;}await copyText(u);notify('Copied link.');}
 async function copyText(v){if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(v);return;}catch{}}if(typeof GM!=='undefined'&&typeof GM.setClipboard==='function'){await GM.setClipboard(v);return;}throw Error('No clipboard permission; use the URL editor to copy manually.');}
-function openView(v){state.view=v;render();}
-function positionCSS(){const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;return `left:${Math.max(5,(vv?.offsetLeft||0)+w-43-Math.max(5,Math.min(w-54,prefs.position.right)))}px;top:${Math.max(5,(vv?.offsetTop||0)+(vv?.height||innerHeight)-43-Math.max(8,Math.min((vv?.height||innerHeight)-54,prefs.position.bottom)))}px;bottom:auto;right:auto;`;}
+function openView(v){
+ if(state.filterReview&&!['teach','select-text','picker','filter','why'].includes(v))endFilterReview();
+ state.view=v;render();
+}
+function positionCSS(){const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;return `left:${Math.max(5,(vv?.offsetLeft||0)+w-56-Math.max(5,Math.min(w-66,prefs.position.right)))}px;top:${Math.max(5,(vv?.offsetTop||0)+(vv?.height||innerHeight)-56-Math.max(8,Math.min((vv?.height||innerHeight)-66,prefs.position.bottom)))}px;bottom:auto;right:auto;`;}
 // Inline, consistent stroke icons; no external assets or webfonts.
 const iconPaths={
  'share':'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.6 6.6-4.1m-6.6 9 6.6 4"/>',
@@ -15,6 +18,7 @@ const iconPaths={
  'sliders':'<path d="M4 6h7m4 0h5M4 12h2m4 0h10M4 18h11m4 0h1"/><circle cx="13" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
  'wave':'<path d="M2 10v4m4-8v12m4-15v18m4-14v10m4-7v4m4-7v10"/>',
  'images':'<rect x="3" y="3" width="15" height="15" rx="2"/><path d="m3 14 4-4 4 4 3-3 4 4M8 7h.01M9 21h11a1 1 0 0 0 1-1V8"/>',
+ 'eye':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
  'pointer':'<path d="m4 3 7 18 2.2-7.6L21 11z"/>',
  'shield':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
  'eye':'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
@@ -124,6 +128,58 @@ button{cursor:pointer;}button:focus-visible,input:focus-visible,select:focus-vis
 .mb-controls{padding:7px 11px calc(8px + env(safe-area-inset-bottom));gap:6px;}
 .mb-pill{border-radius:6px;}
 @media(prefers-reduced-motion:no-preference){.mb-panel:not(.reader){animation:mb-in .15s cubic-bezier(.2,.8,.2,1);}@keyframes mb-in{from{opacity:.85;transform:translateY(5px) scale(.99)}to{opacity:1;transform:none}}}
+.mb-panel.view-speech .mb-body{gap:6px;padding:7px 10px 8px;}
+.mb-panel.view-speech .mb-setting{min-height:44px;}
+.mb-panel.view-speech .mb-row{min-height:36px;}
+.mb-panel.view-speech .mb-caption{margin:0;}
+/* 0.1.3 cohesive touch-first revision: one translucent sheet, grouped surfaces,
+   quiet explanations, full-size gesture targets and stable reader layout. */
+.mb-launch{width:56px;height:56px;border:0;background:transparent;box-shadow:none;color:#fff;font-size:23px;isolation:isolate;}
+.mb-launch::before{content:"";position:absolute;inset:6px;background:rgba(29,35,48,.91);border:1px solid rgba(255,255,255,.22);border-radius:50%;box-shadow:0 4px 16px #0005;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);z-index:-1;}
+.mb-launch-symbol{position:relative;pointer-events:none;}.mb-count{top:2px;right:2px;}
+.mb-panel{--fg:#171b24;--muted:#667085;--bg:rgba(248,249,252,.96);--surface:rgba(255,255,255,.96);--tile:transparent;--bd:rgba(24,34,56,.10);--accent:#366be5;--tint:rgba(56,106,229,.08);width:min(352px,calc(100vw - 20px));border-radius:23px;border:1px solid rgba(255,255,255,.68);box-shadow:0 20px 70px #10172840,0 1px 8px #10172814;-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);overflow:auto;}
+@media(prefers-color-scheme:dark){.mb-panel{--fg:#f4f6fa;--muted:#a1a8b7;--bg:rgba(24,28,36,.97);--surface:#282d38;--tile:transparent;--bd:rgba(255,255,255,.09);--accent:#a0baff;--tint:rgba(126,160,255,.14);border-color:#454957;}}
+.mb-head{min-height:48px;padding:6px 10px;gap:8px;border-color:var(--bd);background:transparent;}
+.mb-head h2{font-size:15px;font-weight:750;letter-spacing:-.35px;}
+.mb-icon-btn{background:var(--surface);border-radius:13px;min-height:44px;min-width:44px;}
+.mb-body{gap:10px;padding:10px 12px 11px;}
+.mb-kicker,.mb-section-title{font-weight:720;font-size:10px;letter-spacing:.7px;}
+.mb-tiles{gap:0;border-radius:15px;background:var(--surface);border:1px solid var(--bd);overflow:hidden;}
+.mb-tile{min-height:66px;border:0;border-radius:0;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:transparent;gap:5px;}
+.mb-tile:nth-child(3n){border-right:0;}.mb-tile:nth-last-child(-n+3){border-bottom:0;}.mb-tile:active{background:var(--tint);}
+.mb-compact-grid{gap:0;border-radius:15px;overflow:hidden;border:1px solid var(--bd);background:var(--surface);}
+.mb-compact{border:0;border-radius:0;min-height:46px;background:transparent;border-bottom:1px solid var(--bd);padding:9px 10px;}
+.mb-compact:nth-child(odd){border-right:1px solid var(--bd);}.mb-compact:nth-last-child(-n+2){border-bottom:0;}
+.mb-settings-group{border:1px solid var(--bd);border-radius:15px;background:var(--surface);overflow:hidden;}
+.mb-setting{min-height:48px;padding:5px 11px;border-bottom:1px solid var(--bd);gap:7px;}
+.mb-setting:last-child{border-bottom:0;}
+.mb-select{border:0;background:transparent;max-width:100%;text-align:right;font-weight:600;}
+.mb-voice-search{background:var(--surface);border:0;border-bottom:1px solid var(--bd);}
+.mb-action{border-radius:13px;background:var(--surface);min-height:44px;}
+.mb-semantic-status{display:flex;gap:8px;align-items:center;padding:10px 11px;border:1px solid var(--bd);border-radius:14px;background:var(--surface);flex-wrap:wrap;}
+.mb-status-copy{display:grid;gap:2px;flex:1;}.mb-status-copy strong{font-size:12px;}.mb-status-copy small{color:var(--muted);font-size:10px;}.mb-warn{width:100%;font-size:11px;color:#cc7744;overflow-wrap:anywhere;}
+.mb-action-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}.mb-strip-action{display:flex;justify-content:center;align-items:center;gap:5px;min-height:45px;background:var(--surface);border:1px solid var(--bd);border-radius:13px;color:var(--fg);font-size:11px;font-weight:650;}.mb-strip-action.selected{color:var(--accent);border-color:var(--accent);}
+.mb-switch{min-width:50px;width:50px;height:32px;border:0;border-radius:18px;background:#c9cfda;position:relative;padding:3px;}
+.mb-switch span{display:block;background:white;width:26px;height:26px;border-radius:50%;box-shadow:0 1px 3px #0003;transition:transform .16s;}.mb-switch.is-on{background:#366be5;}.mb-switch.is-on span{transform:translateX(18px);}
+.mb-range-setting{min-height:35px;border:0;}.mb-range-setting label{font-weight:640;font-size:12px;}.mb-range-setting output{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:760;}
+#mb-threshold,#mb-seed-threshold{width:calc(100% - 22px);margin:3px 11px 10px;accent-color:var(--accent);}
+.mb-hint-row{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;padding:0 4px;margin-top:-4px;}
+.mb-score-card{padding:11px;background:var(--surface);border:1px solid var(--bd);border-radius:14px;}
+.mb-score-header{display:flex;align-items:center;justify-content:space-between;}.mb-score-number{font:730 20px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent);font-variant-numeric:tabular-nums;}
+.mb-score-bars{display:grid;gap:5px;margin:10px 0;}.mb-score-bars>div{display:flex;justify-content:space-between;align-items:center;gap:9px;color:var(--muted);font-size:11px;}.mb-score-bars b{color:var(--fg);font-variant-numeric:tabular-nums;}
+.mb-selection{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:10px;}.mb-selection blockquote{font-size:13px;line-height:1.5;max-height:26vh;overflow:auto;margin:5px 0 0;}
+.mb-panel.reader{border-radius:0;background:var(--bg);}.mb-panel.reader .mb-head{min-height:50px;}.mb-transcript{padding:4px 15px 16px;scrollbar-width:thin;}
+.mb-paragraph{gap:9px;padding:13px 0;line-height:1.55;border-color:var(--bd);}.mb-paragraph.current{background:var(--tint);margin:0 -9px;padding:13px 9px;}
+.mb-paragraph.excluded{opacity:.55;}.mb-pass-toggle{width:44px;min-width:44px;height:44px;min-height:44px;border-radius:13px!important;background:var(--surface)!important;display:grid;place-items:center;color:var(--fg);}
+.mb-pass-content{flex:1;min-width:0;}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;margin:0 0 5px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
+.mb-why-btn{font:650 10px -apple-system,BlinkMacSystemFont,system-ui;color:var(--accent)!important;border:0!important;display:inline-flex;align-items:center;gap:2px;min-height:36px!important;padding:4px 7px!important;background:transparent!important;}
+.mb-pass-text{line-height:1.58;letter-spacing:-.1px;overflow-wrap:anywhere;}
+.mb-controls{padding:8px 14px calc(10px + env(safe-area-inset-bottom));gap:7px;box-shadow:0 -5px 22px #00000008;}
+.mb-timeline{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:680;color:var(--muted);font-variant-numeric:tabular-nums;}
+.mb-timeline span:first-child,.mb-timeline span:last-child{min-width:46px;}.mb-timeline span:last-child{text-align:right;}.mb-timeline span:nth-child(2){font-weight:500;}
+.mb-range{height:15px;margin:0;}.mb-player-extra .mb-action{background:var(--surface);border:1px solid var(--bd);}.mb-primary-play{border-radius:50%;height:48px;min-width:48px!important;}
+@media(prefers-reduced-motion:reduce){.mb-switch span{transition:none;}}
+
 `;
 const globalStyles=`[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
 function head(title){const menu=state.view==='menu';return `<header class="mb-head">${menu?'<span class="mb-brand" aria-hidden="true">✦</span>':`<button type="button" class="mb-small mb-icon-btn" data-action="back" aria-label="Back">${ico('back',19)}</button>`}<h2>${esc(title)}</h2><button type="button" class="mb-small mb-icon-btn" data-action="close" aria-label="Close drawer">${ico('close',16)}</button></header>`;}
@@ -144,27 +200,46 @@ function renderMenu(){
  <div class="mb-row"><span class="mb-footer">v${VERSION} · <span data-count>0</span> hidden items</span><button type="button" class="mb-small" data-action="updates">${ico('refresh',13)} Updates</button></div></div>`;
 }
 function renderURL(){return `${head('Edit URL')}<div class="mb-body"><label class="mb-field">Destination URL<textarea class="mb-textarea" rows="3" id="mb-url">${esc(state.urlDraft||location.href)}</textarea></label><div class="mb-grid">${button('url-clean','✦','Clean URL')}${button('url-copy','▣','Copy')}${button('url-share','↗','Share')}${button('url-open','↗','Open URL')}</div><p class="mb-muted">Only confirmed tracking parameters are removed. Other parameters and fragments are preserved.</p></div>`;}
-function semanticStatus(){const n=vectorsForSite().length;return `<div class="mb-status"><span class="mb-dot ${esc(semantic.status)}"></span><span class="mb-status-text">${esc(semantic.status==='ready'?'MiniLM running locally':semantic.status==='loading'?'Loading local model…':semantic.status==='error'?'Local model unavailable':'Local model not started')} · ${n} examples</span></div>`;}
-function renderFilter(){return `${head('Article filter')}<div class="mb-body">
- <section class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Page filter</span><span class="mb-setting-value">${filterEnabled()?'On':'Off'}</span><button class="mb-minor" data-action="filter-toggle">${filterEnabled()?'Disable':'Enable'}</button></div>
- <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'On':'Off'}</span><button class="mb-minor" data-action="semantic-toggle">${prefs.semanticAuto?'Disable':'Enable'}</button></div></section>
+function semanticStatus(){const n=vectorsForSite().length;
+ const active=filterEnabled()&&prefs.semanticAuto;
+ const status=semantic.status==='ready'?'On-device MiniLM ready':semantic.status==='loading'?'Loading on-device model':semantic.status==='error'?'Model could not load':active?'Waiting to start':'Semantic filter paused';
+ const detail=semantic.status==='error'?`<div class="mb-warn">${esc(semantic.lastError||semantic.detail)}</div>`:'';
+ return `<div class="mb-semantic-status"><span class="mb-dot ${esc(semantic.status)}"></span><div class="mb-status-copy"><strong>${esc(status)}</strong><small>${n} taught examples · ${semantic.scanned} blocks scanned</small></div>${detail}</div>`;
+}
+function formatScore(s){return Number.isFinite(s)&&s>=0?s.toFixed(2):'—';}
+function renderScoreDetails(a){
+ if(!a)return '<p class="mb-caption">No analysis yet. The local model must load before scores become available.</p>';
+ if(a.model!=='MiniLM')return `<p class="mb-caption">${esc(a.reason||'Waiting for a local model.')} · ${esc(a.source||a.model)}. No local model similarity score is available.</p>`;
+ return `<div class="mb-score-header"><strong>${a.excluded?'Excluded':'Kept'}</strong><span class="mb-score-number">${formatScore(a.score)}</span></div>
+ <div class="mb-score-bars"><div><span>Learned skip match</span><b>${formatScore(a.skipScore)}</b></div><div><span>Learned keep match</span><b>${formatScore(a.keepScore)}</b></div><div><span>Built-in nuisance match</span><b>${formatScore(a.seedScore)}</b></div></div>
+ <p class="mb-caption">${esc(a.reason)} · ${esc(a.source)}. Learned threshold ${Number(a.threshold).toFixed(2)}; built-in threshold ${Number(a.seedThreshold).toFixed(2)}. Similarity is not a probability.</p>`;
+}
+function renderFilter(){return `${head('Filter')}<div class="mb-body mb-filter-view">
+ <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Filter this site</span><span class="mb-setting-value">${filterEnabled()?'Active':'Off'}</span><button class="mb-switch ${filterEnabled()?'is-on':''}" role="switch" aria-checked="${filterEnabled()}" aria-label="Filter this site" data-action="filter-toggle"><span></span></button></div>
+ <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'Automatic':'Off'}</span><button class="mb-switch ${prefs.semanticAuto?'is-on':''}" role="switch" aria-checked="${prefs.semanticAuto}" aria-label="Enable local semantic filter" data-action="semantic-toggle"><span></span></button></div></div>
  ${semanticStatus()}
- <div class="mb-grid">${button('semantic-load',ico('wave',17),semantic.status==='ready'?'Rescan article':'Load local model')}${button('select-phrase',ico('pointer',17),'Teach a phrase')}</div>
- <div class="mb-grid">${button('pick-filter',ico('filter',17),'Hide an element')}${button('rules',ico('sliders',17),'Rules & learning')}</div>
- <button class="mb-minor" data-action="restore-hidden">Restore hidden content · <span data-count>0</span> items</button>
- <p class="mb-caption">Select article text, then teach Skip or Keep. Model downloads once when permitted; articles are processed on your device. Learning stores embeddings, not text.</p>
+ <div class="mb-action-strip"><button data-action="filter-preview" class="mb-strip-action ${state.filterReview?'selected':''}">${ico('eye',17)} <span>${state.filterReview?'End preview':'Show all'}</span></button><button data-action="select-phrase" class="mb-strip-action">${ico('pointer',17)} <span>Teach</span></button><button data-action="pick-filter" class="mb-strip-action">${ico('filter',17)} <span>Pick</span></button></div>
+ <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-threshold">Learned match sensitivity</label><output id="mb-threshold-value">${Number(prefs.semanticThreshold??.79).toFixed(2)}</output></div><input type="range" id="mb-threshold" min="0.60" max="0.96" step="0.01" value="${prefs.semanticThreshold??.79}" aria-label="Learned match threshold"></div>
+ <div class="mb-hint-row"><span>Lower = filters more</span><span>Higher = safer</span></div>
+ <div class="mb-row"><button data-action="semantic-load" class="mb-minor">${ico('refresh',14)} ${semantic.status==='ready'?'Rescan':'Retry model'}</button><button data-action="rules" class="mb-minor">Rules & scores ${ico('chevron',14)}</button></div>
+ <p class="mb-caption">${state.filterReview?'All filtered elements are visible for inspection. Tap End preview to reapply your rules.':'Corrections on the page or in the reader train the same local classifier.'}</p>
  </div>`;}
-function renderTeach(){return `${head('Teach the filter')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">Selected passage</span><blockquote>${esc(state.selectionText||'Select text in the article, then open this menu.')}</blockquote></div>
- <label class="mb-field">Why does it interrupt the article?<select class="mb-select" id="mb-reason">${Object.entries(semanticCategories).filter(([key])=>key!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></label>
- <div class="mb-grid">${button('teach-skip',ico('minus',17),'Skip similar')}${button('teach-keep',ico('check',17),'Keep similar')}</div>
- ${semanticStatus()}<p class="mb-caption">Your correction trains a local similarity classifier. It does not fine-tune the model weights. Only explicitly corrected passages become training examples.</p>
- ${button('select-phrase',ico('pointer',16),'Select another passage')}
- </div>`;}
+function renderTeach(){return `${head('Teach filter')}<div class="mb-body">
+ <div class="mb-selection"><span class="mb-kicker">Selected words</span><blockquote>${esc(state.selectionText||'Select text from the article to teach.')}</blockquote></div>
+ <div class="mb-settings-group"><div class="mb-setting"><label class="mb-setting-label" for="mb-reason">Reason</label><div class="mb-setting-value"><select id="mb-reason" class="mb-select">${Object.entries(semanticCategories).filter(([k])=>k!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div></div></div>
+ <div class="mb-grid">${button('teach-skip',ico('close',16),'Skip like this')}${button('teach-keep',ico('check',16),'Keep like this')}</div>
+ ${state.selectionScore?`<div class="mb-score-card">${renderScoreDetails(state.selectionScore)}</div>`:''}
+ ${semanticStatus()}<p class="mb-caption">Page content is visible while teaching; nearby previously hidden passages are included as context for the new example. Only embeddings are saved.</p>
+ <button data-action="select-phrase" class="mb-minor">Change selected text</button></div>`;}
+function renderWhy(){const p=reading.passages[state.whyIndex];return `${head('Why this passage?')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">${p?.excluded?'Excluded':'Included'} · passage ${(state.whyIndex||0)+1}</span><blockquote>${esc(p?.text||'')}</blockquote></div>
+ <div class="mb-score-card">${renderScoreDetails(p?.analysis)}</div><div class="mb-row">${button('pass-toggle:'+state.whyIndex,ico('check',17),p?.excluded?'Include this':'Skip this')}${button('pass-analyze:'+state.whyIndex,ico('refresh',17),'Analyze again')}</div>
+ ${button('filter',ico('sliders',16),'Filter thresholds')}</div>`;}
 function renderSelectText(){return `${head('Select text')}<div class="mb-body"><p class="mb-caption">Long-press and highlight a phrase on the webpage. Then tap ✦ or “Use selection”. Do not select entire articles.</p>${button('selection-use',ico('check',17),'Use highlighted text')}${button('teach-skip',ico('minus',17),'Skip cached selection')}</div>`;}
 function renderPicker(){return `${head('Select nuisance element')}<div class="mb-body"><p>Tap an unwanted element on the webpage. Its matching elements will be outlined before you save anything.</p><div class="mb-rule"><strong>${esc(state.pickerSelector||'No element selected')}</strong><span class="mb-muted">${pickerMatches.length} matching elements highlighted</span>${pickerMatches.length?`<div class="mb-grid">${button('preview',preview?'◉':'◎',preview?'Undo preview':'Preview hiding')}${button('picker-save','✓','Save rule')}</div>${button('picker-next','↓','Show next match')}`:''}</div>${button('picker-cancel','×','Cancel and restore')}</div>`;}
 function renderRules(){const rules=prefs.rules[domainKey()]||[];return `${head('Rules & learning')}<div class="mb-body">
  ${semanticStatus()}<div class="mb-grid">${button('select-phrase',ico('pointer',17),'Teach text')}${button('pick-filter',ico('filter',17),'Visual rule')}</div>
  ${rules.length?rules.map((r,i)=>`<div class="mb-rule"><strong>${esc(r.selector)}</strong><span class="mb-muted">${safeMatches(r.selector).length} matches · ${r.enabled?'Enabled':'Disabled'}</span><div class="mb-grid">${button('rule-toggle:'+i,r.enabled?'✓':'○',r.enabled?'Disable':'Enable')}${button('rule-edit:'+i,'✎','Edit')}${button('rule-delete:'+i,'⌫','Delete')}</div></div>`).join(''):'<p class="mb-caption">No CSS rules yet. Phrase learning does not require CSS selectors.</p>'}
+ <div class="mb-settings-group"><div class="mb-setting mb-range-setting"><label for="mb-seed-threshold">Built-in nuisance sensitivity</label><output id="mb-seed-threshold-value">${Number(prefs.semanticSeedThreshold??0.89).toFixed(2)}</output></div><input type="range" id="mb-seed-threshold" min="0.70" max="0.98" step="0.01" value="${prefs.semanticSeedThreshold??0.89}"></div>
  <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Token fallback</span><span class="mb-setting-value">${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}</span><button class="mb-minor" data-action="learning-toggle">Toggle</button></div>
  <div class="mb-setting"><span class="mb-setting-label">Learning</span><span class="mb-setting-value">${vectorsForSite().length} examples</span><button class="mb-minor" data-action="semantic-reset">Reset</button></div></div>
  <p class="mb-caption">Only your explicit selections and transcript Skip/Keep choices train the filter. No page histories are saved.</p></div>`;}
@@ -183,9 +258,9 @@ function renderSpeech(){const count=state.voicesRegion===prefs.azure.region?stat
  <p class="mb-caption">Key stays in extension storage. Enabled narration text is sent directly to Azure.</p></div>`;}
 function renderReader(){
  const total=reading.passages.length,ready=reading.passages.filter(p=>p.blob&&!p.excluded).length,enabled=enabledIndices().length;
- const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${p.excluded?'＋':'−'}</button><div><small>${i+1}/${total} · ${esc(p.status||'idle')}${p.reason&&p.excluded?' · '+esc(p.reason):''}</small><div style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
+ const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button class="mb-pass-toggle" type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${ico(p.excluded?'check':'close',18)}</button><div class="mb-pass-content"><div class="mb-pass-meta"><span>${String(i+1).padStart(2,'0')} · ${esc(p.excluded?'Skipped':p.status==='ready'?'Ready':'Included')}</span><button type="button" data-action="pass-why:${i}" class="mb-why-btn">${esc(p.analysis?.model==='MiniLM'?formatScore(p.analysis.score):'Why?')} ${ico('chevron',12)}</button></div><div class="mb-pass-text" style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
  return `${head('Article reader')}<div class="mb-body" style="flex:none;padding-bottom:5px"><div class="mb-row"><span class="mb-muted">${ready}/${enabled} ready${reading.preparing?' · Preparing…':''}</span><button class="mb-small" data-action="reader-edit">${ico('file',14)} Edit text</button></div></div>${editor}
- <section class="mb-controls"><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.playing?'Pause':'Play'}">${ico(reading.playing?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
+ <section class="mb-controls"><div class="mb-timeline"><span data-audio-now>0:00</span><span data-audio-segments>${reading.index+1}/${reading.passages.length} passages</span><span data-audio-total>—:—</span></div><input data-audio-seek type="range" class="mb-range" value="0" min="0" max="100" step=".1" aria-label="Seek within current passage"/><div class="mb-player-row"><button class="mb-small" data-action="prev" aria-label="Previous passage">${ico('prev',19)}</button><button class="mb-small mb-primary-play" data-action="play" aria-label="${reading.playing?'Pause':'Play'}">${ico(reading.playing?'pause':'play',23)}</button><button class="mb-small" data-action="next" aria-label="Next passage">${ico('next',19)}</button><label class="mb-field" style="width:81px">Speed<select class="mb-select" id="mb-rate" style="min-height:31px;padding:5px">${[.75,1,1.25,1.5,1.75,2].map(x=>`<option value="${x}" ${prefs.playbackRate===x?'selected':''}>${x}×</option>`).join('')}</select></label></div>
  <div class="mb-player-extra">${button('prepare',ico('wave',17),reading.preparing?'Preparing':'Prepare')}${button('export-mp3',ico('download',17),'MP3')}${button('export-text',ico('file',17),'Transcript')}${button('filter',ico('sliders',17),'Filter')}</div>
  <div class="mb-row"><button class="mb-small" data-action="stop">${ico('close',13)} Stop</button><button class="mb-small" data-action="reader-new">${ico('refresh',13)} Re-extract</button><button class="mb-small" data-action="minimize">${ico('minus',13)} Minimize</button></div></section>`;
 }
@@ -193,5 +268,15 @@ function renderMini(){return `${head('Now playing')}<div class="mb-body"><p clas
 function renderMedia(){state.siteMedia=mediaItems();const i=Math.min(state.mediaIndex,state.siteMedia.length-1),it=state.selectedMedia||state.siteMedia[Math.max(0,i)];return `${head('Media · '+siteName())}<div class="mb-body"><p class="mb-muted">Choose the currently displayed item, or select one directly on the webpage. Downloads require accessible direct files.</p><div class="mb-row"><strong>${state.siteMedia.length} detected items</strong><button class="mb-small" data-action="media-refresh">Refresh</button></div>${state.siteMedia.length?`<select id="mb-media" class="mb-select">${state.siteMedia.map((x,j)=>`<option value="${j}" ${i===j?'selected':''}>${esc(x.kind+' '+(j+1)+' · '+x.label)}</option>`).join('')}</select>`:''}${it?`<div class="mb-preview">${it.kind==='image'?`<img src="${esc(it.url)}" alt="Selected media preview">`:'<span>Video selected</span>'}</div><p class="mb-muted">${esc(it.kind)} · ${esc(it.url.slice(0,110))}</p>`:''}
  <div class="mb-grid">${button('media-picker','◎','Select on page')}${button('media-share','↗','Share file')}${button('media-download','⇩','Download file')}${button('media-open','↗','Open source')}</div></div>`;}
 function renderMediaPicker(){return `${head('Tap page media')}<div class="mb-body"><p>Tap an image or video on the website. The tap will select it rather than open the post.</p>${button('media-cancel','×','Cancel selection')}</div>`;}
-function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
- shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'');const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content)panel.innerHTML=content;updateCount();}
+function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='why'?renderWhy():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
+ shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'')+' view-'+state.view;const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content){
+  // Preserve reader scroll and focused passage even when applying Skip/Keep or playing audio.
+  const oldTranscript=panel.querySelector('[data-transcript]');
+  const savedScroll=oldTranscript?.scrollTop;
+  const hadTranscript=!!oldTranscript&&state.view==='reader'&&!state.readerEditing;
+  const savedFocus=shadow.activeElement?.getAttribute?.('data-action');
+  panel.innerHTML=content;
+  if(hadTranscript){const next=panel.querySelector('[data-transcript]');if(next)next.scrollTop=savedScroll;}
+  if(savedFocus?.startsWith('pass-')&&state.view==='reader')panel.querySelector(`[data-action="${savedFocus}"]`)?.focus({preventScroll:true});
+ }
+ if(state.view==='reader')updateAudioProgress();updateCount();}
