@@ -1,5 +1,17 @@
 # Progress and remaining scope
 
+**Review gates removed; implementation recovery in progress.** The user authorized continued implementation on 2026-10-13. The foundation is merged on main. Central decision, source-mapping and head-training contracts have now been preserved on [rebuild/implementation](https://github.com/ksariash/userscript-master-button/tree/rebuild/implementation).
+
+A larger local implementation, model evaluations and alpha bundle were created, but the execution environment went offline before the complete source/artifact upload. No installable replacement is published. The recovered contracts are a partial source checkpoint, not a release. Read [IMPLEMENTATION_CHECKPOINT.md](IMPLEMENTATION_CHECKPOINT.md) for exact evidence, expected workspace paths, raw model failures, remaining requirements and recovery steps.
+
+Last full local suite: 38 passed (policy, actual Defuddle, mock DOM/Azure and local MP3 encoding). Actual model quality remains below target; automatic exclusions were disabled. Physical iPhone Safari and live Azure remain unverified. No GitHub Actions success is claimed.
+
+The original private design study was restored after the new preview packaging failed. Corrected preview code passed a local smoke check, but final implementation screenshots were not completed before disconnection. Existing phase-0 screenshots remain design evidence only.
+
+## Retained phase-0 record
+
+The ledger below records the earlier repository milestone. Current local implementation coverage and outstanding work are in IMPLEMENTATION_CHECKPOINT.md; do not interpret these historical rows or the earlier small probe as full-product completion.
+
 **Implementation authorized; phase 0 evidence retained.** Built fresh from the reset specifications, without retrieving the rejected implementation. Changes are proposed on `rebuild/phase-0-review`; no replacement userscript is released. Implementation continues under the user’s authorization; there is no design/architecture approval gate.
 
 ## Evidence, kept separate
