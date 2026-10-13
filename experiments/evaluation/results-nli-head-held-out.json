@@ -1,0 +1,757 @@
+{
+  "date": "2026-10-13T19:36:05.873Z",
+  "validationClass": "Actual NLI inference reused to evaluate the trained classification head. No mock logits. Desktop Node CPU, not Safari.",
+  "split": "held-out",
+  "model": {
+    "id": "Xenova/nli-deberta-v3-xsmall",
+    "revision": "2a4f614a701367a02d51389039afc998faeda637",
+    "dtype": "q8",
+    "license": "Apache-2.0",
+    "weightBytes": 87246587,
+    "contextTokens": 460,
+    "labelsVersion": "function-v5-metadata-context"
+  },
+  "head": {
+    "weights": [
+      0.1963541082355274,
+      0.39655321037745433,
+      1.061431057026336,
+      1.3646667444895064,
+      0.6853170738159781,
+      -0.9966462859830464,
+      1.253797244460878,
+      -2.3079926263437307,
+      2.374327926420961,
+      1.6009562992337312,
+      0.1274649066603572,
+      0.25765630776537013,
+      -1.077493606869844,
+      -0.17451739421180323,
+      -0.7650416172011537,
+      -1.9233985240433,
+      -1.1507835098927943,
+      1.3352991673371002
+    ],
+    "bias": -1.0338904050093447,
+    "threshold": 0.5,
+    "featureModel": "Xenova/nli-deberta-v3-xsmall",
+    "featureRevision": "2a4f614a701367a02d51389039afc998faeda637",
+    "validatedExclusion": false
+  },
+  "metrics": {
+    "total": 88,
+    "article": 60,
+    "nuisance": 28,
+    "articleFalseExclusions": 0,
+    "nuisancePrecision": 1,
+    "nuisanceRecall": 0.9285714285714286,
+    "abstentions": 0
+  },
+  "finiteTargetsPassed": true,
+  "rows": [
+    {
+      "caseId": "chrome:97",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.17810663686215694,
+      "latencyMs": 150
+    },
+    {
+      "caseId": "chrome:104",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.1722663233876448,
+      "latencyMs": 127
+    },
+    {
+      "caseId": "chrome:106",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02585087218125003,
+      "latencyMs": 160
+    },
+    {
+      "caseId": "chrome:108",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03009816458695304,
+      "latencyMs": 113
+    },
+    {
+      "caseId": "chrome:110",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03838871019965745,
+      "latencyMs": 138
+    },
+    {
+      "caseId": "chrome:112",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.053476172519076645,
+      "latencyMs": 117
+    },
+    {
+      "caseId": "chrome:114",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.049068921002985065,
+      "latencyMs": 133
+    },
+    {
+      "caseId": "chrome:116",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.008915699391043284,
+      "latencyMs": 108
+    },
+    {
+      "caseId": "chrome:118",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02135077081498778,
+      "latencyMs": 278
+    },
+    {
+      "caseId": "chrome:120",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016377971722425694,
+      "latencyMs": 311
+    },
+    {
+      "caseId": "chrome:122",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.020766948665773166,
+      "latencyMs": 147
+    },
+    {
+      "caseId": "chrome:124",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.021503263057793695,
+      "latencyMs": 142
+    },
+    {
+      "caseId": "chrome:126",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.024268543212876897,
+      "latencyMs": 127
+    },
+    {
+      "caseId": "chrome:128",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.028045255312890045,
+      "latencyMs": 144
+    },
+    {
+      "caseId": "chrome:130",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01497398934041931,
+      "latencyMs": 155
+    },
+    {
+      "caseId": "chrome:132",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01696516827266604,
+      "latencyMs": 164
+    },
+    {
+      "caseId": "chrome:136",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02155761469054048,
+      "latencyMs": 221
+    },
+    {
+      "caseId": "chrome:138",
+      "page": "chrome",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014977253178103948,
+      "latencyMs": 184
+    },
+    {
+      "caseId": "chrome:10",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8571896712868571,
+      "latencyMs": 108
+    },
+    {
+      "caseId": "chrome:169",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7612112566836216,
+      "latencyMs": 155
+    },
+    {
+      "caseId": "chrome:171",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9591439336721644,
+      "latencyMs": 127
+    },
+    {
+      "caseId": "chrome:173",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9633436593697273,
+      "latencyMs": 132
+    },
+    {
+      "caseId": "chrome:177",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7973436011650704,
+      "latencyMs": 151
+    },
+    {
+      "caseId": "chrome:179",
+      "page": "chrome",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9751895405163243,
+      "latencyMs": 149
+    },
+    {
+      "caseId": "mozilla:192",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.3079504311661507,
+      "latencyMs": 154
+    },
+    {
+      "caseId": "mozilla:193",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.30559182606156776,
+      "latencyMs": 150
+    },
+    {
+      "caseId": "mozilla:196",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.31610188549689766,
+      "latencyMs": 128
+    },
+    {
+      "caseId": "mozilla:198",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.33718654942849163,
+      "latencyMs": 113
+    },
+    {
+      "caseId": "mozilla:205",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.2718460153086418,
+      "latencyMs": 118
+    },
+    {
+      "caseId": "mozilla:207",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.49232033048531154,
+      "latencyMs": 130
+    },
+    {
+      "caseId": "mozilla:212",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.027499671553664597,
+      "latencyMs": 176
+    },
+    {
+      "caseId": "mozilla:214",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02725096825275984,
+      "latencyMs": 188
+    },
+    {
+      "caseId": "mozilla:217",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04591456963632163,
+      "latencyMs": 90
+    },
+    {
+      "caseId": "mozilla:219",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.025729788580816298,
+      "latencyMs": 120
+    },
+    {
+      "caseId": "mozilla:221",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02209278179751747,
+      "latencyMs": 160
+    },
+    {
+      "caseId": "mozilla:223",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016867377971001032,
+      "latencyMs": 140
+    },
+    {
+      "caseId": "mozilla:225",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.025419178954981633,
+      "latencyMs": 126
+    },
+    {
+      "caseId": "mozilla:227",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.028565471111480778,
+      "latencyMs": 125
+    },
+    {
+      "caseId": "mozilla:229",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01913512625917781,
+      "latencyMs": 119
+    },
+    {
+      "caseId": "mozilla:231",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01820429624868527,
+      "latencyMs": 112
+    },
+    {
+      "caseId": "mozilla:233",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016548084079950925,
+      "latencyMs": 114
+    },
+    {
+      "caseId": "mozilla:235",
+      "page": "mozilla",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.017848669903067924,
+      "latencyMs": 153
+    },
+    {
+      "caseId": "mozilla:18",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9598590089574826,
+      "latencyMs": 82
+    },
+    {
+      "caseId": "mozilla:20",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8885765413272126,
+      "latencyMs": 77
+    },
+    {
+      "caseId": "mozilla:21",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9716360368701787,
+      "latencyMs": 80
+    },
+    {
+      "caseId": "mozilla:22",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9532142552946037,
+      "latencyMs": 79
+    },
+    {
+      "caseId": "mozilla:23",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9544566394057377,
+      "latencyMs": 89
+    },
+    {
+      "caseId": "mozilla:24",
+      "page": "mozilla",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9636011105318633,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "queue:0",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.008040262854859663,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "queue:2",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016718580760001153,
+      "latencyMs": 110
+    },
+    {
+      "caseId": "queue:4",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.021496039137452107,
+      "latencyMs": 119
+    },
+    {
+      "caseId": "queue:6",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02555299186847506,
+      "latencyMs": 113
+    },
+    {
+      "caseId": "queue:8",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.6783999516615767,
+      "latencyMs": 95
+    },
+    {
+      "caseId": "queue:10",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9556476611923779,
+      "latencyMs": 87
+    },
+    {
+      "caseId": "queue:12",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9491721169499348,
+      "latencyMs": 94
+    },
+    {
+      "caseId": "queue:14",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.011802569980364826,
+      "latencyMs": 91
+    },
+    {
+      "caseId": "queue:16",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014590467805369456,
+      "latencyMs": 144
+    },
+    {
+      "caseId": "queue:18",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.022053192138596953,
+      "latencyMs": 117
+    },
+    {
+      "caseId": "queue:20",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.03932947701298405,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "queue:22",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014716598489548182,
+      "latencyMs": 101
+    },
+    {
+      "caseId": "queue:24",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01799849863226695,
+      "latencyMs": 84
+    },
+    {
+      "caseId": "queue:26",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02594510517747294,
+      "latencyMs": 89
+    },
+    {
+      "caseId": "queue:28",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.900760315327223,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "queue:30",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01379858936169366,
+      "latencyMs": 104
+    },
+    {
+      "caseId": "queue:32",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8945567064234693,
+      "latencyMs": 86
+    },
+    {
+      "caseId": "queue:34",
+      "page": "queue",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.020756646819025615,
+      "latencyMs": 115
+    },
+    {
+      "caseId": "queue:36",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.860629225903248,
+      "latencyMs": 93
+    },
+    {
+      "caseId": "queue:38",
+      "page": "queue",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8451171019997615,
+      "latencyMs": 81
+    },
+    {
+      "caseId": "library:0",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.008508101470678577,
+      "latencyMs": 101
+    },
+    {
+      "caseId": "library:2",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.012629328904795017,
+      "latencyMs": 128
+    },
+    {
+      "caseId": "library:4",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03308226707259967,
+      "latencyMs": 128
+    },
+    {
+      "caseId": "library:6",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7158342571186049,
+      "latencyMs": 87
+    },
+    {
+      "caseId": "library:8",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9654413264931397,
+      "latencyMs": 96
+    },
+    {
+      "caseId": "library:10",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9172705574050118,
+      "latencyMs": 88
+    },
+    {
+      "caseId": "library:12",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.025744945926923272,
+      "latencyMs": 110
+    },
+    {
+      "caseId": "library:14",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.04937297553797539,
+      "latencyMs": 103
+    },
+    {
+      "caseId": "library:16",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.039557576151574875,
+      "latencyMs": 98
+    },
+    {
+      "caseId": "library:18",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02315680045964841,
+      "latencyMs": 131
+    },
+    {
+      "caseId": "library:20",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.007489952719209501,
+      "latencyMs": 87
+    },
+    {
+      "caseId": "library:22",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01233981493927976,
+      "latencyMs": 105
+    },
+    {
+      "caseId": "library:24",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8673961604141994,
+      "latencyMs": 99
+    },
+    {
+      "caseId": "library:26",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.017480043856510048,
+      "latencyMs": 84
+    },
+    {
+      "caseId": "library:28",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.022666927312806638,
+      "latencyMs": 89
+    },
+    {
+      "caseId": "library:30",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02544289508977977,
+      "latencyMs": 88
+    },
+    {
+      "caseId": "library:32",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7757010164034636,
+      "latencyMs": 91
+    },
+    {
+      "caseId": "library:34",
+      "page": "library",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01858407741952682,
+      "latencyMs": 103
+    },
+    {
+      "caseId": "library:36",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.827115222981176,
+      "latencyMs": 83
+    },
+    {
+      "caseId": "library:38",
+      "page": "library",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8083222574121521,
+      "latencyMs": 81
+    }
+  ]
+}

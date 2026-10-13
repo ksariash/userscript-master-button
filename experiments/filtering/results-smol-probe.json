@@ -1,0 +1,730 @@
+{
+  "generatedAt": "2026-10-13T18:39:31.265Z",
+  "status": "ready",
+  "model": {
+    "id": "onnx-community/SmolLM2-135M-Instruct-ONNX",
+    "revision": "b8a5c0f183b78c55955a5364f610c36668b5e681",
+    "dtype": "q8",
+    "bytes": 135658354,
+    "license": "Apache-2.0",
+    "promptVersion": "block-v2",
+    "backend": "onnxruntime-node CPU",
+    "maxInputTokens": 1100
+  },
+  "validationClass": "actual local inference, desktop Node CPU",
+  "corpus": {
+    "version": 1,
+    "labeler": "Implementation author; no independent human audit yet",
+    "note": "Feasibility probe, not the 150-block release benchmark",
+    "split": "Predeclared probe, no tuning and no independently held-out release set"
+  },
+  "environment": {
+    "platform": "linux",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "cpu": "CPU identity unavailable in container",
+    "threads": 2
+  },
+  "pages": [
+    {
+      "url": "https://example.org/city",
+      "htmlHash": "3c4c474bca751fe87fbdf4d38fda27dc7734c0372797ff74382494bea9a76e2b",
+      "inventoryBlocks": 25,
+      "wordCount": 184,
+      "mappingAmbiguities": 0,
+      "extractedMembers": 13,
+      "limitation": "Direct inline text around nested semantic blocks and virtualized/offscreen content are not covered by this probe."
+    },
+    {
+      "url": "https://webkit.org/blog/17333/webkit-features-in-safari-26-0/",
+      "htmlHash": "ebe0484c74dd22e1597d7d9713daebe2f493e177e8d93f1f4964c93cd8357b01",
+      "inventoryBlocks": 493,
+      "wordCount": 9086,
+      "mappingAmbiguities": 31,
+      "extractedMembers": 428,
+      "limitation": "Direct inline text around nested semantic blocks and virtualized/offscreen content are not covered by this probe."
+    },
+    {
+      "url": "https://stephango.com/saw",
+      "htmlHash": "b1137c52acf8848fdc2634cafa4759b5cf26b96fb3a5a9f883502ac784a44969",
+      "inventoryBlocks": 18,
+      "wordCount": 143,
+      "mappingAmbiguities": 0,
+      "extractedMembers": 5,
+      "limitation": "Direct inline text around nested semantic blocks and virtualized/offscreen content are not covered by this probe."
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "nav",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "b41f91b96df301b4d512fc6b8937389746069695c39a8b84c20b2022d2e3f6b6",
+      "inputTokens": 200,
+      "latencyMs": 531,
+      "sourceId": "87ea8be0645154a199ae:0:98c78e1a955a",
+      "textHash": "e59d785fec73a66005357764fd6901a0b710020e9fa22adc2740150d90820bbf",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "title",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "8f730e173548da5089af6d36544158ff3158014af4927f99f47d5923a9b03ae5",
+      "inputTokens": 228,
+      "latencyMs": 523,
+      "sourceId": "87ea8be0645154a199ae:1:16982b412832",
+      "textHash": "fb9ba81ce93ccee8130c59c09103a05daf431e5dab09ec1659e1f7bf631941d0",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "intro",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "63d5633bf38d74239994fc8f9a20c55b382013e118129d7a28bdc542a5d3ab1f",
+      "inputTokens": 255,
+      "latencyMs": 531,
+      "sourceId": "87ea8be0645154a199ae:2:8b49f0923979",
+      "textHash": "5291ccf5d5b125af0c80996a45bba0f7439372055c07d0f3e75d59bdf359b452",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "story",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "88c2302f93b8a00c115529d956ddce3f6c7df882c052ec9c78602096865dd3b0",
+      "inputTokens": 255,
+      "latencyMs": 496,
+      "sourceId": "87ea8be0645154a199ae:3:fab73d583aad",
+      "textHash": "3ea340b05564afe7cb823818846ed19f3a009c5e94e7367236d3f895fc373aa6",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "related-heading",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "af4c8e5db03704c1ac565da258ed9ca6532a52049d301e11df1cb805b829d194",
+      "inputTokens": 241,
+      "latencyMs": 489,
+      "sourceId": "87ea8be0645154a199ae:4:c3465d9df4ea",
+      "textHash": "343d6338f6f774b118603f176bb0828fa767ca0c161d613e287fa490acc7311a",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "related-book",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "006b755162263d7571a2612ff344eb54fe78ceab7f3c5b664519c53868807aa8",
+      "inputTokens": 214,
+      "latencyMs": 464,
+      "sourceId": "87ea8be0645154a199ae:5:0d4a685e1095",
+      "textHash": "a24ed53d848595cb2ff5102d63f83d50241c45165883006d33304e1e5d7d902b",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "related-story",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "a48c9bc876b4eb3c2825f228e627246dc4d3c8638d9549674a64fab1f5186271",
+      "inputTokens": 215,
+      "latencyMs": 430,
+      "sourceId": "87ea8be0645154a199ae:6:2aebf58008fd",
+      "textHash": "38ca62186a86fd2e286cdfa527a11cf5a9bd2bb77f9634c1866a03b8ee7556e2",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "bridge",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "dbe7287ff66984540095c65ca5b02e0f3b5d79e5a3efc998ebde5812d935c4f9",
+      "inputTokens": 230,
+      "latencyMs": 406,
+      "sourceId": "87ea8be0645154a199ae:7:4d05fa5a4be8",
+      "textHash": "8cefb659caef55068176173a110c485c8163860fd705c45016778dffa5073502",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "ads-discussion",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "274fa4eed3dc675fdf2c55c3ff8998a54bdc40cfc4f7e32b0c950fd3aaf94fa0",
+      "inputTokens": 248,
+      "latencyMs": 453,
+      "sourceId": "87ea8be0645154a199ae:8:f62bbc52467f",
+      "textHash": "0ae589d67be8b123ff42864cd2e8af17bd93bd22e4d1f90a0c6d5cf79c25b72e",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "quote",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "a821afd25b14600b24270cbd6cc45a403c15f171bc23e746d225f4160693d0b7",
+      "inputTokens": 262,
+      "latencyMs": 446,
+      "sourceId": "87ea8be0645154a199ae:9:1720d7c22783",
+      "textHash": "73784cd0795fae3d8e393ca184cdc3b20b2328fd87a30c795a8bf8ced82ec20f",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "mixed-prose",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "a821afd25b14600b24270cbd6cc45a403c15f171bc23e746d225f4160693d0b7",
+      "inputTokens": 249,
+      "latencyMs": 465,
+      "sourceId": "87ea8be0645154a199ae:10:337efb3faeae",
+      "textHash": "221110f096760019d3d86a6ca40361df7e10ba1b2d4281b12a30465656e6e493",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "mixed-promo",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "87ae5a125de3d816b861d5cbc966b92b1ea85f1ae1c09191abe83589ee091d9d",
+      "inputTokens": 232,
+      "latencyMs": 473,
+      "sourceId": "87ea8be0645154a199ae:11:4f03fed6a028",
+      "textHash": "f3fe89a9c566b65991f4fd3b4d1424e39ebf8bb848b58499622a0157bca78b6b",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "caption",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "6fa53ec95c57685556eb8720c8a2ef3bd63f6287cf4c1153c50755a37d3f85bb",
+      "inputTokens": 217,
+      "latencyMs": 412,
+      "sourceId": "87ea8be0645154a199ae:12:70020fb989cc",
+      "textHash": "bd6b6a9315b44401ea75c0cfe93362371eaf268a1d841d9d8c232049488c48e4",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "list-heading",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "c5219944fe2ff166d155f7aaf0106c81b2f0121c76fca859666870d39dddc844",
+      "inputTokens": 214,
+      "latencyMs": 391,
+      "sourceId": "87ea8be0645154a199ae:13:ec81882defcc",
+      "textHash": "59475f2f13e1c9ecac350ef593b75b34356eff11e27e564d366211b841a59fc5",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "list-one",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "73202ad8bb81b7ad9cb42f83ff908d3e92511975cfcc42ccb840339b8ccede77",
+      "inputTokens": 212,
+      "latencyMs": 408,
+      "sourceId": "87ea8be0645154a199ae:14:835bb310d2b3",
+      "textHash": "e83d8efa1fdd923a33d4e351b34877cad7ddd402ce2a074a38e64c15f18a2168",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "list-two",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "ce6066405e020d50d29e3108fb17b72e437148e504f527767980d09721d585ed",
+      "inputTokens": 231,
+      "latencyMs": 476,
+      "sourceId": "87ea8be0645154a199ae:15:c08fa254443b",
+      "textHash": "4e81d5281823b1e88ce4d394c8df0c190c20000a9c0359483f28ba835955f4eb",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "subscriptions",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "0679d3a79497c13bb3d41c799db1664fc2499b4f56ed763ec67ba54d28f3e0f9",
+      "inputTokens": 225,
+      "latencyMs": 465,
+      "sourceId": "87ea8be0645154a199ae:16:c7714cc2168c",
+      "textHash": "686e25c77e41cdb3256b8af4a5552c3dc612610615d071db69b05707b4aa2ae8",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "duplicate-one",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "f0b7631c028fbd70c3eedb517ab0b1ca3fbee341ad6788eadc4998ab050fe73a",
+      "inputTokens": 223,
+      "latencyMs": 445,
+      "sourceId": "87ea8be0645154a199ae:17:ceac899dd9ee",
+      "textHash": "e4b0d46e9f1de200df431c614dd665345d81b7d14382a7cf2305272487d611a0",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "duplicate-two",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "4dfe629d868c252bfd2070ca97442db4345ee92d1469cff517a2ecde6fe254ff",
+      "inputTokens": 220,
+      "latencyMs": 470,
+      "sourceId": "87ea8be0645154a199ae:18:702e37afc5bf",
+      "textHash": "e4b0d46e9f1de200df431c614dd665345d81b7d14382a7cf2305272487d611a0",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "sale",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "e4b0d46e9f1de200df431c614dd665345d81b7d14382a7cf2305272487d611a0",
+      "inputTokens": 227,
+      "latencyMs": 480,
+      "sourceId": "87ea8be0645154a199ae:19:122a41a3f94a",
+      "textHash": "9956b0951d5a50a95dd7af434df00e31085493bd87aa846fa9112f8517456ad4",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "app",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "f086239b1854f94f3eb5848d93f459939933b40610e0bb43d0a74bebdffbb062",
+      "inputTokens": 252,
+      "latencyMs": 427,
+      "sourceId": "87ea8be0645154a199ae:20:e07bd932201c",
+      "textHash": "f919a03eb2ee35181d21a98fe67e0dc2d2c94c578e31a76daa2d13096338d42b",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "injection",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "f086239b1854f94f3eb5848d93f459939933b40610e0bb43d0a74bebdffbb062",
+      "inputTokens": 253,
+      "latencyMs": 436,
+      "sourceId": "87ea8be0645154a199ae:21:8aed4e0e766a",
+      "textHash": "42005ea0ef493755f0e76120dd0ef69d264ff24957da09d4f779f47f3cf9d4d8",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "ending",
+      "kind": "synthetic",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "f086239b1854f94f3eb5848d93f459939933b40610e0bb43d0a74bebdffbb062",
+      "inputTokens": 250,
+      "latencyMs": 444,
+      "sourceId": "87ea8be0645154a199ae:22:41c44a4d56df",
+      "textHash": "758302fc9d5a5c67f0fbf774f9be9ced50e9bcd8092af8588c7dfd07b3aaa2ee",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "footer",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "528cd72ac0942a0ef712dd1364345059168825593da9a713f8fd9ee4d5790a7c",
+      "inputTokens": 231,
+      "latencyMs": 457,
+      "sourceId": "87ea8be0645154a199ae:23:d8e242d5a09f",
+      "textHash": "9092b28ee710e2c98499ea12be90e2bb871bdfa088e920a0fc2baa4155cff9a7",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "copyright",
+      "kind": "synthetic",
+      "expected": "NUISANCE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "b41f91b96df301b4d512fc6b8937389746069695c39a8b84c20b2022d2e3f6b6",
+      "inputTokens": 210,
+      "latencyMs": 416,
+      "sourceId": "87ea8be0645154a199ae:24:9af3745aa5b0",
+      "textHash": "6230ba26d8dc2a3186efb15328ba7e6d4ad805d9845c89ecc744753c1ec7d031",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:0",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "76f28db467411f879c79b77e00999b26a669f73fa615be8ae495db0b144ba3ba",
+      "inputTokens": 217,
+      "latencyMs": 408,
+      "sourceId": "59a7535c8b63c2686722:27:f81331390c25",
+      "textHash": "6d24edc6e401ac57dc385359339ae23c595979bc4b7eda58025079a075ba4f1c",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:1",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "c35018bc39cd27975d8722ea58a3a5f3b62f6f7e4d469d40caa49f5ef1b7f38f",
+      "inputTokens": 354,
+      "latencyMs": 629,
+      "sourceId": "59a7535c8b63c2686722:61:dc726b0ddef3",
+      "textHash": "9d5c6ed353764539036160705253656e3a86dabeb2d6cbf0f6de57eafd7260d8",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:2",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "8bebd54d3b081f7670a8ba340ce599666c948777f720d9c686f3e9e198d932be",
+      "inputTokens": 389,
+      "latencyMs": 701,
+      "sourceId": "59a7535c8b63c2686722:62:fb01f89b72c3",
+      "textHash": "6641ecce9faea5fe5d5e2f051ef2a133172fcddac748bbae3413d89c4462e39f",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:3",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "bdd6d6d893fded445d28cf93b7e4d23b545b0740110ddd33388a9fbdc150bd78",
+      "inputTokens": 300,
+      "latencyMs": 518,
+      "sourceId": "59a7535c8b63c2686722:63:c6c558728197",
+      "textHash": "ba54477950bc70488b01632c874b51de05a822aa14b0bd2f666bd71a05405ac4",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:4",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "ce6066405e020d50d29e3108fb17b72e437148e504f527767980d09721d585ed",
+      "inputTokens": 288,
+      "latencyMs": 459,
+      "sourceId": "59a7535c8b63c2686722:66:9ac2897d7111",
+      "textHash": "0e46a30f1741b46398e1b3a596cb280b3a640413d0ae5a92cb40286bffb379ee",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "webkit-26:5",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "67daa0b7a61a1d65862062bdf1f358c5086c77fdcafb466cd0a6299bca8261e5",
+      "inputTokens": 358,
+      "latencyMs": 590,
+      "sourceId": "59a7535c8b63c2686722:67:f3bb38da74a4",
+      "textHash": "6a8480f6df7059405c48ae0b2060d55244d9b9ca976a713b3771c781818a0d85",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:0",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "76f28db467411f879c79b77e00999b26a669f73fa615be8ae495db0b144ba3ba",
+      "inputTokens": 224,
+      "latencyMs": 412,
+      "sourceId": "27f4d5daad752e12d8ee:0:b71c5e87cb99",
+      "textHash": "6235929f13ad188b0a1a680aa8ce4a5c394b5009d76388d129e72d88d93cb95b",
+      "extraction": {
+        "member": false,
+        "mapping": "not-in-extraction"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:1",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "be3f6bc35eaeeb67b3653c23caf82f22eb2763d3e04daf5b6cceab42850c3b92",
+      "inputTokens": 263,
+      "latencyMs": 494,
+      "sourceId": "27f4d5daad752e12d8ee:1:50ee8d2767ef",
+      "textHash": "05db21cc1c57f2a934a5ec07d74b0cd0bac2a71da54ec663de9bb23b6ba5b01a",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:2",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "ce6066405e020d50d29e3108fb17b72e437148e504f527767980d09721d585ed",
+      "inputTokens": 309,
+      "latencyMs": 623,
+      "sourceId": "27f4d5daad752e12d8ee:2:97d08a7cbcd8",
+      "textHash": "266c6ded4bc97e46d7cfb265da4261649b625d52c33616354a83da4ad016c89d",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:3",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "b00bc81a8f91d70aecd6d8897bb9ff674720a43c59abb36f1b63b9e6992d19d1",
+      "inputTokens": 304,
+      "latencyMs": 601,
+      "sourceId": "27f4d5daad752e12d8ee:3:281460cfac2e",
+      "textHash": "5a7a8e4523c5dc779288856c53d9b887f4517089ae0df144641a7cfdde59a5a4",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:4",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "2ac9a72299a10c629433494c13d4c2a82ae7c07879242456d11eb8d9aa4bacb5",
+      "inputTokens": 285,
+      "latencyMs": 562,
+      "sourceId": "27f4d5daad752e12d8ee:4:3728869efff4",
+      "textHash": "5f1702fb911d9f8af5ea3c36763b1c7d66717d943a8b1f51adf13fa14a868c3e",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    },
+    {
+      "caseId": "saw:5",
+      "kind": "real-page",
+      "expected": "ARTICLE",
+      "suggested": "UNCERTAIN",
+      "rawLabel": "(invalid output; abstained)",
+      "rawHash": "0679d3a79497c13bb3d41c799db1664fc2499b4f56ed763ec67ba54d28f3e0f9",
+      "inputTokens": 238,
+      "latencyMs": 482,
+      "sourceId": "27f4d5daad752e12d8ee:5:7809a37f7c16",
+      "textHash": "7dfc972d7a87c3f5e4fed4dacc7d84e2f94db5010dcb685ef361478b8c18a988",
+      "extraction": {
+        "member": true,
+        "mapping": "clone-id"
+      },
+      "included": true
+    }
+  ],
+  "metrics": {
+    "all": {
+      "total": 37,
+      "article": 28,
+      "nuisance": 9,
+      "rawArticleFalseExclusions": 0,
+      "rawNuisancePrecision": null,
+      "rawNuisanceRecall": 0,
+      "abstentions": 37,
+      "effectiveArticleFalseExclusions": 0,
+      "effectiveNuisanceRecall": 0
+    },
+    "synthetic": {
+      "total": 25,
+      "article": 16,
+      "nuisance": 9,
+      "rawArticleFalseExclusions": 0,
+      "rawNuisancePrecision": null,
+      "rawNuisanceRecall": 0,
+      "abstentions": 25,
+      "effectiveArticleFalseExclusions": 0,
+      "effectiveNuisanceRecall": 0
+    },
+    "realPages": {
+      "total": 12,
+      "article": 12,
+      "nuisance": 0,
+      "rawArticleFalseExclusions": 0,
+      "rawNuisancePrecision": null,
+      "rawNuisanceRecall": null,
+      "abstentions": 12,
+      "effectiveArticleFalseExclusions": 0,
+      "effectiveNuisanceRecall": null
+    }
+  },
+  "startupMs": 16523,
+  "cacheBytes": 815632263,
+  "rssBeforeBytes": null,
+  "rssAfterBytes": null,
+  "processPeakRssBytes": 892739584,
+  "memoryNote": "Whole-process memory where accessible; null means unavailable in this restricted container. Not an iPhone measurement.",
+  "elapsedMs": 34607
+}

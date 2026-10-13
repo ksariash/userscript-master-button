@@ -1,44 +1,32 @@
 # Implementation direction
 
+The user removed design, model-choice, architecture and milestone approval gates on 2026-10-13. Continue work and report evidence without pausing for approval. Validation standards remain.
+
 ## Architecture
 
-One immutable source inventory plus one decision store is the center of the application. Views issue commands; all enabled-content selectors use the same resolved passages. Page identity, source node/range identity, source revision, and exact original wording travel together. Identical words at different locations remain different passages.
+- `src/core/source.mjs`: disjoint original text ranges, stable live-node identities, inline/BR/mixed-container handling, exact Defuddle membership evidence, batched mutations and document retirement. Extraction never directly deletes text.
+- `core/decisions.mjs`: explicit correction → saved Keep/Skip rules/memory → validated automatic exclusion → inclusion. It owns Undo, teaching contributions, content/evidence leases, reader mapping, and enabled-sequence revisions. Diagnostic-only updates do not invalidate audio or exports.
+- `src/platform/model-worker.mjs`: real pinned DeBERTa NLI inference in a local worker, one-thread WASM by default. Bounded neighboring/group/control/link context; full oversize blocks abstain. Public downloads omit credentials/referrer; no article-model server.
+- `src/core/head.mjs`, `site-head.mjs`: trained classification head using actual entailment activations plus structure. Explicit site corrections update head weights by gradient descent. Base language-model weights remain frozen; predictions never self-train. Exact-wording Keep/Skip memories are independent of inference availability.
+- `src/ui/`: restrained isolated launcher, contextual page review, editorial reader, compact player and child inspectors. Views dispatch shared commands. Selection/edits with no source mapping say so.
+- `src/speech/`: direct Azure GM transport, serial paid requests with immediate inclusion rechecks, exact-text/config PCM cache, first-segment playback and bounded preparation, cancellation/stale-intent checks, local format-aware MP3 encoding and revision-bound exports.
+- `src/tools/`: previewed selector rules, owned-style restoration, deterministic URL preservation, model-reviewed proposals and contextual best-effort site utilities.
+- `src/platform/storage.mjs`: filename-scoped GM storage, non-destructive v1 migration, separate speech key, explicit-site-only persistence. No newly collected browsing archive.
 
-| Boundary | Proposed contract |
-| --- | --- |
-| Inventory | Snapshot relevant source blocks, weakly associate live nodes/ranges, preserve original wording/order, split mixed containers at semantic boundaries. Never inventory a parent and all descendants as competing passages. |
-| Defuddle | Extract from an annotated clone, disable async remote extractors, map surviving source IDs back; use unique exact text only when unambiguous. Extraction membership is evidence. Removed, changed, or ambiguous blocks remain available for review. |
-| Local model | Bounded neighbor/structure/extraction evidence in; ARTICLE, NUISANCE, or abstention out. Strict output validation, no rewriting, no cloud fallback. Invalid, oversized, unavailable, or unvalidated assessments stay included. |
-| Decision store | Explicit correction → enabled saved rule → validated automatic exclusion → include. Revision-check late work. Keep/Skip and teaching contribution are one undoable transaction. |
-| Page/reader | Subscribe and patch only affected passages; retain geometry when graying. Review markers use safe margins; Previous/Next context controls reach short/full-width passages when no margin fits. Why is on demand. |
-| Speech/export | Snapshot exact enabled text, IDs, source revisions, and sequence revision. Recheck before each request; discard stale playback intent/export assembly. Cache exact text plus speech configuration. |
-| Platform | Userscripts content scope for granted GM APIs; isolated UI styling, one-instance/lifecycle owner, validated storage adapter and migrations, no page storage for secrets. |
+## Chosen alternatives and unresolved proof
 
-The experimental source identity is stable within a captured document only. Live weak-node identity, source ranges, mutation batching, SPA retirement, and dynamic remapping remain part of phase 1. Current parser coverage is leaf semantic blocks, not all possible inline/nested HTML. No production compatibility is claimed.
+Qwen3 0.6B improved the small probe but failed wider accuracy and peaked near 3.9 GB on desktop. The selected smaller NLI language model is a genuine encoder language model, not an embedding similarity substitute. It requires about 87 MB of weights and has substantially lower measured desktop process memory. Browser memory/CSP/latency remain unverified.
 
-## Phases and gates
+Classifier-head learning is implemented; **full base-LM weight fine-tuning is not**. Keep memories and the personalized head can make inclusion more conservative. They cannot silently enlarge an unvalidated automatic exclusion policy.
 
-1. **Phase 0 — completed evidence:** official research, a runnable real local-model probe, author-labeled realistic cases, separate interactive design study, rendered evidence, and an explicit requirement ledger. No installable release.
-2. **Phase 1 — prove the slice:** select a useful model on a predeclared calibration/held-out corpus; then prove extraction → inference → original-page Skip/Keep → reader synchronization → reversible teaching/Undo, including races, duplicates, mutations, full-width passages, and navigation. Run physical iPhone CSP/backend/cache tests before claiming Safari support. Gate: visual review plus zero narrative exclusions, ≥95% nuisance precision, ≥85% held-out recall on the agreed finite corpus.
-3. **Phase 2 — speech and export:** direct Azure transport and voice list, secure key adapter, first-segment start, bounded preparation/cache, seek/rate/follow/minimize, cancellation/revision safety; then format-aware MP3 export and transcript/timing snapshots. Mock integration, live Azure, real-player recordings, and physical locked-screen tests are separate gates.
-4. **Phase 3 — the rest:** conservative clean/share/edit URL tools and reviewed model-assisted suggestions; selector picker and consent adapters; all requested site utilities; validated legacy migration; reproducible userscript, matching metadata/build/source, supported update flow and recovery. Every requirement has a ledger row.
+The model still misses the complete target, including article translation-link errors and missed short widget headings. Automatic exclusions remain disabled. Existing regression pages were used during debugging; an independent final holdout and independent label audit remain outstanding. Do not turn on the exclusion flag for appearance or green CI.
 
-## Choices that still need resolution
+Native sharing, playback activation, locked-screen transitions, model execution and key setup require a physical iPhone/extension check. REST supplies PCM and no verified word events; only real segment/sample durations are used. No consent adapter submits choices until validated on a live site.
 
-| Choice | Evidence and proposed next decision |
-| --- | --- |
-| Model | FLAN-T5-small q8 is a genuine local generative language model, but the frozen probe found 0/9 nuisances. Reject it as a release candidate in this configuration. Compare a stronger compact instruction model on a separate development set, then lock prompts/thresholds before held-out evaluation. SmolLM2-135M q4 was researched (about 181 MB for its ONNX weight file), not executed. An embedding classifier would require an explicit product choice and its own evaluation. |
-| Runtime/device | Proposed browser probe: matching bundled Transformers.js/ONNX WASM assets, one thread and no proxy worker first; WebGPU only after real capability/inference tests. Safari 26 support in WebKit is not Userscripts compatibility evidence. Need actual iPhone model, iOS/Safari and Userscripts versions, download/memory budget, CSP/worker tests, origin/cache behavior, eviction/reload tests, and thermal/battery measurements. |
-| Learning | Immediate corrections and per-site labeled examples are practical to implement. Proposed retrieval of explicit examples/structural rules is **not weight fine-tuning** and needs agreement. True local weight updates remain research: the current quantized inference pipeline supplies no training implementation. Do not self-train on predictions. Keep exceptions and Undo must reverse the same contribution. |
-| Speech | Prefer direct Azure REST for a small adapter; evaluate SDK only if verified word-boundary events are required. Never fabricate timestamps. GM storage is extension controlled, not a promised encrypted vault. Physical background transitions and Media Session remain unverified; a prepared recording is a separately tested fallback. |
-| Consent | Per-site, visible native reject/necessary-only controls and verified outcomes. Hiding a banner cannot establish consent. Unsupported interfaces stay explicit. |
-| Smart URL cleaning | Model-assisted proposals require evidence of usefulness. Preserve required query/fragment semantics deterministically; require review of risky removals. Never auto-navigate from a share action. |
-| Updates | Bundle application code in one userscript. Match documented extension metadata/update support to the installed version; do not promise automatic checking when release notes have disabled it. Preserve `master-button:v1` preferences and the separate key until a validated migration is available. |
+## Remaining phases
 
-## Visual direction
+1. Improve filtering/generalization and collect a new independent holdout; verify actual Safari runtime and memory. Replace whole-document mutation rescans with affected-region work where needed.
+2. Run live Azure and real-player/locked-screen trials; fix observed platform behavior without creating a second decision layer.
+3. Validate current site/consent adapters, native sharing/handoffs, accessibility/viewport cases, and real old-filename storage/update behavior. Preserve every outstanding row in PROGRESS.md.
 
-Editorial serif reading text, system-font commands, warm light/cool dark surfaces, one muted blue accent, thin separators, and one shallow functional surface. A 260px menu presents Read, Review, Share, and More. A selected passage receives one correction bar; Why opens a short excerpt/state/reason with Details collapsed. The reader uses one column and a compact player, without fabricated playback or whole-article timing. Speech setup is an unconnected design state with a disabled secret field.
-
-Obsidian informs content hierarchy/typography and actions in both source and reader. Readwise informs local contextual correction and honest matching uncertainty. Apple materials/toolbars guidance informs restraint and command grouping, not a promise of native Liquid Glass. See [RESEARCH.md](RESEARCH.md) and [prototype/README.md](prototype/README.md).
-
-**Implementation authorization:** the user removed review/approval gates on 2026-10-13. Continue all milestones without waiting for approval. Preserve validation standards and honest limits; do not claim that retrieval updates language-model weights.
+These are implementation priorities, not review gates. Installable alpha source/builds can be published with honest limits while those proofs remain outstanding.

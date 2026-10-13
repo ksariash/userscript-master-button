@@ -1,20 +1,28 @@
-# Validation record and next checks
+# Validation record — experimental alpha
 
-## Reproduce the work that was run
+## Reproduce local checks
 
 ```sh
 ONNXRUNTIME_NODE_INSTALL=skip npm ci
-npm run build:prototype
 npm test
-npm run experiment
-MB_RESULTS=experiments/filtering/results-warm.json npm run experiment
+npm run build
+npm run build:prototype
+node scripts/build-implementation-prototype.mjs
 ```
 
-Node v24.19.0 on Linux x64; Transformers.js 4.3.1, native ONNX 1.30.0, Defuddle 0.19.5, linkedom 0.18.12. Test DOM uses JSDOM 29.0.1 with only our authored script executed; no external resource loading. All eleven tests passed. No GitHub Actions run was claimed.
+All **38 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. No GitHub Actions run is asserted until its result is observed.
 
-The model test uses a revision-pinned downloaded language model and real tensor execution. Policy tests supply assessments intentionally; they are not model evaluation. The GUI study uses authored article data and explicit corrections; its speech controls make no network requests. Node model inference and the prototype remain separate.
+## Actual model evaluation
 
-The real-page labels cover twelve ARTICLE blocks from two public pages (WebKit's Safari 26.0 article and Steph Ango's saw essay). The nuisance cases, including the related-books trap, are authored fixtures. Labels were set by the implementation author before inference and are not independently audited. There is no held-out precision/recall claim. Source page hashes and exact source IDs are in the raw results; captures stay ignored and are not republished.
+Real pinned ONNX inference ran separately on desktop CPU: FLAN-T5-small, Qwen3 0.6B and DeBERTa NLI. The initial 169 labels cover eight pages/four layouts; an additional 85 cases cover three new sites. Six initially mislabelled related links were corrected by semantic audit; initial manifests and Qwen results remain. Labels were set by the implementation author, without independent audit. Later debugging reused regression inputs; current reports are not an untouched final holdout.
+
+The current 85-case NLI/head report has **one ARTICLE false exclusion, 95% NUISANCE precision, 82.6% recall and three abstentions**. Abstentions count as nuisance misses. Targets are unmet; `baseline-head.json` keeps `validatedExclusion: false`. Automatic exclusion recall is therefore zero, and original text remains included unless explicitly corrected or matched by a saved rule. Scores are uncalibrated activations.
+
+Weights: 87,246,587 bytes, pinned revision and integrity in the evaluation/docs. Desktop feature runs took roughly nine seconds to initialize and peaked around 803–875 MB for the whole process. These are not Safari or iPhone resource measurements. See [the raw evaluation record](experiments/evaluation/README.md).
+
+## Actual codec verification
+
+The local Lame encoder produced a mono 24 kHz MP3 from two authored tones: FFprobe reported 2.064 s and 24,768 bytes. FFmpeg decoded and sought without error. This proves a desktop codec path, not live Azure output, native iPhone sharing or locked-screen playback. Current speech tests use mock PCM and transport.
 
 ## Rendering and browser limits
 

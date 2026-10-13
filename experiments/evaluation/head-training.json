@@ -1,0 +1,541 @@
+{
+  "method": "Frozen NLI language model plus a locally trained 14-feature logistic classification head. Activation is not a calibrated probability.",
+  "date": "2026-10-13T19:49:03.676Z",
+  "featureModel": {
+    "id": "Xenova/nli-deberta-v3-xsmall",
+    "revision": "2a4f614a701367a02d51389039afc998faeda637",
+    "dtype": "q8",
+    "license": "Apache-2.0",
+    "weightBytes": 87246587,
+    "contextTokens": 460,
+    "labelsVersion": "function-v7-translations"
+  },
+  "threshold": 0.5,
+  "head": {
+    "weights": [
+      -0.07803678027797131,
+      0.8829521400464796,
+      1.138939706446909,
+      1.156520989085528,
+      1.200342269658201,
+      -0.9803705416649804,
+      -0.12953690287674333,
+      1.256744538865703,
+      -2.2365584401449876,
+      2.2710103791200607,
+      1.628086302977494,
+      0.12108240844957589,
+      0.23957260507293776,
+      -1.0995570852234597,
+      -0.17359190239472932,
+      -0.7351624054857899,
+      -1.7922379647797009,
+      -1.303465320841488,
+      1.1799848275480282
+    ],
+    "bias": -1.1373189143225118
+  },
+  "selection": "Threshold set using development fitted ARTICLE activations plus .05 margin; leave-one-page-out performance is reported separately. No held-out labels used to fit weights or threshold.",
+  "developmentCrossValidation": {
+    "total": 81,
+    "articleFalseExclusions": 7,
+    "nuisancePrecision": 0.8108108108108109,
+    "nuisanceRecall": 0.9375,
+    "abstentions": 0
+  },
+  "developmentFit": {
+    "total": 81,
+    "articleFalseExclusions": 0,
+    "nuisancePrecision": 1,
+    "nuisanceRecall": 0.9375,
+    "abstentions": 0
+  },
+  "foldRows": [
+    {
+      "caseId": "webkit:87",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.9494371180162207
+    },
+    {
+      "caseId": "webkit:89",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.8924846544407031
+    },
+    {
+      "caseId": "webkit:91",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.8835462424434308
+    },
+    {
+      "caseId": "webkit:101",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.878615195146997
+    },
+    {
+      "caseId": "webkit:115",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.8561881747193792
+    },
+    {
+      "caseId": "webkit:117",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02534453521626077
+    },
+    {
+      "caseId": "webkit:119",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.025791688330685167
+    },
+    {
+      "caseId": "webkit:121",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01686106435310042
+    },
+    {
+      "caseId": "webkit:127",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.031023538610067975
+    },
+    {
+      "caseId": "webkit:129",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01828369368579219
+    },
+    {
+      "caseId": "webkit:131",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03253212449286714
+    },
+    {
+      "caseId": "webkit:133",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01889948977258098
+    },
+    {
+      "caseId": "webkit:135",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02628784211181541
+    },
+    {
+      "caseId": "webkit:137",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02235080199282183
+    },
+    {
+      "caseId": "webkit:139",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.011923907823751122
+    },
+    {
+      "caseId": "webkit:141",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.037151403282735945
+    },
+    {
+      "caseId": "webkit:143",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.035835192790733966
+    },
+    {
+      "caseId": "webkit:145",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.07705652292540265
+    },
+    {
+      "caseId": "webkit:3",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9434847356707096
+    },
+    {
+      "caseId": "webkit:6",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9796693251631882
+    },
+    {
+      "caseId": "webkit:8",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9443917261296102
+    },
+    {
+      "caseId": "webkit:9",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.940428309686085
+    },
+    {
+      "caseId": "webkit:11",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9690826656590821
+    },
+    {
+      "caseId": "webkit:14",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9103436412670423
+    },
+    {
+      "caseId": "saw:4",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.8983902554280164
+    },
+    {
+      "caseId": "saw:6",
+      "expected": "ARTICLE",
+      "suggested": "NUISANCE",
+      "activation": 0.8522803942359539
+    },
+    {
+      "caseId": "saw:9",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.033785578357840136
+    },
+    {
+      "caseId": "saw:11",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016094271243895245
+    },
+    {
+      "caseId": "saw:13",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.2310680367392931
+    },
+    {
+      "caseId": "saw:15",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03055259537104812
+    },
+    {
+      "caseId": "saw:17",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02751563048387101
+    },
+    {
+      "caseId": "saw:23",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7524244875288277
+    },
+    {
+      "caseId": "saw:25",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.72063880204422
+    },
+    {
+      "caseId": "saw:31",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8274427069517672
+    },
+    {
+      "caseId": "saw:33",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.6536570031415614
+    },
+    {
+      "caseId": "saw:35",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7194031509388621
+    },
+    {
+      "caseId": "saw:37",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7776487942044846
+    },
+    {
+      "caseId": "saw:1",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9686302029524694
+    },
+    {
+      "caseId": "saw:45",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9829881017142374
+    },
+    {
+      "caseId": "saw:47",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9921670443717635
+    },
+    {
+      "caseId": "saw:52",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9830363664860681
+    },
+    {
+      "caseId": "harbor:0",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.007297768537842978
+    },
+    {
+      "caseId": "harbor:2",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.013873268990074322
+    },
+    {
+      "caseId": "harbor:4",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01522458711716238
+    },
+    {
+      "caseId": "harbor:6",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.5308411207067593
+    },
+    {
+      "caseId": "harbor:8",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9480422367609808
+    },
+    {
+      "caseId": "harbor:10",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9501093458850094
+    },
+    {
+      "caseId": "harbor:12",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01161898874950224
+    },
+    {
+      "caseId": "harbor:14",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.032277392033733476
+    },
+    {
+      "caseId": "harbor:16",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.03449874883711854
+    },
+    {
+      "caseId": "harbor:18",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.019495870835660012
+    },
+    {
+      "caseId": "harbor:20",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.008933593104084073
+    },
+    {
+      "caseId": "harbor:22",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.014555536003303844
+    },
+    {
+      "caseId": "harbor:24",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8726074557407315
+    },
+    {
+      "caseId": "harbor:26",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.02143258656678291
+    },
+    {
+      "caseId": "harbor:28",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01906383512065873
+    },
+    {
+      "caseId": "harbor:30",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03785640374747422
+    },
+    {
+      "caseId": "harbor:32",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7141124532017924
+    },
+    {
+      "caseId": "harbor:34",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.016523019971716617
+    },
+    {
+      "caseId": "harbor:36",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7441030577894533
+    },
+    {
+      "caseId": "harbor:38",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.6764643163781473
+    },
+    {
+      "caseId": "field-notes:0",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.005946186529007406
+    },
+    {
+      "caseId": "field-notes:2",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.008557119459259627
+    },
+    {
+      "caseId": "field-notes:4",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.005168789040527609
+    },
+    {
+      "caseId": "field-notes:6",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01588982183957017
+    },
+    {
+      "caseId": "field-notes:8",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03475384496550201
+    },
+    {
+      "caseId": "field-notes:10",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.5200874654941404
+    },
+    {
+      "caseId": "field-notes:12",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9168340170759404
+    },
+    {
+      "caseId": "field-notes:14",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.9532696589426359
+    },
+    {
+      "caseId": "field-notes:16",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01630424525330129
+    },
+    {
+      "caseId": "field-notes:18",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.0071655419729501416
+    },
+    {
+      "caseId": "field-notes:20",
+      "expected": "NUISANCE",
+      "suggested": "ARTICLE",
+      "activation": 0.040025300040213235
+    },
+    {
+      "caseId": "field-notes:22",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.006939513629576005
+    },
+    {
+      "caseId": "field-notes:24",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.037378122900403654
+    },
+    {
+      "caseId": "field-notes:26",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.009101334410949208
+    },
+    {
+      "caseId": "field-notes:28",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.8139457900928208
+    },
+    {
+      "caseId": "field-notes:30",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.03882363180294048
+    },
+    {
+      "caseId": "field-notes:32",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7834764988937891
+    },
+    {
+      "caseId": "field-notes:34",
+      "expected": "ARTICLE",
+      "suggested": "ARTICLE",
+      "activation": 0.01429102032671902
+    },
+    {
+      "caseId": "field-notes:36",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.7376649621791519
+    },
+    {
+      "caseId": "field-notes:38",
+      "expected": "NUISANCE",
+      "suggested": "NUISANCE",
+      "activation": 0.755353714710435
+    }
+  ]
+}

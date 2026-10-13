@@ -1,0 +1,50 @@
+import test from 'node:test'; import assert from 'node:assert/strict';
+import { DecisionStore } from '../core/decisions.mjs'; import { AzureClient, ssml } from '../src/speech/azure.mjs'; import { SpeechSession } from '../src/speech/session.mjs';
+import { ExportJob, transcript, encodeMP3 } from '../src/speech/export.mjs'; import { splitText, segmentsFor } from '../src/speech/audio.mjs';
+class FakeAudio extends EventTarget {
+  constructor() { super(); this.src=''; this.duration=1; this.currentTime=0; this.paused=true; this.playbackRate=1; this.plays=0; }
+  pause() { this.paused=true; this.dispatchEvent(new Event('pause')); }
+  async play() { this.paused=false; this.plays++; this.dispatchEvent(new Event('playing')); }
+}
+const config = {region:'eastus',voice:'en-US-JennyNeural',rate:1};
+const pcm = () => new ArrayBuffer(48000);
+const waitTick = () => new Promise(r=>setTimeout(r,0));
+const setup = request => {
+  const store = new DecisionStore([{id:'a',originalText:'Original one.'},{id:'b',originalText:'Original two.'}],{documentId:'d'}), audio = new FakeAudio(), calls=[];
+  const client = new AzureClient({getKey: async()=> 'k'.repeat(32),request: details=> {calls.push(details); return request ? request(details) : Promise.resolve({status:200,response:pcm()});}});
+  const speech = new SpeechSession(store,client,{audio,getConfig:()=>config,makeURL:()=>`blob:test:${calls.length}`,revokeURL:()=>{}});
+  return {store,audio,calls,speech,client};
+};
+test('Mock Azure transport rechecks inclusion after awaiting the key and never sends a skipped block', async()=>{
+  let unlock; const key = new Promise(r=>unlock=r), calls=[], store=new DecisionStore([{id:'a',originalText:'Never send'}],{documentId:'d'});
+  const client=new AzureClient({getKey:()=>key,request:d=> {calls.push(d);return Promise.resolve({status:200,response:pcm()});}}), audio=new FakeAudio();
+  const speech=new SpeechSession(store,client,{audio,getConfig:()=>config,makeURL:()=> 'blob:x',revokeURL:()=>{}}); const job=speech.play(); await waitTick(); store.correct('a','NUISANCE'); unlock('k'.repeat(32)); await job;
+  assert.equal(calls.length,0); assert.equal(audio.plays,0); speech.stop();
+});
+test('Mock narration reuses compatible PCM after corrections, and late jobs cannot take over a new reading', async()=>{
+  const {store,speech,audio,calls}=setup(); await speech.play('a'); await waitTick(); await waitTick(); const before=calls.length;
+  store.correct('b','NUISANCE'); await speech.play('a'); assert.equal(calls.length,before); assert.equal(audio.plays,2);
+  assert.ok(calls.every(d=>d.url==='https://eastus.tts.speech.microsoft.com/cognitiveservices/v1')); assert.ok(calls.every(d=>d.headers['Ocp-Apim-Subscription-Key']==='k'.repeat(32)));
+  speech.stop();
+  let release; const late=setup(()=>new Promise(r=>release=r)); const first=late.speech.play('a'); await waitTick(); late.speech.cancel(); release({status:200,response:pcm()}); await first; assert.equal(late.audio.plays,0); late.speech.stop();
+});
+test('Mock export aborts on selection changes and transcripts use exactly the enabled sequence', async()=>{
+  let release; const s=setup(()=>new Promise(r=>release=r)); const exporter=new ExportJob(s.store,s.speech,{encode:async()=>new Blob(['mock'],{type:'audio/mpeg'})}); const job=exporter.prepare(); await waitTick(); s.store.correct('b','NUISANCE'); release({status:200,response:pcm()}); await assert.rejects(job,e=>e.name==='AbortError'); assert.equal(exporter.currentArtifact(),null); assert.equal(transcript(s.store.snapshot()),'Original one.'); s.store.undo(); assert.equal(transcript(s.store.snapshot()),'Original one.\n\nOriginal two.'); s.speech.stop();
+});
+test('Mock service failure does not retry invalid credentials or leak its response body', async()=>{
+  let count=0; const client=new AzureClient({getKey:async()=> 'k'.repeat(32),request:()=>{count++;return Promise.resolve({status:401,responseText:'secret body'});}});
+  await assert.rejects(client.synthesize('Safe text',config),e=>e.message.includes('key or region')&&!e.message.includes('secret')); assert.equal(count,1);
+  assert.equal(ssml('<script>& "quote"',config.voice).includes('<script>'),false); assert.throws(()=>ssml('x','evil" onload="x'));
+});
+test('Long speech passages are not truncated, chunks maintain exact wording and distinct identities',()=>{
+  const text='A long sentence with 😀 and punctuation. '.repeat(100); const chunks=splitText(text); assert.equal(chunks.map(x=>x.text).join(''),text); assert.ok(chunks.every(x=>x.text.length<=800));
+  const segments=segmentsFor({passages:[{id:'a',revision:1,text}]}); assert.equal(new Set(segments.map(s=>s.id)).size,segments.length);
+});
+test('Actual local MP3 encoder produces a compact MPEG recording from PCM, separately from Azure',async()=>{
+  const buffer=new ArrayBuffer(24000*2), view=new DataView(buffer); for(let i=0;i<24000;i++)view.setInt16(i*2,Math.sin(i/24000*Math.PI*2*440)*8000,true);
+  const blob=await encodeMP3([buffer],{quality:'standard'}); assert.equal(blob.type,'audio/mpeg'); assert.ok(blob.size>5000&&blob.size<20000);
+  const bytes=new Uint8Array(await blob.arrayBuffer()); assert.equal(bytes[0],0xff); assert.equal(bytes[1]&0xe0,0xe0);
+});
+test('Mock late voice demo is canceled before article playback or settings changes, and retired sessions cannot synthesize',async()=>{
+ let release;const s=setup(()=>new Promise(r=>release=r));const demo=s.speech.demo();await waitTick();s.speech.cancel();release({status:200,response:pcm()});await demo;assert.equal(s.audio.plays,0);s.speech.stop();const before=s.calls.length;await assert.rejects(s.speech.play('a'),e=>e.name==='AbortError');assert.equal(s.calls.length,before);
+});
