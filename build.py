@@ -2,7 +2,7 @@
 """Reproducible dependency-free userscript builder."""
 from pathlib import Path
 P=Path(__file__).resolve().parent
-VERSION='0.1.0'
+VERSION='0.1.1'
 META=f'''// ==UserScript==
 // @name         iPhone Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
@@ -11,7 +11,7 @@ META=f'''// ==UserScript==
 // @author       ksariash
 // @match        *://*/*
 // @exclude      *://*.banking.*/*
-// @run-at       document-idle
+// @run-at       document-start
 // @noframes
 // @inject-into  content
 // @grant        GM.getValue
