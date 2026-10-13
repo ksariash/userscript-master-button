@@ -18,6 +18,7 @@ with sync_playwright() as p:
   page.screenshot(path=str(ROOT/'dist'/f'menu-02-{scheme}.png'))
   page.locator('[data-action="filter"]').click();page.locator('[data-action="page-review"]').click()
   assert not page.locator('.mb-panel').is_visible()
+  assert 'system-ui' in page.locator('.mb-review-bar').evaluate('(e)=>getComputedStyle(e).fontFamily')
   first=page.locator('.mb-page-toggle').first
   assert first.bounding_box()['width']>=44
   source=first.get_attribute('data-action').split(':')[1]

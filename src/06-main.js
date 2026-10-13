@@ -45,7 +45,7 @@ async function handleAction(action,el){
    catch(e){state.teachError='Could not save learning. Your selection is preserved. Retry when the model and storage are available.';}
    finally{state.teaching=false;render();}return;
   }
-  if(action==='semantic-reset'){for(const x of vectorsForSite())cancelTraining(domainKey(),x.h);delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
+  if(action==='semantic-reset'){for(const key of trainingVersions.keys())if(key.startsWith(domainKey()+'|'))trainingVersions.set(key,trainingVersions.get(key)+1);for(const x of vectorsForSite())cancelTraining(domainKey(),x.h);delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}

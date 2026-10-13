@@ -12,7 +12,7 @@ with sync_playwright() as p:
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
  page.set_content(html)
  page.evaluate('''() => {window.GM={getValue:async(k,d)=>k.endsWith(':azure')?d:{semanticAuto:false},setValue:async()=>true};}''')
- page.evaluate(script.replace('\n})();','\nwindow.__mb_test={reading,prefs,semantic,semanticDecision,beginFilterReview,endFilterReview,hideNode,hidden,host,render};\n})();'))
+ page.evaluate(script.replace('\n})();','\nwindow.__mb_test={reading,get prefs(){return prefs;},semantic,semanticDecision,beginFilterReview,endFilterReview,hideNode,hidden,host,render};\n})();'))
  launcher=page.locator('.mb-launch');rect=launcher.bounding_box();cx=rect['x']+rect['width']/2;cy=rect['y']+rect['height']/2
  page.touchscreen.tap(cx,cy)
  assert page.locator('.mb-panel').is_visible(),'First tap must open'

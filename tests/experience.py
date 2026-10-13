@@ -18,7 +18,7 @@ with sync_playwright() as p:
  {ShortName:'en-US-GuyNeural',Locale:'en-US',LocalName:'Guy',Gender:'Male'},
  {ShortName:'fr-FR-DeniseNeural',Locale:'fr-FR',LocalName:'Denise',Gender:'Female'}
  ])})};}''')
- page.evaluate(src.replace("\n})();", "\nwindow.__mb_test={semantic,prefs,render,semanticDecision};\n})();"))
+ page.evaluate(src.replace("\n})();", "\nwindow.__mb_test={semantic,get prefs(){return prefs;},render,semanticDecision};\n})();"))
  page.locator('.mb-launch').click()
  page.locator('[data-action="speech"]').click()
  page.locator('#mb-region').wait_for()
