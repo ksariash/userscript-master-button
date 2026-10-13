@@ -45,7 +45,7 @@ with sync_playwright() as p:
  assert page.locator('.mb-panel').inner_text().find('Check out these related articles')>=0
  page.locator('#mb-reason').select_option('related')
  page.locator('[data-action="teach-skip"]').click()
- page.wait_for_function("(window.__semanticTrainingDone = __mb_test.prefs.semanticExamples && __mb_test.prefs.semanticExamples[''].length > 0) === true")
+ page.wait_for_function("(window.__semanticTrainingDone = __mb_test.prefs.semanticExamples && (__mb_test.prefs.semanticExamples['']?.length || 0) > 0) === true")
  res=page.evaluate('''() => {const vector=[1,0,0];return {n:__mb_test.prefs.semanticExamples[''].length,d:__mb_test.semanticDecision(vector),storedText:JSON.stringify(__mb_test.prefs.semanticExamples['']).includes('related articles')};}''')
  assert res['n']==1,res
  assert res['d']['excluded'],res

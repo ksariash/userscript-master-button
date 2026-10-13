@@ -20,11 +20,11 @@ jobs:
       - run: git diff --exit-code -- dist/master-button.user.js dist/master-button.meta.js
       - run: pip install playwright==1.58.0 && python -m playwright install --with-deps chromium
       - run: |
-          python tests/browser.py
-          python tests/reddit_delayed.py
-          python tests/experience.py
-          python tests/ux_revision.py
-          python tests/page_review.py
+          failed=0
+          for test in browser reddit_delayed experience ux_revision page_review; do
+            python "tests/$test.py" || failed=1
+          done
+          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

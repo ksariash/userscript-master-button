@@ -24,13 +24,14 @@ with sync_playwright() as p:
  page.locator('[data-transcript]').evaluate('(e)=>e.scrollTop=1040')
  original=page.locator('[data-transcript]').evaluate('(e)=>e.scrollTop')
  assert original>900,original
- page.locator('[data-action="pass-toggle:4"]').click()
+ chosen=page.locator('[data-transcript]').evaluate("""e=>{const r=e.getBoundingClientRect();return [...e.querySelectorAll('.mb-pass-toggle')].find(b=>{const a=b.getBoundingClientRect();return a.top>=r.top&&a.bottom<=r.bottom;}).dataset.action.split(':')[1]}""")
+ page.locator(f'[data-action="pass-toggle:{chosen}"]').click()
  after=page.locator('[data-transcript]').evaluate('(e)=>e.scrollTop')
  assert abs(after-original)<=2,(original,after)
  assert page.locator('[data-audio-now]').count()==1
  assert page.locator('[data-audio-total]').count()==1
- assert page.locator('[data-action="pass-why:4"]').count()==1
- page.locator('[data-action="pass-why:4"]').click()
+ assert page.locator(f'[data-action="pass-why:{chosen}"]').count()==1
+ page.locator(f'[data-action="pass-why:{chosen}"]').click()
  assert page.get_by_text('Why this passage?').count()==1
  page.locator('[data-action="back"]').click()
  assert page.locator('[data-transcript]').count()==1
