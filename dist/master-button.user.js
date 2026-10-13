@@ -117,12 +117,12 @@ const domainKey=()=>location.hostname.toLowerCase().replace(/^www\./,'');
 const filterEnabled=()=>prefs.filter[domainKey()]!==false;
 const cleanupEnabled=()=>prefs.siteCleanup[siteName()]!==false;
 
-// Reversible visual filtering. Learning is a bounded local hash-based classifier,
-// NOT a pretrained or fine-tuned LLM. Classifier labels come exclusively from explicit choices.
+// Reversible visual rules. Legacy token scores are read-only; new explicit
+// corrections use the shared passage store and local embedding prototypes.
 const hidden=new Map(); let picker=null, pickerMatches=[], preview=false, filterTick=0;
 const BAN_SEL='[data-mb-host],html,body,head,main,article,[role="main"],shreddit-post';
 function protectedNode(el){return !el || !el.isConnected || el.closest('[data-mb-host]') || el.matches(BAN_SEL) || el.querySelector('article,main,[role="main"],[data-mb-host]') || el===document.documentElement || el===document.body;}
-function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
+function hideNode(el,reason='Rule',owner='filter'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason,owner});el.style.setProperty('display','none','important');updateCount();return true;}
 function showNode(el){const old=hidden.get(el);if(!old)return;if(old.display)el.style.setProperty('display',old.display,old.priority);else el.style.removeProperty('display');hidden.delete(el);updateCount();}
 function showAll(){for(const e of [...hidden.keys()])showNode(e);}
 function updateCount(){
@@ -184,7 +184,8 @@ function passageAnalysis(p){
  const base=p.analysis||{excluded:false,reason:'Not classified',model:'Unavailable',source:'no inference',score:null};
  const ownedHidden=[...hidden,...(state.reviewHidden||[])].find(([el])=>p.element&&(el===p.element||el.contains(p.element)));
  const rule=filterEnabled()?p.ruleReason:null;
- const automaticReason=rule||ownedHidden?.[1].reason;
+ const owned=ownedHidden?.[1],ownedActive=owned&&(owned.owner==='site'?cleanupEnabled():filterEnabled());
+ const automaticReason=rule||(ownedActive&&(!owned.reason.startsWith('Custom rule:')||p.ruleReason)?owned.reason:null);
  if(p.override!==null)return {...base,excluded:p.override==='skip',reason:`You ${p.override==='skip'?'skipped':'kept'} this passage`,source:'Your explicit choice'};
  if(automaticReason)return {...base,excluded:true,reason:automaticReason,source:'Saved page rule'};
  return {...base,excluded:filterEnabled()&&!!base.excluded};
@@ -353,7 +354,8 @@ function renderPageControls(){
   const x=rightMargin?r.right+2:leftMargin?r.left-46:null;
   const y=Math.max(top+2,r.top,lastBottom+2);
   // Crowded and edge-to-edge text uses the native passage chooser, never a target over text.
-  if(x===null||y+44>Math.min(r.bottom+6,top+h-106)){needsPicker=true;continue;}
+  if(x===null||y+44>r.bottom+6){needsPicker=true;continue;}
+  if(y+44>top+h-106)continue;
   let b=markers.get(p.id);
   if(!b){b=document.createElement('button');b.type='button';b.className='mb-page-toggle';b.dataset.sourceId=p.id;layer.insertBefore(b,bar);}
   markers.delete(p.id);b.dataset.action='page-toggle:'+p.id;
@@ -511,6 +513,7 @@ async function reclassifyTranscript(){
  await runSemanticScan();syncPassageViews();
 }
 
+function hideSiteNode(el,reason){return hideNode(el,reason,'site');}
 const REDDIT_NAGS=[
  '#configured-xpromo-unrated_block','#configured-xpromo-blocking_xpromo_nsfw_blocking','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop_cms','#desktop-dynamic-upsell-dialog','#app-upsell-blocking-bottom-sheet-direct','#app-upsell-blocking-bottom-sheet-seo','#xpromo-bottom-sheet','#xpromo-new-app-selector','#xpromo-app-selector','#xpromo-small-header','#nsfw-desktop-auth-blocking-modal-dialog','#nsfw-desktop-auth-blocking-modal-overlay-element','#nsfw-qr-dialog','#blocking-modal','#nsfw-desktop-auth-blocking-modal','xpromo-top-button','xpromo-app-selector','faceplate-bottom-sheet[id*="xpromo"]','rpl-bottom-sheet[id*="app-upsell"]','rpl-bottom-sheet[id*="xpromo"]','configured-xpromo-modal[id*="xpromo"]','.configured-xpromo-bottom-sheet','.configured-xpromo-full-screen','.XPromoPopup','.XPromoPopupRpl','.XPromoPopupRplNew','.XPromoBottomBar','.XPromoInFeed','.XPromoPill','.AppSelectorModal__body','.upsell_banner','.rpl-dialog#age-gate-interstitial'
 ];
@@ -563,14 +566,14 @@ function redditExtraPromos(){
  const headings=safeMatches('h1,h2,h3,[role="heading"]').filter(h=>REDDIT_PROMO_HEAD.test(text(h.textContent).slice(0,150)));
  for(const heading of headings.slice(0,18)){
   const candidate=redditRootForPromotion(heading);
-  if(candidate){candidate.setAttribute('data-mb-reddit-nag','');if(hideNode(candidate,'Reddit app interstitial'))removed++;}
+  if(candidate){candidate.setAttribute('data-mb-reddit-nag','');if(hideSiteNode(candidate,'Reddit app interstitial'))removed++;}
  }
  // A plain visible modal may lack a heading but still contain unmistakable app-promo copy.
  for(const el of safeMatches(REDDIT_DIALOGISH).slice(0,55)){
   if(protectedNode(el)||el.querySelector('input,textarea,[contenteditable="true"]'))continue;
   const msg=text(el.textContent).slice(0,1200);
   if(msg&&msg.length<1000&&REDDIT_PROMO_HEAD.test(msg)){
-   el.setAttribute('data-mb-reddit-nag','');if(hideNode(el,'Reddit app interstitial'))removed++;
+   el.setAttribute('data-mb-reddit-nag','');if(hideSiteNode(el,'Reddit app interstitial'))removed++;
   }
  }
  return removed;
@@ -608,16 +611,16 @@ function redditRestoreScrollOwnership(){
 
 function siteClean(){
  if(state.filterReview||!cleanupEnabled()||siteName()==='other'||isAuthPage())return;
- const name=siteName();if(name==='reddit')toggleRedditCSS(true);let hiddenPromos=0;for(const sel of siteSelectors[name]||[])for(const n of safeMatches(sel))if(hideNode(n,'Known '+name+' app prompt'))hiddenPromos++;
+ const name=siteName();if(name==='reddit')toggleRedditCSS(true);let hiddenPromos=0;for(const sel of siteSelectors[name]||[])for(const n of safeMatches(sel))if(hideSiteNode(n,'Known '+name+' app prompt'))hiddenPromos++;
  if(name==='reddit')hiddenPromos+=redditExtraPromos();
  if(['reddit','instagram','facebook','x','linkedin'].includes(name)){
   // Never hide a generic dialog based solely on its role: only clearly matching promo copy.
   for(const el of safeMatches(DIALOGS).slice(0,50)){
-   const body=text(el.textContent).slice(0,900);if(body.length&&NAG_RE.test(body)&&body.length<700&&el.querySelectorAll('input,textarea').length===0)hideNode(el,'App or login interruption');
+   const body=text(el.textContent).slice(0,900);if(body.length&&NAG_RE.test(body)&&body.length<700&&el.querySelectorAll('input,textarea').length===0)hideSiteNode(el,'App or login interruption');
   }
   for(const a of safeMatches('header a,nav a,header button,nav button').slice(0,60)){
    const label=text(a.textContent+' '+(a.getAttribute('aria-label')||''));
-   if(NAG_RE.test(label)&&label.length<85)hideNode(a,'App promotion');
+   if(NAG_RE.test(label)&&label.length<85)hideSiteNode(a,'App promotion');
   }
  }
  if(name==='reddit'){if(hiddenPromos)redditDismissed=true;redditUnlockScroll();if(prefs.nsfw)revealReddit();}
@@ -639,7 +642,7 @@ function revealReddit(){
  for(const e of safeMatches('xpromo-nsfw-blocking-container')){
   const sr=e.shadowRoot;if(!sr)continue;
   if(!sr.querySelector('slot[data-mb-nsfw]')){const slot=document.createElement('slot');slot.dataset.mbNsfw='1';sr.append(slot);}
-  sr.querySelectorAll('[role="dialog"],.prompt,.viewInApp').forEach(n=>{if(NAG_RE.test(text(n.textContent)))hideNode(n,'NSFW app prompt');});
+  sr.querySelectorAll('[role="dialog"],.prompt,.viewInApp').forEach(n=>{if(NAG_RE.test(text(n.textContent)))hideSiteNode(n,'NSFW app prompt');});
  }
 }
 function updateSite(){siteClean();appliedFilter();}
@@ -876,7 +879,7 @@ const styles=`\n:host{all:initial;--fg:#202632;--muted:#687080;--bg:#f7f8fa;--su
 .mb-transcript{flex:1;min-height:0;overflow:auto;padding:4px 12px 12px;overscroll-behavior:contain}.mb-paragraph{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-bottom:1px solid var(--bd)}.mb-paragraph.current{background:var(--tint)}.mb-paragraph.excluded .mb-pass-text{color:var(--muted);background:var(--surface)}.mb-pass-toggle{min-width:44px;min-height:44px;border:0;border-radius:10px;background:var(--surface);display:grid;place-items:center}.mb-pass-content{flex:1;min-width:0}.mb-pass-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}.mb-why-btn{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--accent);font-size:11px}.mb-pass-text{display:block;width:100%;min-height:44px;text-align:left;border:0;background:transparent;padding:0;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere}
 .mb-controls{flex:none;display:grid;gap:4px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);background:var(--bg)}.mb-timeline{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}.mb-range{width:100%;height:28px;margin:0;accent-color:var(--accent)}.mb-player-row{display:flex;justify-content:space-between;align-items:center;gap:5px}.mb-primary-play{background:var(--fg);color:var(--bg);border-radius:50%;height:44px;width:44px}.mb-player-extra{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.mb-player-extra .mb-action{justify-content:center;font-size:10px;gap:3px;padding:5px 2px}.mb-player-extra .mb-action svg{width:14px}
 .mb-toast{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:352px;margin:auto;padding:9px 11px;border-radius:12px;background:#202631f2;color:#fff;z-index:6;font-size:12px;line-height:1.4;pointer-events:none;overflow-wrap:anywhere;max-height:100px;overflow:hidden}.mb-preview{height:95px;display:grid;place-items:center;overflow:hidden}.mb-preview img{max-width:100%;max-height:95px}.mb-pill{font-size:10px;color:var(--muted)}
-.mb-page-controls,.mb-toast{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}.mb-page-toggle{position:fixed;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--accent);font-size:22px;z-index:2;isolation:isolate}.mb-page-toggle::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface);border:1px solid var(--bd);z-index:-1}.mb-page-toggle[aria-pressed=true]{color:var(--muted)}.mb-review-bar{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;right:12px;max-width:352px;margin:auto;display:grid;gap:0;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;pointer-events:auto;box-shadow:0 3px 15px #0003;z-index:5;font-size:12px}.mb-review-actions,.mb-review-picker{display:flex;align-items:center;gap:4px}.mb-review-picker[hidden]{display:none}.mb-review-picker select{flex:1;min-width:0;min-height:44px;border:0;background:transparent;font-size:16px}.mb-review-bar span{flex:1}.mb-review-bar button{min-width:44px;min-height:44px;padding:4px 8px;background:transparent;color:var(--accent);border:0}
+.mb-page-controls,.mb-toast{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}.mb-page-toggle{position:fixed;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--accent);font-size:22px;z-index:2;isolation:isolate}.mb-page-toggle::before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--surface);border:1px solid var(--bd);z-index:-1}.mb-page-toggle[aria-pressed=true]{color:var(--muted)}.mb-review-bar{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;right:12px;width:min(352px,calc(100vw - 24px));max-width:352px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:0;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:12px;padding:2px 8px;pointer-events:auto;box-shadow:0 3px 15px #0003;z-index:5;font-size:12px}.mb-review-actions,.mb-review-picker{display:flex;align-items:center;gap:4px;min-width:0;width:100%}.mb-review-picker[hidden]{display:none}.mb-review-picker select{flex:1;min-width:0;width:0;min-height:44px;border:0;background:transparent;font-size:16px}.mb-review-bar span{flex:1}.mb-review-bar button{min-width:44px;min-height:44px;padding:4px 8px;background:transparent;color:var(--accent);border:0}
 \n`;
 const globalStyles=`[data-mb-review-target]{outline:2px solid #4c80ff!important;outline-offset:2px!important;}[data-mb-skipped]{color:#727780!important;background-color:rgba(128,128,128,.09)!important;}[data-mb-skipped] *{color:inherit!important;}[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
 function head(title){const menu=state.view==='menu';return `<header class="mb-head">${menu?'<span class="mb-brand" aria-hidden="true">✦</span>':`<button type="button" class="mb-small mb-icon-btn" data-action="back" aria-label="Back">${ico('back',19)}</button>`}<h2>${esc(title)}</h2><button type="button" class="mb-small mb-icon-btn" data-action="close" aria-label="Close drawer">${ico('close',16)}</button></header>`;}

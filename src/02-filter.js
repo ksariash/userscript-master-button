@@ -1,9 +1,9 @@
-// Reversible visual filtering. Learning is a bounded local hash-based classifier,
-// NOT a pretrained or fine-tuned LLM. Classifier labels come exclusively from explicit choices.
+// Reversible visual rules. Legacy token scores are read-only; new explicit
+// corrections use the shared passage store and local embedding prototypes.
 const hidden=new Map(); let picker=null, pickerMatches=[], preview=false, filterTick=0;
 const BAN_SEL='[data-mb-host],html,body,head,main,article,[role="main"],shreddit-post';
 function protectedNode(el){return !el || !el.isConnected || el.closest('[data-mb-host]') || el.matches(BAN_SEL) || el.querySelector('article,main,[role="main"],[data-mb-host]') || el===document.documentElement || el===document.body;}
-function hideNode(el,reason='Rule'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason});el.style.setProperty('display','none','important');updateCount();return true;}
+function hideNode(el,reason='Rule',owner='filter'){if(protectedNode(el))return false;if(passageStore.records.some(p=>p.override==='keep'&&p.element&&(el===p.element||el.contains(p.element))))return false;if(hidden.has(el))return false;const passage=passageRecord(el);if(passage&&passage.originalDisplay!==null)restorePassageStyle(passage);hidden.set(el,{display:el.style.getPropertyValue('display'),priority:el.style.getPropertyPriority('display'),reason,owner});el.style.setProperty('display','none','important');updateCount();return true;}
 function showNode(el){const old=hidden.get(el);if(!old)return;if(old.display)el.style.setProperty('display',old.display,old.priority);else el.style.removeProperty('display');hidden.delete(el);updateCount();}
 function showAll(){for(const e of [...hidden.keys()])showNode(e);}
 function updateCount(){

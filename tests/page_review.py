@@ -24,6 +24,7 @@ with sync_playwright() as p:
   source=first.get_attribute('data-action').split(':')[1]
   assert page.evaluate("""id=>{const p=T.passageStore.byId.get(id).element.getBoundingClientRect(),b=[...document.querySelector('[data-mb-host]').shadowRoot.querySelectorAll('.mb-page-toggle')].find(x=>x.dataset.sourceId===id).getBoundingClientRect();return b.left>=p.right||b.right<=p.left}""",source)
   assert first.evaluate('(e)=>{e.focus();const before=e;T.render();return before===document.querySelector("[data-mb-host]").shadowRoot.activeElement}')
+  assert page.locator('.mb-review-bar').evaluate('(e)=>[...e.querySelectorAll("button")].every(b=>{const r=b.getBoundingClientRect();return !r.width||(r.left>=0&&r.right<=390)})')
   first.click();page.wait_for_function('(id)=>T.passageStore.byId.get(id).override==="skip"',arg=source)
   assert page.evaluate('(id)=>T.passageStore.byId.get(id).element.hasAttribute("data-mb-skipped")',source)
   page.screenshot(path=str(ROOT/'dist'/f'page-review-02-{scheme}.png'))
@@ -45,6 +46,7 @@ with sync_playwright() as p:
   page.locator('[data-action="page-review"]').click()
   assert page.locator('#mb-review-passage').is_visible(),'Crowded layout needs a complete passage chooser'
   assert page.locator('#mb-review-passage option').count()==16
+  assert page.locator('.mb-review-bar').evaluate('(e)=>[...e.querySelectorAll("button")].every(b=>{const r=b.getBoundingClientRect();return r.left>=0&&r.right<=390})')
   chosen=page.locator('#mb-review-passage option').nth(9).get_attribute('value')
   page.locator('#mb-review-passage').select_option(chosen)
   page.locator('[data-action="page-selected-toggle"]').click()

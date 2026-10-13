@@ -5,7 +5,8 @@ function passageAnalysis(p){
  const base=p.analysis||{excluded:false,reason:'Not classified',model:'Unavailable',source:'no inference',score:null};
  const ownedHidden=[...hidden,...(state.reviewHidden||[])].find(([el])=>p.element&&(el===p.element||el.contains(p.element)));
  const rule=filterEnabled()?p.ruleReason:null;
- const automaticReason=rule||ownedHidden?.[1].reason;
+ const owned=ownedHidden?.[1],ownedActive=owned&&(owned.owner==='site'?cleanupEnabled():filterEnabled());
+ const automaticReason=rule||(ownedActive&&(!owned.reason.startsWith('Custom rule:')||p.ruleReason)?owned.reason:null);
  if(p.override!==null)return {...base,excluded:p.override==='skip',reason:`You ${p.override==='skip'?'skipped':'kept'} this passage`,source:'Your explicit choice'};
  if(automaticReason)return {...base,excluded:true,reason:automaticReason,source:'Saved page rule'};
  return {...base,excluded:filterEnabled()&&!!base.excluded};
@@ -174,7 +175,8 @@ function renderPageControls(){
   const x=rightMargin?r.right+2:leftMargin?r.left-46:null;
   const y=Math.max(top+2,r.top,lastBottom+2);
   // Crowded and edge-to-edge text uses the native passage chooser, never a target over text.
-  if(x===null||y+44>Math.min(r.bottom+6,top+h-106)){needsPicker=true;continue;}
+  if(x===null||y+44>r.bottom+6){needsPicker=true;continue;}
+  if(y+44>top+h-106)continue;
   let b=markers.get(p.id);
   if(!b){b=document.createElement('button');b.type='button';b.className='mb-page-toggle';b.dataset.sourceId=p.id;layer.insertBefore(b,bar);}
   markers.delete(p.id);b.dataset.action='page-toggle:'+p.id;

@@ -22,7 +22,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
  // CSS-rule exclusions are shared even while preview temporarily reveals the source.
  t.prefs.rules['example.com']=[{type:'css',selector:'#a1',enabled:true}];t.updateSite();t.openReader();const ruled=t.passageRecord(w.document.querySelector('#a1'));
  assert(t.passageExcluded(ruled));assert(t.reading.passages.filter(p=>p.sourceId===ruled.id).every(p=>p.excluded));
- t.beginFilterReview();assert.notEqual(ruled.element.style.display,'none');assert(t.passageExcluded(ruled));t.endFilterReview();assert.equal(ruled.element.style.display,'none');
+ t.beginFilterReview();assert.notEqual(ruled.element.style.display,'none');assert(t.passageExcluded(ruled));t.setFiltering(false);assert(!t.passageExcluded(ruled),'Disabled rules must not survive through a preview snapshot');t.setFiltering(true);t.endFilterReview();assert.equal(ruled.element.style.display,'none');
  await t.correctPassage(ruled,'keep');assert(!t.passageExcluded(ruled));assert.notEqual(ruled.element.style.display,'none');await t.undoPassageCorrection();assert(t.passageExcluded(ruled));assert.equal(ruled.element.style.display,'none');
  t.setFiltering(false);assert(!t.passageExcluded(ruled));t.setFiltering(true);
  // Teaching routes through the same correction and Undo operation, exactly one prototype.
