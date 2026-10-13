@@ -15,3 +15,7 @@
 4. Test another site and verify the compact drawer, safe-area placement, visual element picker, and audio reader all remain usable.
 
 Known tradeoff: the timed upsell has only been validated against a synthetic approximation. If the live page uses a closed shadow DOM or a full-page server redirect, it will require further site-specific work.
+
+## 0.1.2 additions
+
+Run `python tests/experience.py`. It verifies 30+ Azure region values, three **mock** Azure voices, inline filtering of options, compact speech screen (<530px in Chromium at 390×844), and explicit sample-label training using a **fake deterministic embedding** model. It DOES NOT verify the 23 MB MiniLM download, Transformers.js operation in iPhone Safari or Azure credentials. Chromium UI screenshots: `dist/speech-compact.png`. Physical iPhone validation is mandatory before claiming real model operation or background narration.

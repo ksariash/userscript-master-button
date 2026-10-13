@@ -16,7 +16,13 @@ async function handleAction(action,el){
   }
   if(action==='reader'){if(reading.passages.length)openView('reader');else openReader();return;}
   if(action==='reader-new'){openReader();return;}
-  if(action==='filter'){openView('filter');return;}
+  if(action==='filter'){openView('filter');if(prefs.semanticAuto&&semantic.status==='idle')void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});return;}
+  if(action==='semantic-load'){if(semantic.extractor){for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');scheduleSemanticScan();notify('Rescanning article with local model.');}else{notify('Loading on-device language model…');await loadSemantic();await ensureSemanticSeeds();scheduleSemanticScan();if(reading.passages.length)await reclassifyTranscript();notify('Local MiniLM is ready.');}render();return;}
+  if(action==='semantic-toggle'){prefs.semanticAuto=!prefs.semanticAuto;await saveSettings();if(!prefs.semanticAuto){for(const [el,old] of [...hidden])if(String(old.reason).startsWith('Similar to')||String(old.reason).startsWith('Likely'))showNode(el);}else{if(!semantic.extractor)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});else scheduleSemanticScan();}render();return;}
+  if(action==='select-phrase'){rememberSelectedPhrase();openView(state.selectionText?'teach':'select-text');return;}
+  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}openView('teach');return;}
+  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');openView('filter');return;}
+  if(action==='semantic-reset'){delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
@@ -55,12 +61,12 @@ async function handleAction(action,el){
    const b=responseBlob(r,type);const name=`${siteName()}-${Date.now()}.${m.kind==='video'?'mp4':/\.png/i.test(m.url)?'png':'jpg'}`;
    if(action==='media-share')await downloadBlob(b,name);else{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);notify('Download requested.');}return;
   }
-  if(action==='speech'){openView('speech');return;}
+  if(action==='speech'){openView('speech');if(azureKey&&state.voicesRegion!==prefs.azure.region&&!state.voicesLoading)void loadVoices().catch(e=>notify(e.message));return;}
   if(action==='speech-save'){
    const k=host.shadowRoot.getElementById('mb-key')?.value?.trim();const region=host.shadowRoot.getElementById('mb-region')?.value?.trim().toLowerCase();
    if(!/^[a-z0-9-]{3,40}$/.test(region))throw Error('Enter a valid Azure region, e.g. eastus.');
    prefs.azure.region=region;if(k){if(!storageOK)throw Error('Extension-controlled storage is required before saving a key.');await gmSet(STORAGE+':azure',k);azureKey=k;}
-   await saveSettings();notify('Speech settings saved.');render();return;
+   await saveSettings();if(state.voicesRegion!==region){state.voices=[];state.voicesRegion='';}notify('Speech settings saved. Loading voices…');render();if(azureKey)await loadVoices();return;
   }
   if(action==='speech-forget'){await gmSet(STORAGE+':azure','');azureKey='';reading.sampleCache.clear();notify('Speech key forgotten.');render();return;}
   if(action==='speech-voices'){await loadVoices();return;}
@@ -94,25 +100,34 @@ function startMediaPick(){endMediaPick();state.selectMedia=true;state.mediaPickL
   if(!url){notify('No direct media URL for this element.');return;}
   state.selectedMedia={url:url.href,kind:item.tagName==='VIDEO'?'video':'image',el:item,label:'Selected on page'};endMediaPick();openView('media');notify('Media selected.');
  };document.addEventListener('click',state.mediaPickListener,true);openView('media-picker');}
+function rememberSelectedPhrase(){
+ const sel=window.getSelection();if(!sel||sel.isCollapsed)return;
+ const v=text(sel.toString());if(v.length<8||v.length>650)return;
+ const anchor=sel.anchorNode?.nodeType===1?sel.anchorNode:sel.anchorNode?.parentElement;
+ if(!anchor||anchor.closest?.('[data-mb-host]'))return;
+ const element=anchor.closest?.('p,li,blockquote,aside,div,section');
+ state.selectionText=v;state.selectionElement=element&&!protectedNode(element)?element:null;
+}
 function installUI(){if(document.querySelector('[data-mb-host]'))return;
  host=document.createElement('div');host.setAttribute('data-mb-host','');host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:2147483647!important;pointer-events:none!important;';
  const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools">✦<span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
  document.documentElement.appendChild(host);
  const global=document.createElement('style');global.textContent=globalStyles;global.id='mb-global-style';(document.head||document.documentElement).append(global);
- let drag=null;const launch=shadow.querySelector('.mb-launch');
+ let drag=null;const launch=shadow.querySelector('.mb-launch');document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
  launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false};launch.setPointerCapture?.(e.pointerId);});
  launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>9)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-54,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min(innerHeight-54,drag.bottom-dy));launch.style.cssText=positionCSS();});
  launch.addEventListener('pointerup',()=>{if(!drag)return;ignoreClick=drag.moved;if(drag.moved)saveSettings();drag=null;});
- launch.addEventListener('click',e=>{if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
+ launch.addEventListener('click',e=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}
-  if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;saveSettings();}
+  if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;reading.sampleCache.clear();saveSettings();}
+  if(e.target.id==='mb-region'){prefs.azure.region=e.target.value;state.voices=[];state.voicesRegion='';state.voicesError='';saveSettings();render();if(azureKey)void loadVoices().catch(x=>notify(x.message));}
   if(e.target.id==='mb-quality'){prefs.azure.quality=e.target.value;saveSettings();}
   if(e.target.id==='mb-rate'){prefs.playbackRate=Number(e.target.value);audio.playbackRate=prefs.playbackRate;saveSettings();}
   if(e.target.matches('[data-audio-seek]')&&Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,Number(e.target.value));
  });
- shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;});
+ shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
  addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-54);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-54);render();});
  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const keyboard=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);launch.style.bottom=Math.max(prefs.position.bottom,keyboard+14)+'px';});
  render();
@@ -129,7 +144,7 @@ function monitorDOM(){
  observer=new MutationObserver(records=>{
   // Avoid scanning each leaf mutation during fast page transitions.
   if(!records.some(r=>![host?.contains(r.target)]&&r.target!==host&&r.target.id!=='mb-global-style'))return;
-  clearTimeout(observerTimer);observerTimer=setTimeout(()=>{if(location.href!==lastLocation){lastLocation=location.href;autoMapRedirect();}updateSite();},420);
+  clearTimeout(observerTimer);observerTimer=setTimeout(()=>{if(location.href!==lastLocation){lastLocation=location.href;state.selectionText='';state.selectionElement=null;autoMapRedirect();}updateSite();if(prefs.semanticAuto&&semantic.status==='idle'&&document.querySelector('article,main,[role="main"]'))void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});scheduleSemanticScan();},420);
  });observer.observe(document.documentElement,{childList:true,characterData:true,subtree:true});
  addEventListener('popstate',()=>{lastLocation=location.href;autoMapRedirect();setTimeout(updateSite,100);});
  addEventListener('pageshow',()=>updateSite());
@@ -137,7 +152,7 @@ function monitorDOM(){
 async function boot(){
  if(document.querySelector('[data-mb-host]'))return;
  await readSettings();autoMapRedirect();if(!document.documentElement)return;if(siteName()==='reddit')toggleRedditCSS(cleanupEnabled());
- installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');
+ installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');if(prefs.semanticAuto&&document.querySelector('article,main,[role="main"]'))setTimeout(()=>{if(prefs.semanticAuto)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});},2200);
 }
 // Hide known Reddit interstitials before the first asynchronous settings read.
 // The persisted per-site setting is applied by boot() as soon as it resolves.

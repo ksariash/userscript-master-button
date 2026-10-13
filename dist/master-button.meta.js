@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         iPhone Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
-// @version      0.1.1
+// @version      0.1.2
 // @description  A single floating drawer for clean links, nuisance filtering, media, and Azure narration
 // @author       ksariash
 // @match        *://*/*

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         iPhone Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
-// @version      0.1.1
+// @version      0.1.2
 // @description  A single floating drawer for clean links, nuisance filtering, media, and Azure narration
 // @author       ksariash
 // @match        *://*/*
@@ -31,7 +31,7 @@
 
 ;(()=>{
 'use strict';
-const VERSION = '0.1.1';
+const VERSION = '0.1.2';
 const URL_BLACKLIST = new Set(['fbclid','gclid','dclid','gbraid','wbraid','msclkid','mc_cid','mc_eid','igshid','vero_id','oly_enc_id','oly_anon_id','_hsenc','_hsmi','__hsfp','ref_src','spm','yclid']);
 const text = v => String(v == null ? '' : v).replace(/\s+/g,' ').trim();
 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -78,7 +78,7 @@ function chunkText(input,max=1550){
 const libTest = {cleanURL,amazonData,camelURL,appleMapsURL,tokens,tokenHash,chunkText,siteName};
 
 const STORAGE='master-button:v1';
-const defaults=()=>({position:{right:14,bottom:105}, filter:{}, siteCleanup:{}, nsfw:true, autoMaps:true, playbackRate:1,fontSize:17, azure:{region:'eastus',voice:'en-US-JennyNeural',quality:'compact'}, rules:{}, learning:{}, learningEnabled:{}});
+const defaults=()=>({position:{right:14,bottom:105}, filter:{}, siteCleanup:{}, nsfw:true, autoMaps:true, playbackRate:1,fontSize:17, azure:{region:'eastus',voice:'en-US-JennyNeural',quality:'compact'}, rules:{}, learning:{}, learningEnabled:{}, semanticAuto:true, semanticExamples:{}});
 let prefs=defaults(), azureKey='', storageOK=false;
 async function gmGet(k, def){if(typeof GM==='undefined'||typeof GM.getValue!=='function')return def;return await GM.getValue(k,def);}
 async function gmSet(k,v){if(typeof GM==='undefined'||typeof GM.setValue!=='function')throw Error('Protected Userscripts storage unavailable');await GM.setValue(k,v);}
@@ -99,7 +99,7 @@ function showAll(){for(const e of [...hidden.keys()])showNode(e);}
 function updateCount(){if(!host)return;for(const n of host.shadowRoot.querySelectorAll('[data-count]'))n.textContent=String([...hidden.keys()].filter(e=>e.isConnected&&!([...hidden.keys()].some(other=>other!==e&&other.contains(e)))).length);}
 function activeRules(){return (prefs.rules[domainKey()]||[]).filter(r=>r.enabled!==false);}
 function safeMatches(sel){try{return [...document.querySelectorAll(sel)].slice(0,350);}catch{return [];}}
-function appliedFilter(){if(!filterEnabled())return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}}
+function appliedFilter(){if(!filterEnabled())return;const rules=activeRules();for(const rule of rules){for(const el of safeMatches(rule.selector)){if(rule.type==='css'&&!protectedNode(el))hideNode(el,`Custom rule: ${rule.selector}`);}}scheduleSemanticScan();}
 function setFiltering(enabled){prefs.filter[domainKey()]=enabled;saveSettings();if(!enabled){showAll();}else appliedFilter();render();}
 function nodeSelector(el){
   if(el.id&&/^[a-zA-Z][\w:-]{2,75}$/.test(el.id)&&!/\d{5,}/.test(el.id))return '#'+CSS.escape(el.id);
@@ -130,6 +130,127 @@ function nuisanceReason(el,str){
  return '';
 }
 function inspectPassage(v,el){const why=nuisanceReason(el,v);return {excluded:!!why,reason:why||'Article text'};}
+
+// Pretrained *local* language-embedding model + online, per-site prototype learning.
+// Not generative LLM weight fine-tuning: explicit feedback trains a nearest-prototype
+// classifier in the model's semantic space. Text stays on-device; stored examples
+// are rounded vectors without article text or URL histories.
+const EMBEDDING_MODEL='Xenova/all-MiniLM-L6-v2';
+const EMBEDDING_RUNTIME='https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/+esm';
+const semantic={status:'idle',detail:'Not loaded',extractor:null,loading:null,queue:Promise.resolve(),running:false,refreshTimer:0,revision:0};
+const semanticCategories={related:'Related stories',promotion:'Promotion / newsletter',navigation:'Navigation / page chrome',offtopic:'Breaks article flow',article:'Article prose'};
+const SEMANTIC_SEEDS=[
+ ['Related articles you may also like', 'related'],
+ ['Recommended for you: Read these stories next', 'related'],
+ ['You might also enjoy these other posts', 'related'],
+ ['Sign up for our newsletter to get updates in your inbox', 'promotion'],
+ ['Subscribe now for exclusive access and offers', 'promotion'],
+ ['Sponsored content. Advertisement.', 'promotion'],
+ ['Download our app for a better reading experience', 'promotion'],
+ ['Share this article on Facebook, Instagram or X', 'navigation'],
+ ['Skip to content. Home. Menu. Latest news.', 'navigation']
+];
+let seedVectors=null;
+function vectorsForSite(domain=domainKey()){const raw=prefs.semanticExamples?.[domain];return Array.isArray(raw)?raw:[];}
+function dot(a,b){if(!a||!b||a.length!==b.length)return 0;let sum=0;for(let i=0;i<a.length;i++)sum+=a[i]*b[i];return sum;}
+function compactVector(v){return Array.from(v, x=>Math.round(Number(x)*1000)/1000);}
+function embeddingInput(s){return text(s).slice(0,650);}
+async function loadSemantic(){
+ if(semantic.extractor)return semantic.extractor;
+ if(semantic.loading)return semantic.loading;
+ semantic.status='loading';semantic.detail='Downloading model and starting local inference';render();
+ semantic.loading=(async()=>{
+  try{
+   // No text sent to a service: only model code and weights are downloaded.
+   const lib=await import(EMBEDDING_RUNTIME);
+   const pipeline=lib.pipeline;
+   if(typeof pipeline!=='function')throw Error('Model runtime was not available');
+   const extractor=await pipeline('feature-extraction',EMBEDDING_MODEL,{device:'wasm',dtype:'q8',progress_callback:p=>{
+    if(p.status==='progress'&&Number.isFinite(p.progress))semantic.detail=`Loading model · ${Math.round(p.progress)}%`;
+   }});
+   semantic.extractor=extractor;semantic.status='ready';semantic.detail='MiniLM embeddings · on device';
+   render();return extractor;
+  }catch(err){semantic.status='error';semantic.detail=String(err.message||err).slice(0,175);render();throw err;}
+  finally{semantic.loading=null;}
+ })();return semantic.loading;
+}
+async function embedTexts(input){
+ const model=await loadSemantic();const texts=input.map(embeddingInput);
+ const out=[];
+ // Sequential, small batches keep memory bounded on Safari.
+ for(let i=0;i<texts.length;i+=4){
+  const r=await model(texts.slice(i,i+4),{pooling:'mean',normalize:true});
+  const rows=r.tolist();for(const row of rows)out.push(compactVector(row));
+ }
+ return out;
+}
+async function ensureSemanticSeeds(){if(!seedVectors){const v=await embedTexts(SEMANTIC_SEEDS.map(x=>x[0]));seedVectors=v.map((vector,i)=>({vector,reason:SEMANTIC_SEEDS[i][1]}));}return seedVectors;}
+function semanticDecision(vec,domain=domainKey()){
+ const items=vectorsForSite(domain);let skip={score:-1},keep={score:-1};
+ for(const x of items){if(!Array.isArray(x.v))continue;const score=Math.max(dot(vec,x.v),Array.isArray(x.contextV)?0.97*dot(vec,x.contextV):0);if(x.d==='skip'&&score>skip.score)skip={score,reason:x.reason||'offtopic'};if(x.d==='keep'&&score>keep.score)keep={score};}
+ // Explicit keep choices override weak skip similarity.
+ if(skip.score>=0.79&&skip.score>keep.score+0.065)return {excluded:true,reason:`Similar to skipped ${semanticCategories[skip.reason]||'content'}`,score:skip.score};
+ if(keep.score>=0.74)return {excluded:false,reason:'Kept by your feedback',score:keep.score};
+ if(seedVectors){let best={score:0};for(const x of seedVectors){const score=dot(vec,x.vector);if(score>best.score)best={score,reason:x.reason};}
+  if(best.score>=0.89)return {excluded:true,reason:`Likely ${semanticCategories[best.reason]||'distraction'}`,score:best.score};}
+ return {excluded:false,reason:'Article text',score:Math.max(skip.score,keep.score)};
+}
+async function teachSemantic(value,decision,reason='offtopic',el=null){
+ const sample=embeddingInput(value);if(sample.length<8)throw Error('Select a longer phrase to teach the model.');
+ if(!prefs.semanticExamples)prefs.semanticExamples={};
+ const origin=domainKey();
+ semantic.detail='Learning from selected text';render();
+ learnPassage(sample,decision);const context=el?embeddingInput(el.textContent):'';const contextUseful=context.length>25&&context!==sample&&context.length<650;const vectors=await embedTexts(contextUseful?[sample,context]:[sample]);const vector=vectors[0];
+ const examples=prefs.semanticExamples[origin]||=[];
+ const duplicate=examples.findIndex(x=>x.h===tokenHash(sample.toLowerCase()));
+ if(duplicate>=0)examples.splice(duplicate,1);
+ examples.push({h:tokenHash(sample.toLowerCase()),d:decision,reason:decision==='keep'?'article':reason,v:vector,contextV:contextUseful?vectors[1]:undefined});
+ prefs.semanticExamples[origin]=examples.slice(-24);
+ await saveSettings();
+ if(el&&decision==='skip'&&filterEnabled()&&!protectedNode(el))hideNode(el,'Explicitly skipped: '+(semanticCategories[reason]||reason));
+ semantic.detail=`Ready · ${prefs.semanticExamples[origin].length} learned examples`;
+ semantic.revision++;render();scheduleSemanticScan();if(reading.passages.length)void reclassifyTranscript().catch(e=>notify(e.message));
+ return true;
+}
+function semanticCandidates(){
+ const roots=[...document.querySelectorAll('article,[itemprop="articleBody"],main,[role="main"]')];
+ const root=roots.sort((a,b)=>text(b.textContent).length-text(a.textContent).length)[0];
+ if(!root)return [];
+ return [...root.querySelectorAll('p,li,blockquote,aside,section')].filter(el=>{
+  const t=text(el.textContent);return t.length>=25&&t.length<750&&!el.querySelector('p,li,blockquote,aside,section')&&!el.closest('nav,footer,header,[data-mb-host]')&&!protectedNode(el);
+ }).slice(0,90);
+}
+function scheduleSemanticScan(){
+ if(!prefs.semanticAuto||!filterEnabled()||semantic.running||!semantic.extractor||!document.querySelector('article,main,[role="main"]'))return;
+ clearTimeout(semantic.refreshTimer);semantic.refreshTimer=setTimeout(()=>{void runSemanticScan();},850);
+}
+async function runSemanticScan(){
+ if(semantic.running||!semantic.extractor||!prefs.semanticAuto||!filterEnabled())return;
+ const candidates=semanticCandidates().filter(el=>!hidden.has(el)&&!el.hasAttribute('data-mb-semantic-reviewed'));
+ if(!candidates.length)return;
+ const origin=domainKey();semantic.running=true;try{
+  const embeddings=await embedTexts(candidates.map(el=>text(el.textContent)));
+  if(domainKey()!==origin||!filterEnabled()||!prefs.semanticAuto)return;
+  for(let i=0;i<candidates.length;i++){
+   const el=candidates[i];if(!el.isConnected)continue;
+   const result=semanticDecision(embeddings[i],origin);
+   el.setAttribute('data-mb-semantic-reviewed','');
+   if(result.excluded)hideNode(el,result.reason);
+  }
+ }catch(err){semantic.detail='Model filtering stopped: '+String(err.message||err);}
+ finally{semantic.running=false;render();}
+}
+async function reclassifyTranscript(){
+ if(!semantic.extractor||!reading?.passages?.length)return;
+ const gen=reading.generation,items=reading.passages.filter(p=>p.reason!=='You skipped this passage'&&p.reason!=='You kept this passage');
+ if(!items.length)return;const data=await embedTexts(items.map(p=>p.text));if(gen!==reading.generation)return;
+ for(let i=0;i<items.length;i++){
+  const result=semanticDecision(data[i]);const p=items[i];
+  // Do not override explicit keep/skip or already-prepared audio.
+  if(p.status==='idle'&&!p.blob){p.excluded=result.excluded;p.reason=result.reason;}
+ }
+ render();
+}
 
 const REDDIT_NAGS=[
  '#configured-xpromo-unrated_block','#configured-xpromo-blocking_xpromo_nsfw_blocking','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop','#configured-xpromo-blocking_xpromo_nsfw_blocking_desktop_cms','#desktop-dynamic-upsell-dialog','#app-upsell-blocking-bottom-sheet-direct','#app-upsell-blocking-bottom-sheet-seo','#xpromo-bottom-sheet','#xpromo-new-app-selector','#xpromo-app-selector','#xpromo-small-header','#nsfw-desktop-auth-blocking-modal-dialog','#nsfw-desktop-auth-blocking-modal-overlay-element','#nsfw-qr-dialog','#blocking-modal','#nsfw-desktop-auth-blocking-modal','xpromo-top-button','xpromo-app-selector','faceplate-bottom-sheet[id*="xpromo"]','rpl-bottom-sheet[id*="app-upsell"]','rpl-bottom-sheet[id*="xpromo"]','configured-xpromo-modal[id*="xpromo"]','.configured-xpromo-bottom-sheet','.configured-xpromo-full-screen','.XPromoPopup','.XPromoPopupRpl','.XPromoPopupRplNew','.XPromoBottomBar','.XPromoInFeed','.XPromoPill','.AppSelectorModal__body','.upsell_banner','.rpl-dialog#age-gate-interstitial'
@@ -316,10 +437,10 @@ function discoverPassages(){
  }
  return result;
 }
-function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');}
+function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');if(semantic.extractor)void reclassifyTranscript().catch(e=>notify(e.message));}
 function readerPlain(){return reading.passages.filter(p=>!p.excluded).map(p=>p.text).join('\n\n');}
 function replaceReaderText(v){stopPlayback(true);reading.passages=chunkText(v).map(t=>({text:t,element:null,excluded:false,reason:'Edited text',blob:null,status:'idle'}));reading.index=0;state.readerEditing=false;render();}
-function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');reading.passages.forEach(t=>{t.status='idle';});render();}
+function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');void teachSemantic(p.text,p.excluded?'skip':'keep',p.excluded?'offtopic':'article',p.element).catch(e=>notify('Local model: '+e.message));reading.passages.forEach(t=>{t.status='idle';});render();}
 async function requestGM(url,opts={}){
  if(!/^https:/.test(url))throw Error('Only HTTPS requests are allowed.');
  if(typeof GM==='undefined'||typeof GM.xmlHttpRequest!=='function')throw Error('Userscripts GM.xmlHttpRequest is unavailable. Check the script grants and extension permissions.');
@@ -339,8 +460,8 @@ async function azureSynthesize(v,onRequest){
  const r=await requestGM(azureEndpoint('v1'),{method:'POST',data:synthSSML(v),responseType:'arraybuffer',headers:{'Ocp-Apim-Subscription-Key':azureKey,'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':fmt,'User-Agent':'iPhoneMasterButton/0.1'},onRequest});
  return responseBlob(r);
 }
-async function loadVoices(){if(!azureKey)throw Error('Enter a key first.');const region=prefs.azure.region?.trim().toLowerCase();const r=await requestGM(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`,{responseType:'text',headers:{'Ocp-Apim-Subscription-Key':azureKey}});let list;try{list=JSON.parse(r.responseText||r.response);}catch{throw Error('Azure returned an invalid voices list.');}
- state.voices=list.filter(v=>v.ShortName&&v.Locale).map(v=>({id:v.ShortName,label:`${v.Locale} · ${v.LocalName||v.ShortName} (${v.Gender||'voice'})`}));notify(`Loaded ${state.voices.length} Azure voices`);render();}
+async function loadVoices(){if(!azureKey)throw Error('Save a key first.');const region=prefs.azure.region?.trim().toLowerCase();state.voicesLoading=true;render();try{const r=await requestGM(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`,{responseType:'text',headers:{'Ocp-Apim-Subscription-Key':azureKey}});let list;try{list=JSON.parse(r.responseText||r.response);}catch{throw Error('Azure returned an invalid voices list.');}
+ state.voices=list.filter(v=>v.ShortName&&v.Locale).map(v=>({id:v.ShortName,locale:v.Locale,label:`${v.LocalName||v.ShortName} · ${v.Locale} · ${v.Gender||'Voice'}`})).sort((a,b)=>a.locale.localeCompare(b.locale)||a.label.localeCompare(b.label));state.voicesRegion=region;state.voicesError='';notify(`Loaded ${state.voices.length} Azure voices`);render();}catch(e){state.voicesError=e.message;throw e;}finally{state.voicesLoading=false;render();}}
 async function demoVoice(){if(!azureKey)return notify('Enter your Azure key first.');stopPlayback(true);audioMode='demo';try{
  const key=prefs.azure.region+'|'+prefs.azure.voice+'|'+prefs.azure.quality;
  if(!reading.sampleCache.has(key))reading.sampleCache.set(key,await azureSynthesize('Hello. This is a sample of the selected reading voice.'));
@@ -351,6 +472,10 @@ function stopPlayback(invalidate=false){if(invalidate){reading.generation++;for(
 function enabledIndices(){return reading.passages.map((p,i)=>!p.excluded?i:-1).filter(i=>i>=0);}
 function nextEnabled(from){return enabledIndices().find(i=>i>=from)??-1;}
 async function prepareReading(){
+ if(prefs.semanticAuto&&filterEnabled()&&reading.passages.length){
+  if(!semantic.extractor){try{notify('Preparing the local filter before speech…');await loadSemantic();await ensureSemanticSeeds();}catch(e){notify('Local model unavailable. Review the text and disable Local AI if you want to proceed without it.');openView('filter');return;}}
+  await reclassifyTranscript();
+ }
  if(!azureKey){openView('speech');return;}
  const ids=enabledIndices();if(!ids.length)return notify('No enabled passages to narrate.');
  const job=++reading.generation;reading.preparing=true;reading.autoplay=true;render();
@@ -384,7 +509,7 @@ function setMediaSession(){if(!('mediaSession' in navigator))return;try{navigato
 setMediaSession();
 
 let host=null,toastTimer=0,observer=null,observerTimer=0,lastLocation=location.href,ignoreClick=false;
-const state={view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false};
+const state={view:'',readerEditing:false,readerDraft:'',voices:[],siteMedia:[],mediaIndex:0,selectedMedia:null,selectMedia:false,pickerSelector:'',exporting:false,slashdotSimple:false,voicesRegion:'',voicesLoading:false,voicesError:'',voiceQuery:'',selectionText:'',selectionElement:null,selectionReason:'related',selectionMode:false};
 const button=(action,icon,label,extra='')=>`<button type="button" data-action="${esc(action)}" class="mb-action" ${extra}><span aria-hidden="true">${icon}</span><span>${esc(label)}</span></button>`;
 function notify(message){if(!host)return;const el=host.shadowRoot.querySelector('.mb-toast');if(!el)return;el.textContent=String(message);el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(el.isConnected)el.hidden=true;},4500);}
 async function shareURL(u){try{if(navigator.share){await navigator.share({url:u});return;}}catch(e){if(e.name==='AbortError')return;}await copyText(u);notify('Copied link.');}
@@ -473,6 +598,41 @@ button{cursor:pointer;}button:focus-visible,input:focus-visible,select:focus-vis
 .mb-toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 61px);left:10px;right:10px;margin:auto;max-width:370px;color:#fff;background:rgba(21,25,35,.95);padding:10px 12px;border-radius:12px;font:12px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;z-index:5;pointer-events:none;box-shadow:0 8px 25px #0005;}
 .mb-toast[hidden],.mb-panel[hidden]{display:none;}.mb-pill{font:600 10px;color:var(--muted);background:var(--surface);padding:4px 7px;border-radius:7px;}
 .mb-preview{height:95px;border-radius:11px;background:var(--surface);display:grid;place-items:center;overflow:hidden;}.mb-preview img,.mb-preview video{max-width:100%;max-height:95px;object-fit:contain;}
+
+/* v0.1.2 compact iPhone design tokens: 44pt target, 7pt between groups,
+   6/12pt gutters, separators instead of outlines, one obvious accent. */
+.mb-panel{--fg:#1c2535;--muted:#6e7787;--bg:#f4f5f8;--surface:#fff;--tile:#fff;--bd:#e5e8ee;--accent:#386de7;--tint:#eef3ff;border-radius:19px;width:min(352px,calc(100vw - 24px));max-height:min(73dvh,560px);font-size:13px;}
+@media(prefers-color-scheme:dark){.mb-panel{--fg:#f6f7fb;--muted:#a4abba;--bg:#171a21;--surface:#232730;--tile:#232730;--bd:#333743;--accent:#a0bdff;--tint:#293a55;}}
+.mb-head{padding:4px 8px;border-bottom:1px solid var(--bd);min-height:45px;}
+.mb-head h2{font-size:15px;font-weight:680;letter-spacing:-.27px;}
+.mb-icon-btn{height:42px;width:42px;border-radius:12px;background:transparent;padding:10px;}
+.mb-brand{height:30px;width:30px;border-radius:10px;}
+.mb-body{padding:9px 11px 11px;gap:7px;}
+.mb-section{gap:5px;}.mb-section-title{font-size:10px;letter-spacing:.6px;}.mb-section-note{font-size:10px;}
+.mb-tiles{gap:5px;}.mb-tile{min-height:59px;border-radius:12px;gap:3px;border-color:transparent;padding:6px 3px;}.mb-tile svg{height:19px;width:19px;}.mb-tile span{font-size:10.5px;}
+.mb-compact-grid{gap:5px;}.mb-compact{border-color:transparent;border-radius:11px;min-height:44px;padding:7px 10px;font-size:12px;}
+.mb-grid{gap:5px;}.mb-action{border-color:transparent;border-radius:11px;min-height:44px;padding:8px 11px;font-size:12.5px;font-weight:570;}
+.mb-small{min-height:39px;font-size:12px;}
+.mb-row{gap:6px;}.mb-rule{gap:6px;padding:9px;border-color:transparent;}
+.mb-field{font-size:11px;gap:3px;}.mb-input,.mb-select,.mb-textarea{min-height:44px;background:var(--surface);border-color:var(--bd);border-radius:11px;padding:8px 11px;font-size:14px;}
+.mb-settings-group{background:var(--surface);border-radius:13px;overflow:hidden;}
+.mb-setting{display:flex;align-items:center;min-height:47px;gap:9px;padding:2px 11px;border-bottom:1px solid var(--bd);}
+.mb-setting:last-child{border-bottom:0;}.mb-setting-label{font-weight:590;flex:0 0 90px;font-size:12.5px;}
+.mb-setting-value{flex:1;min-width:0;}.mb-setting-value .mb-input,.mb-setting-value .mb-select{min-height:40px;border:0;border-radius:0;background:transparent;padding:6px 2px;text-align:right;font-size:13px;}
+.mb-setting-value .mb-select{text-align-last:right;}.mb-setting .mb-small{flex:none;min-width:38px;min-height:40px;}
+.mb-caption{color:var(--muted);font-size:11px;line-height:1.35;padding:1px 3px;}
+.mb-kicker{font-size:10px;letter-spacing:.55px;text-transform:uppercase;font-weight:740;color:var(--muted);}
+.mb-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);min-width:0;line-height:1.35;}
+.mb-dot{width:7px;height:7px;border-radius:50%;background:#adb3bf;flex:none;}.mb-dot.ready{background:#28a36c;}.mb-dot.loading{background:#e9a63d;}.mb-dot.error{background:#d95c67;}
+.mb-status-text{overflow-wrap:anywhere;min-width:0;}
+.mb-minor{border:0;background:transparent;color:var(--accent);font-size:12px;min-height:40px;padding:4px 9px;font-weight:650;}
+.mb-voice-search{border:0;border-bottom:1px solid var(--bd);background:transparent;width:100%;padding:9px 12px;min-height:41px;color:var(--fg);font-size:13px;outline:none;}
+.mb-selection{display:grid;gap:6px;}.mb-selection blockquote{margin:0;padding:9px 11px;border-left:2px solid var(--accent);background:var(--surface);border-radius:8px;font-size:12px;max-height:84px;overflow:auto;}
+.mb-fieldset{display:grid;gap:4px;}.mb-inline{display:flex;align-items:center;gap:4px;min-width:0;}
+.mb-voice-status{font-size:10.5px;color:var(--muted);}
+.mb-transcript{padding:6px 12px;}.mb-paragraph{padding:8px 0;line-height:1.5;}
+.mb-controls{padding:7px 11px calc(8px + env(safe-area-inset-bottom));gap:6px;}
+.mb-pill{border-radius:6px;}
 @media(prefers-reduced-motion:no-preference){.mb-panel:not(.reader){animation:mb-in .15s cubic-bezier(.2,.8,.2,1);}@keyframes mb-in{from{opacity:.85;transform:translateY(5px) scale(.99)}to{opacity:1;transform:none}}}
 `;
 const globalStyles=`[data-mb-preview]{outline:3px dashed #4c80ff!important;outline-offset:3px!important;}[data-mb-preview-hide]{visibility:hidden!important;}html[data-mb-slashdot] #slashboxes,html[data-mb-slashdot] #footer,html[data-mb-slashdot] .adwrap{display:none!important;}html[data-mb-slashdot] #firehose,html[data-mb-slashdot] #articles{max-width:790px!important;width:100%!important;margin:auto!important;}`;
@@ -494,19 +654,43 @@ function renderMenu(){
  <div class="mb-row"><span class="mb-footer">v${VERSION} · <span data-count>0</span> hidden items</span><button type="button" class="mb-small" data-action="updates">${ico('refresh',13)} Updates</button></div></div>`;
 }
 function renderURL(){return `${head('Edit URL')}<div class="mb-body"><label class="mb-field">Destination URL<textarea class="mb-textarea" rows="3" id="mb-url">${esc(state.urlDraft||location.href)}</textarea></label><div class="mb-grid">${button('url-clean','✦','Clean URL')}${button('url-copy','▣','Copy')}${button('url-share','↗','Share')}${button('url-open','↗','Open URL')}</div><p class="mb-muted">Only confirmed tracking parameters are removed. Other parameters and fragments are preserved.</p></div>`;}
-function renderFilter(){return `${head('Page filtering')}<div class="mb-body">${button('filter-toggle',filterEnabled()?'✓':'○',`Filter ${filterEnabled()?'enabled':'disabled'} for ${domainKey()}`)}${button('pick-filter','⊕','Tap an element to filter')}${button('rules','⚙','Inspect and edit rules')}${button('restore-hidden','↶','Restore all hidden items')}
- <p class="mb-muted">Hidden now: <span data-count>0</span>. A preview never saves a rule. Article extraction also omits related-story and promotion blocks conservatively.</p></div>`;}
+function semanticStatus(){const n=vectorsForSite().length;return `<div class="mb-status"><span class="mb-dot ${esc(semantic.status)}"></span><span class="mb-status-text">${esc(semantic.status==='ready'?'MiniLM running locally':semantic.status==='loading'?'Loading local model…':semantic.status==='error'?'Local model unavailable':'Local model not started')} · ${n} examples</span></div>`;}
+function renderFilter(){return `${head('Article filter')}<div class="mb-body">
+ <section class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Page filter</span><span class="mb-setting-value">${filterEnabled()?'On':'Off'}</span><button class="mb-minor" data-action="filter-toggle">${filterEnabled()?'Disable':'Enable'}</button></div>
+ <div class="mb-setting"><span class="mb-setting-label">Local AI</span><span class="mb-setting-value">${prefs.semanticAuto?'On':'Off'}</span><button class="mb-minor" data-action="semantic-toggle">${prefs.semanticAuto?'Disable':'Enable'}</button></div></section>
+ ${semanticStatus()}
+ <div class="mb-grid">${button('semantic-load',ico('wave',17),semantic.status==='ready'?'Rescan article':'Load local model')}${button('select-phrase',ico('pointer',17),'Teach a phrase')}</div>
+ <div class="mb-grid">${button('pick-filter',ico('filter',17),'Hide an element')}${button('rules',ico('sliders',17),'Rules & learning')}</div>
+ <button class="mb-minor" data-action="restore-hidden">Restore hidden content · <span data-count>0</span> items</button>
+ <p class="mb-caption">Select article text, then teach Skip or Keep. Model downloads once when permitted; articles are processed on your device. Learning stores embeddings, not text.</p>
+ </div>`;}
+function renderTeach(){return `${head('Teach the filter')}<div class="mb-body"><div class="mb-selection"><span class="mb-kicker">Selected passage</span><blockquote>${esc(state.selectionText||'Select text in the article, then open this menu.')}</blockquote></div>
+ <label class="mb-field">Why does it interrupt the article?<select class="mb-select" id="mb-reason">${Object.entries(semanticCategories).filter(([key])=>key!=='article').map(([key,label])=>`<option value="${esc(key)}" ${state.selectionReason===key?'selected':''}>${esc(label)}</option>`).join('')}</select></label>
+ <div class="mb-grid">${button('teach-skip',ico('minus',17),'Skip similar')}${button('teach-keep',ico('check',17),'Keep similar')}</div>
+ ${semanticStatus()}<p class="mb-caption">Your correction trains a local similarity classifier. It does not fine-tune the model weights. Only explicitly corrected passages become training examples.</p>
+ ${button('select-phrase',ico('pointer',16),'Select another passage')}
+ </div>`;}
+function renderSelectText(){return `${head('Select text')}<div class="mb-body"><p class="mb-caption">Long-press and highlight a phrase on the webpage. Then tap ✦ or “Use selection”. Do not select entire articles.</p>${button('selection-use',ico('check',17),'Use highlighted text')}${button('teach-skip',ico('minus',17),'Skip cached selection')}</div>`;}
 function renderPicker(){return `${head('Select nuisance element')}<div class="mb-body"><p>Tap an unwanted element on the webpage. Its matching elements will be outlined before you save anything.</p><div class="mb-rule"><strong>${esc(state.pickerSelector||'No element selected')}</strong><span class="mb-muted">${pickerMatches.length} matching elements highlighted</span>${pickerMatches.length?`<div class="mb-grid">${button('preview',preview?'◉':'◎',preview?'Undo preview':'Preview hiding')}${button('picker-save','✓','Save rule')}</div>${button('picker-next','↓','Show next match')}`:''}</div>${button('picker-cancel','×','Cancel and restore')}</div>`;}
-function renderRules(){const rules=prefs.rules[domainKey()]||[];return `${head('Filter rules')}<div class="mb-body">${button('pick-filter','⊕','New visual rule')}${rules.length?rules.map((r,i)=>`<div class="mb-rule"><strong>${esc(r.selector)}</strong><span class="mb-muted">${safeMatches(r.selector).length} current matches · ${r.enabled?'Enabled':'Disabled'}</span><div class="mb-grid">${button('rule-toggle:'+i,r.enabled?'✓':'○',r.enabled?'Disable':'Enable')}${button('rule-edit:'+i,'✎','Edit selector')}${button('rule-delete:'+i,'⌫','Delete')}</div></div>`).join(''):'<p class="mb-muted">No custom rules for this site.</p>'}
- ${button('learning-toggle',prefs.learningEnabled?.[domainKey()]===false?'○':'✓',`Learning: ${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}`)}${button('learning-clear','↶','Reset learned preferences')}<p class="mb-muted">${Object.keys(prefs.learning[domainKey()]||{}).length} hashed token weights saved. No raw article text is stored.</p></div>`;}
-function renderSpeech(){return `${head('Azure speech settings')}<div class="mb-body"><p class="mb-muted">Credentials are saved using Userscripts extension storage, not the website’s storage. Azure synthesis sends enabled text to Microsoft.</p>
- <label class="mb-field">Speech resource key<input class="mb-input" id="mb-key" type="password" value="" autocomplete="off" placeholder="${azureKey?'Saved · enter to replace':'Enter Azure resource key'}"></label>
- <label class="mb-field">Resource region<input class="mb-input" id="mb-region" value="${esc(prefs.azure.region)}" placeholder="eastus"></label>
- <div class="mb-grid">${button('speech-save','✓','Save settings')}${button('speech-forget','⌫','Forget key')}</div>
- ${button('speech-voices','↻','Load voices from Azure')}
- <label class="mb-field">Voice<select class="mb-select" id="mb-voice"><option value="${esc(prefs.azure.voice)}">${esc(prefs.azure.voice)}</option>${state.voices.filter(v=>v.id!==prefs.azure.voice).map(v=>`<option value="${esc(v.id)}">${esc(v.label)}</option>`).join('')}</select></label>
- ${button('speech-demo','▶','▶ Hear voice sample')}
- <label class="mb-field">Audio quality<select class="mb-select" id="mb-quality"><option value="compact" ${prefs.azure.quality==='compact'?'selected':''}>Compact MP3 · 48 kbps</option><option value="high" ${prefs.azure.quality==='high'?'selected':''}>Higher quality MP3 · 96 kbps</option></select></label><p class="mb-muted">Choose quality before synthesis. Previously prepared audio is reused for export.</p></div>`;}
+function renderRules(){const rules=prefs.rules[domainKey()]||[];return `${head('Rules & learning')}<div class="mb-body">
+ ${semanticStatus()}<div class="mb-grid">${button('select-phrase',ico('pointer',17),'Teach text')}${button('pick-filter',ico('filter',17),'Visual rule')}</div>
+ ${rules.length?rules.map((r,i)=>`<div class="mb-rule"><strong>${esc(r.selector)}</strong><span class="mb-muted">${safeMatches(r.selector).length} matches · ${r.enabled?'Enabled':'Disabled'}</span><div class="mb-grid">${button('rule-toggle:'+i,r.enabled?'✓':'○',r.enabled?'Disable':'Enable')}${button('rule-edit:'+i,'✎','Edit')}${button('rule-delete:'+i,'⌫','Delete')}</div></div>`).join(''):'<p class="mb-caption">No CSS rules yet. Phrase learning does not require CSS selectors.</p>'}
+ <div class="mb-settings-group"><div class="mb-setting"><span class="mb-setting-label">Token fallback</span><span class="mb-setting-value">${prefs.learningEnabled?.[domainKey()]===false?'Off':'On'}</span><button class="mb-minor" data-action="learning-toggle">Toggle</button></div>
+ <div class="mb-setting"><span class="mb-setting-label">Learning</span><span class="mb-setting-value">${vectorsForSite().length} examples</span><button class="mb-minor" data-action="semantic-reset">Reset</button></div></div>
+ <p class="mb-caption">Only your explicit selections and transcript Skip/Keep choices train the filter. No page histories are saved.</p></div>`;}
+const azureRegions=[['australiaeast','Australia East'],['brazilsouth','Brazil South'],['canadacentral','Canada Central'],['canadaeast','Canada East'],['centralindia','Central India'],['centralus','Central US'],['eastasia','East Asia'],['eastus','East US'],['eastus2','East US 2'],['francecentral','France Central'],['germanywestcentral','Germany West Central'],['italynorth','Italy North'],['japaneast','Japan East'],['japanwest','Japan West'],['koreacentral','Korea Central'],['northcentralus','North Central US'],['northeurope','North Europe'],['norwayeast','Norway East'],['qatarcentral','Qatar Central'],['southafricanorth','South Africa North'],['southcentralus','South Central US'],['southeastasia','Southeast Asia'],['swedencentral','Sweden Central'],['switzerlandnorth','Switzerland North'],['switzerlandwest','Switzerland West'],['uaenorth','UAE North'],['uksouth','UK South'],['ukwest','UK West'],['westcentralus','West Central US'],['westeurope','West Europe'],['westus','West US'],['westus2','West US 2'],['westus3','West US 3']];
+function voiceOptions(){const chosen=prefs.azure.voice,list=state.voicesRegion===prefs.azure.region?state.voices:[];if(!list.length)return `<option value="${esc(chosen)}">${esc(chosen)} · load voices below</option>`;return list.map(v=>`<option value="${esc(v.id)}" ${v.id===chosen?'selected':''}>${esc(v.label)}</option>`).join('');}
+function renderSpeech(){const count=state.voicesRegion===prefs.azure.region?state.voices.length:0;return `${head('Speech')}<div class="mb-body">
+ <span class="mb-kicker">Azure resource</span><div class="mb-settings-group">
+ <div class="mb-setting"><label class="mb-setting-label" for="mb-key">API key</label><div class="mb-setting-value"><input class="mb-input" id="mb-key" type="password" autocomplete="off" placeholder="${azureKey?'Saved · replace key':'Enter key'}"></div></div>
+ <div class="mb-setting"><label class="mb-setting-label" for="mb-region">Region</label><div class="mb-setting-value"><select id="mb-region" class="mb-select">${azureRegions.map(([v,t])=>`<option value="${v}" ${prefs.azure.region===v?'selected':''}>${esc(t)}</option>`).join('')}</select></div></div></div>
+ <div class="mb-row"><button class="mb-minor" data-action="speech-forget">Forget key</button><button class="mb-small" data-action="speech-save">${ico('check',16)} Save & load voices</button></div>
+ <span class="mb-kicker">Voice ${count?'· '+count+' available':''}</span><div class="mb-settings-group">
+ <input class="mb-voice-search" type="search" id="mb-voice-search" placeholder="Search language or voice" aria-label="Search loaded voices">
+ <div class="mb-setting"><label class="mb-setting-label" for="mb-voice">Voice</label><div class="mb-setting-value"><select class="mb-select" id="mb-voice">${voiceOptions()}</select></div><button class="mb-small" aria-label="Hear selected voice" data-action="speech-demo">${ico('play',17)}</button></div>
+ <div class="mb-setting"><label class="mb-setting-label" for="mb-quality">MP3 quality</label><div class="mb-setting-value"><select class="mb-select" id="mb-quality"><option value="compact" ${prefs.azure.quality==='compact'?'selected':''}>48 kbps · compact</option><option value="high" ${prefs.azure.quality==='high'?'selected':''}>96 kbps · high</option></select></div></div></div>
+ <div class="mb-row"><span class="mb-voice-status">${esc(state.voicesLoading?'Loading voices…':state.voicesError|| (count?count+' voices ready':'Save key and region to load voices'))}</span><button class="mb-minor" data-action="speech-voices">${ico('refresh',15)} Reload</button></div>
+ <p class="mb-caption">Key stays in extension storage. Enabled narration text is sent directly to Azure.</p></div>`;}
 function renderReader(){
  const total=reading.passages.length,ready=reading.passages.filter(p=>p.blob&&!p.excluded).length,enabled=enabledIndices().length;
  const editor=state.readerEditing?`<div class="mb-body"><textarea class="mb-textarea" style="min-height:42dvh" id="mb-reader-edit">${esc(state.readerDraft)}</textarea>${button('reader-save','✓','Use edited text')}${button('reader-abort','×','Cancel editing')}</div>`:`<div class="mb-transcript" data-transcript>${total?reading.passages.map((p,i)=>`<div class="mb-paragraph ${p.excluded?'excluded':''} ${i===reading.index?'current':''}" data-pass="${i}"><button type="button" data-action="pass-toggle:${i}" aria-label="${p.excluded?'Include':'Skip'} passage ${i+1}">${p.excluded?'＋':'−'}</button><div><small>${i+1}/${total} · ${esc(p.status||'idle')}${p.reason&&p.excluded?' · '+esc(p.reason):''}</small><div style="font-size:${prefs.fontSize}px" data-action="pass-play:${i}">${esc(p.text)}</div></div></div>`).join(''):'<p>No article found. Tap Edit text to paste something to narrate.</p>'}</div>`;
@@ -519,8 +703,8 @@ function renderMini(){return `${head('Now playing')}<div class="mb-body"><p clas
 function renderMedia(){state.siteMedia=mediaItems();const i=Math.min(state.mediaIndex,state.siteMedia.length-1),it=state.selectedMedia||state.siteMedia[Math.max(0,i)];return `${head('Media · '+siteName())}<div class="mb-body"><p class="mb-muted">Choose the currently displayed item, or select one directly on the webpage. Downloads require accessible direct files.</p><div class="mb-row"><strong>${state.siteMedia.length} detected items</strong><button class="mb-small" data-action="media-refresh">Refresh</button></div>${state.siteMedia.length?`<select id="mb-media" class="mb-select">${state.siteMedia.map((x,j)=>`<option value="${j}" ${i===j?'selected':''}>${esc(x.kind+' '+(j+1)+' · '+x.label)}</option>`).join('')}</select>`:''}${it?`<div class="mb-preview">${it.kind==='image'?`<img src="${esc(it.url)}" alt="Selected media preview">`:'<span>Video selected</span>'}</div><p class="mb-muted">${esc(it.kind)} · ${esc(it.url.slice(0,110))}</p>`:''}
  <div class="mb-grid">${button('media-picker','◎','Select on page')}${button('media-share','↗','Share file')}${button('media-download','⇩','Download file')}${button('media-open','↗','Open source')}</div></div>`;}
 function renderMediaPicker(){return `${head('Tap page media')}<div class="mb-body"><p>Tap an image or video on the website. The tap will select it rather than open the post.</p>${button('media-cancel','×','Cancel selection')}</div>`;}
-function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
- shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'');const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(370,w-20)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(370,w-20)}px`;if(panel.innerHTML!==content)panel.innerHTML=content;updateCount();}
+function render(){if(!host)return;const shadow=host.shadowRoot;const content=state.view==='menu'?renderMenu():state.view==='url'?renderURL():state.view==='filter'?renderFilter():state.view==='teach'?renderTeach():state.view==='select-text'?renderSelectText():state.view==='picker'?renderPicker():state.view==='rules'?renderRules():state.view==='speech'?renderSpeech():state.view==='reader'?renderReader():state.view==='mini'?renderMini():state.view==='media'?renderMedia():state.view==='media-picker'?renderMediaPicker():'';
+ shadow.querySelector('.mb-launch').style.cssText=positionCSS();const panel=shadow.querySelector('.mb-panel');panel.hidden=!state.view;panel.className='mb-panel'+(state.view==='reader'?' reader':'');const vv=window.visualViewport,w=vv?.width||document.documentElement?.clientWidth||innerWidth;panel.style.left=state.view==='reader'?`${vv?.offsetLeft||0}px`:`${(vv?.offsetLeft||0)+Math.max(10,w-Math.min(352,w-24)-12)}px`;panel.style.right='auto';panel.style.bottom=state.view==='reader'?'auto':`calc(env(safe-area-inset-bottom) + ${64+Math.max(0,innerHeight-(vv?.height||innerHeight)-(vv?.offsetTop||0))}px)`;panel.style.top=state.view==='reader'?`${vv?.offsetTop||0}px`:'auto';panel.style.height=state.view==='reader'?`${vv?.height||innerHeight}px`:'auto';panel.style.width=state.view==='reader'?`${w}px`:`${Math.min(352,w-24)}px`;if(panel.innerHTML!==content)panel.innerHTML=content;updateCount();}
 
 async function handleAction(action,el){
  try{
@@ -540,7 +724,13 @@ async function handleAction(action,el){
   }
   if(action==='reader'){if(reading.passages.length)openView('reader');else openReader();return;}
   if(action==='reader-new'){openReader();return;}
-  if(action==='filter'){openView('filter');return;}
+  if(action==='filter'){openView('filter');if(prefs.semanticAuto&&semantic.status==='idle')void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});return;}
+  if(action==='semantic-load'){if(semantic.extractor){for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');scheduleSemanticScan();notify('Rescanning article with local model.');}else{notify('Loading on-device language model…');await loadSemantic();await ensureSemanticSeeds();scheduleSemanticScan();if(reading.passages.length)await reclassifyTranscript();notify('Local MiniLM is ready.');}render();return;}
+  if(action==='semantic-toggle'){prefs.semanticAuto=!prefs.semanticAuto;await saveSettings();if(!prefs.semanticAuto){for(const [el,old] of [...hidden])if(String(old.reason).startsWith('Similar to')||String(old.reason).startsWith('Likely'))showNode(el);}else{if(!semantic.extractor)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});else scheduleSemanticScan();}render();return;}
+  if(action==='select-phrase'){rememberSelectedPhrase();openView(state.selectionText?'teach':'select-text');return;}
+  if(action==='selection-use'){rememberSelectedPhrase();if(!state.selectionText){notify('Select words on the webpage first.');return;}openView('teach');return;}
+  if(action==='teach-skip'||action==='teach-keep'){const v=state.selectionText;if(!v)throw Error('Select some article text first.');const decision=action==='teach-skip'?'skip':'keep';const reason=host.shadowRoot.getElementById('mb-reason')?.value||state.selectionReason;state.selectionReason=reason;notify('Learning from your selection…');await teachSemantic(v,decision,reason,state.selectionElement);notify(decision==='skip'?'Saved. Similar interruptions will be filtered.':'Saved. Similar article prose will be preserved.');openView('filter');return;}
+  if(action==='semantic-reset'){delete prefs.semanticExamples[domainKey()];delete prefs.learning[domainKey()];await saveSettings();semantic.revision++;for(const x of document.querySelectorAll('[data-mb-semantic-reviewed]'))x.removeAttribute('data-mb-semantic-reviewed');showAll();appliedFilter();render();notify('Site learning reset.');return;}
   if(action==='filter-toggle'){setFiltering(!filterEnabled());return;}
   if(action==='restore-hidden'){showAll();notify('Restored items modified by this script.');return;}
   if(action==='rules'){openView('rules');return;}
@@ -579,12 +769,12 @@ async function handleAction(action,el){
    const b=responseBlob(r,type);const name=`${siteName()}-${Date.now()}.${m.kind==='video'?'mp4':/\.png/i.test(m.url)?'png':'jpg'}`;
    if(action==='media-share')await downloadBlob(b,name);else{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);notify('Download requested.');}return;
   }
-  if(action==='speech'){openView('speech');return;}
+  if(action==='speech'){openView('speech');if(azureKey&&state.voicesRegion!==prefs.azure.region&&!state.voicesLoading)void loadVoices().catch(e=>notify(e.message));return;}
   if(action==='speech-save'){
    const k=host.shadowRoot.getElementById('mb-key')?.value?.trim();const region=host.shadowRoot.getElementById('mb-region')?.value?.trim().toLowerCase();
    if(!/^[a-z0-9-]{3,40}$/.test(region))throw Error('Enter a valid Azure region, e.g. eastus.');
    prefs.azure.region=region;if(k){if(!storageOK)throw Error('Extension-controlled storage is required before saving a key.');await gmSet(STORAGE+':azure',k);azureKey=k;}
-   await saveSettings();notify('Speech settings saved.');render();return;
+   await saveSettings();if(state.voicesRegion!==region){state.voices=[];state.voicesRegion='';}notify('Speech settings saved. Loading voices…');render();if(azureKey)await loadVoices();return;
   }
   if(action==='speech-forget'){await gmSet(STORAGE+':azure','');azureKey='';reading.sampleCache.clear();notify('Speech key forgotten.');render();return;}
   if(action==='speech-voices'){await loadVoices();return;}
@@ -618,25 +808,34 @@ function startMediaPick(){endMediaPick();state.selectMedia=true;state.mediaPickL
   if(!url){notify('No direct media URL for this element.');return;}
   state.selectedMedia={url:url.href,kind:item.tagName==='VIDEO'?'video':'image',el:item,label:'Selected on page'};endMediaPick();openView('media');notify('Media selected.');
  };document.addEventListener('click',state.mediaPickListener,true);openView('media-picker');}
+function rememberSelectedPhrase(){
+ const sel=window.getSelection();if(!sel||sel.isCollapsed)return;
+ const v=text(sel.toString());if(v.length<8||v.length>650)return;
+ const anchor=sel.anchorNode?.nodeType===1?sel.anchorNode:sel.anchorNode?.parentElement;
+ if(!anchor||anchor.closest?.('[data-mb-host]'))return;
+ const element=anchor.closest?.('p,li,blockquote,aside,div,section');
+ state.selectionText=v;state.selectionElement=element&&!protectedNode(element)?element:null;
+}
 function installUI(){if(document.querySelector('[data-mb-host]'))return;
  host=document.createElement('div');host.setAttribute('data-mb-host','');host.style.cssText='all:initial!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:2147483647!important;pointer-events:none!important;';
  const shadow=host.attachShadow({mode:'open'});shadow.innerHTML=`<style>${styles}</style><button class="mb-launch" type="button" aria-label="Open Master Button tools">✦<span class="mb-count" data-count>0</span></button><section class="mb-panel" role="dialog" aria-label="Master Button controls" hidden></section><div class="mb-toast" role="status" aria-live="polite" hidden></div>`;
  document.documentElement.appendChild(host);
  const global=document.createElement('style');global.textContent=globalStyles;global.id='mb-global-style';(document.head||document.documentElement).append(global);
- let drag=null;const launch=shadow.querySelector('.mb-launch');
+ let drag=null;const launch=shadow.querySelector('.mb-launch');document.addEventListener('selectionchange',()=>{const selection=window.getSelection();if(selection&&!selection.isCollapsed&&selection.toString().length>8)rememberSelectedPhrase();});
  launch.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,right:prefs.position.right,bottom:prefs.position.bottom,moved:false};launch.setPointerCapture?.(e.pointerId);});
  launch.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>9)drag.moved=true;if(!drag.moved)return;prefs.position.right=Math.max(6,Math.min((visualViewport?.width||innerWidth)-54,drag.right-dx));prefs.position.bottom=Math.max(6,Math.min(innerHeight-54,drag.bottom-dy));launch.style.cssText=positionCSS();});
  launch.addEventListener('pointerup',()=>{if(!drag)return;ignoreClick=drag.moved;if(drag.moved)saveSettings();drag=null;});
- launch.addEventListener('click',e=>{if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
+ launch.addEventListener('click',e=>{rememberSelectedPhrase();if(state.view==='select-text'&&state.selectionText){openView('teach');return;}if(ignoreClick){e.preventDefault();ignoreClick=false;return;}openView(state.view?'':reading.playing?'mini':'menu');});
  shadow.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b){e.stopPropagation();void handleAction(b.dataset.action,b);}});
  shadow.addEventListener('change',e=>{
   if(e.target.id==='mb-media'){state.mediaIndex=Number(e.target.value);state.selectedMedia=null;render();}
-  if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;saveSettings();}
+  if(e.target.id==='mb-voice'){prefs.azure.voice=e.target.value;reading.sampleCache.clear();saveSettings();}
+  if(e.target.id==='mb-region'){prefs.azure.region=e.target.value;state.voices=[];state.voicesRegion='';state.voicesError='';saveSettings();render();if(azureKey)void loadVoices().catch(x=>notify(x.message));}
   if(e.target.id==='mb-quality'){prefs.azure.quality=e.target.value;saveSettings();}
   if(e.target.id==='mb-rate'){prefs.playbackRate=Number(e.target.value);audio.playbackRate=prefs.playbackRate;saveSettings();}
   if(e.target.matches('[data-audio-seek]')&&Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,Number(e.target.value));
  });
- shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;});
+ shadow.addEventListener('input',e=>{if(e.target.id==='mb-url')state.urlDraft=e.target.value;if(e.target.id==='mb-reader-edit')state.readerDraft=e.target.value;if(e.target.id==='mb-voice-search'){const q=e.target.value.trim().toLowerCase();const sel=host.shadowRoot.getElementById('mb-voice');if(sel){const items=state.voices.filter(v=>(v.label+' '+v.id).toLowerCase().includes(q)).slice(0,250);sel.replaceChildren(...items.map(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.label;o.selected=v.id===prefs.azure.voice;return o;}));if(!items.length){const o=document.createElement('option');o.textContent='No matching voices';sel.append(o);}}}});
  addEventListener('resize',()=>{prefs.position.right=Math.min(prefs.position.right,innerWidth-54);prefs.position.bottom=Math.min(prefs.position.bottom,innerHeight-54);render();});
  if(window.visualViewport)visualViewport.addEventListener('resize',()=>{const keyboard=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);launch.style.bottom=Math.max(prefs.position.bottom,keyboard+14)+'px';});
  render();
@@ -653,7 +852,7 @@ function monitorDOM(){
  observer=new MutationObserver(records=>{
   // Avoid scanning each leaf mutation during fast page transitions.
   if(!records.some(r=>![host?.contains(r.target)]&&r.target!==host&&r.target.id!=='mb-global-style'))return;
-  clearTimeout(observerTimer);observerTimer=setTimeout(()=>{if(location.href!==lastLocation){lastLocation=location.href;autoMapRedirect();}updateSite();},420);
+  clearTimeout(observerTimer);observerTimer=setTimeout(()=>{if(location.href!==lastLocation){lastLocation=location.href;state.selectionText='';state.selectionElement=null;autoMapRedirect();}updateSite();if(prefs.semanticAuto&&semantic.status==='idle'&&document.querySelector('article,main,[role="main"]'))void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});scheduleSemanticScan();},420);
  });observer.observe(document.documentElement,{childList:true,characterData:true,subtree:true});
  addEventListener('popstate',()=>{lastLocation=location.href;autoMapRedirect();setTimeout(updateSite,100);});
  addEventListener('pageshow',()=>updateSite());
@@ -661,7 +860,7 @@ function monitorDOM(){
 async function boot(){
  if(document.querySelector('[data-mb-host]'))return;
  await readSettings();autoMapRedirect();if(!document.documentElement)return;if(siteName()==='reddit')toggleRedditCSS(cleanupEnabled());
- installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');
+ installUI();updateSite();monitorDOM();if(!storageOK)notify('Extension storage unavailable: preferences will not persist.');if(prefs.semanticAuto&&document.querySelector('article,main,[role="main"]'))setTimeout(()=>{if(prefs.semanticAuto)void loadSemantic().then(ensureSemanticSeeds).then(scheduleSemanticScan).catch(()=>{});},2200);
 }
 // Hide known Reddit interstitials before the first asynchronous settings read.
 // The persisted per-site setting is applied by boot() as soon as it resolves.

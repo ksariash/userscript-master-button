@@ -23,10 +23,10 @@ function discoverPassages(){
  }
  return result;
 }
-function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');}
+function openReader(){stopPlayback(true);reading.passages=discoverPassages();reading.index=0;state.readerEditing=false;if(!reading.passages.length)notify('No article text found. Select text first, or paste text in the reader.');openView('reader');if(semantic.extractor)void reclassifyTranscript().catch(e=>notify(e.message));}
 function readerPlain(){return reading.passages.filter(p=>!p.excluded).map(p=>p.text).join('\n\n');}
 function replaceReaderText(v){stopPlayback(true);reading.passages=chunkText(v).map(t=>({text:t,element:null,excluded:false,reason:'Edited text',blob:null,status:'idle'}));reading.index=0;state.readerEditing=false;render();}
-function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');reading.passages.forEach(t=>{t.status='idle';});render();}
+function excludePassage(i){const p=reading.passages[i];if(!p)return;stopPlayback(true);p.excluded=!p.excluded;p.reason=p.excluded?'You skipped this passage':'You kept this passage';learnPassage(p.text,p.excluded?'skip':'keep');void teachSemantic(p.text,p.excluded?'skip':'keep',p.excluded?'offtopic':'article',p.element).catch(e=>notify('Local model: '+e.message));reading.passages.forEach(t=>{t.status='idle';});render();}
 async function requestGM(url,opts={}){
  if(!/^https:/.test(url))throw Error('Only HTTPS requests are allowed.');
  if(typeof GM==='undefined'||typeof GM.xmlHttpRequest!=='function')throw Error('Userscripts GM.xmlHttpRequest is unavailable. Check the script grants and extension permissions.');
@@ -46,8 +46,8 @@ async function azureSynthesize(v,onRequest){
  const r=await requestGM(azureEndpoint('v1'),{method:'POST',data:synthSSML(v),responseType:'arraybuffer',headers:{'Ocp-Apim-Subscription-Key':azureKey,'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':fmt,'User-Agent':'iPhoneMasterButton/0.1'},onRequest});
  return responseBlob(r);
 }
-async function loadVoices(){if(!azureKey)throw Error('Enter a key first.');const region=prefs.azure.region?.trim().toLowerCase();const r=await requestGM(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`,{responseType:'text',headers:{'Ocp-Apim-Subscription-Key':azureKey}});let list;try{list=JSON.parse(r.responseText||r.response);}catch{throw Error('Azure returned an invalid voices list.');}
- state.voices=list.filter(v=>v.ShortName&&v.Locale).map(v=>({id:v.ShortName,label:`${v.Locale} · ${v.LocalName||v.ShortName} (${v.Gender||'voice'})`}));notify(`Loaded ${state.voices.length} Azure voices`);render();}
+async function loadVoices(){if(!azureKey)throw Error('Save a key first.');const region=prefs.azure.region?.trim().toLowerCase();state.voicesLoading=true;render();try{const r=await requestGM(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`,{responseType:'text',headers:{'Ocp-Apim-Subscription-Key':azureKey}});let list;try{list=JSON.parse(r.responseText||r.response);}catch{throw Error('Azure returned an invalid voices list.');}
+ state.voices=list.filter(v=>v.ShortName&&v.Locale).map(v=>({id:v.ShortName,locale:v.Locale,label:`${v.LocalName||v.ShortName} · ${v.Locale} · ${v.Gender||'Voice'}`})).sort((a,b)=>a.locale.localeCompare(b.locale)||a.label.localeCompare(b.label));state.voicesRegion=region;state.voicesError='';notify(`Loaded ${state.voices.length} Azure voices`);render();}catch(e){state.voicesError=e.message;throw e;}finally{state.voicesLoading=false;render();}}
 async function demoVoice(){if(!azureKey)return notify('Enter your Azure key first.');stopPlayback(true);audioMode='demo';try{
  const key=prefs.azure.region+'|'+prefs.azure.voice+'|'+prefs.azure.quality;
  if(!reading.sampleCache.has(key))reading.sampleCache.set(key,await azureSynthesize('Hello. This is a sample of the selected reading voice.'));
@@ -58,6 +58,10 @@ function stopPlayback(invalidate=false){if(invalidate){reading.generation++;for(
 function enabledIndices(){return reading.passages.map((p,i)=>!p.excluded?i:-1).filter(i=>i>=0);}
 function nextEnabled(from){return enabledIndices().find(i=>i>=from)??-1;}
 async function prepareReading(){
+ if(prefs.semanticAuto&&filterEnabled()&&reading.passages.length){
+  if(!semantic.extractor){try{notify('Preparing the local filter before speech…');await loadSemantic();await ensureSemanticSeeds();}catch(e){notify('Local model unavailable. Review the text and disable Local AI if you want to proceed without it.');openView('filter');return;}}
+  await reclassifyTranscript();
+ }
  if(!azureKey){openView('speech');return;}
  const ids=enabledIndices();if(!ids.length)return notify('No enabled passages to narrate.');
  const job=++reading.generation;reading.preparing=true;reading.autoplay=true;render();
