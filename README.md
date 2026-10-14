@@ -2,13 +2,15 @@
 
 A compact Safari Userscripts utility for source-preserving reading, passage review, Azure narration and clean-link sharing.
 
-**Experimental rebuild, `2.0.0-alpha.4`.** Review/approval gates were removed at the user’s request. Implementation continues autonomously. This is not a validated iPhone release: filtering quality still misses the target, so **automatic exclusions remain disabled**. Explicit Skip/Keep, remembered exceptions and selector rules are implemented. Physical Safari and live Azure verification remain untested.
+**Experimental rebuild, `2.0.0-alpha.5`.** The user removed review gates. A conservative local-model policy now excludes some evaluated interruptions; the broad head remains disabled because it deletes legitimate references. The overall recall target is still unmet. Physical iPhone and live Azure verification remain untested. Key setup now shows paste/save feedback beside the field; recurring root scroll locks and blob-backed X media are covered by authored regression checks.
+
+On the requested BBC capture, Read selects 64 original article-region passages. Actual WASM inference excludes 12 related-book intro/link rows and three promotions, preserving all 41 labeled article rows; eight nuisance rows remain included. Full-page Review retains all 195 source rows. [Evidence and limits](experiments/evaluation/README.md).
 
 [Install / update](INSTALL.md) · [Progress and complete requirement ledger](PROGRESS.md) · [Validation](VALIDATION.md) · [Architecture](REBUILD.md) · [Site support](SUPPORT.md)
 
 The pipeline is **original HTML inventory → Defuddle on a detached clone → actual local NLI language model + classification head → one authoritative decision store**. Original wording and source ranges remain available when extraction omits or cannot map a block. Page controls, reader, learning, narration and exports resolve the same decisions. Uncertain/unavailable classification stays included.
 
-Implemented source includes live passage controls and Undo, reader selection/editing, site-scoped head learning, selector preview/rules, a cancellable direct Azure queue, local MP3 encoding, transcript/audio exports, URL tools and best-effort site adapters. Presence in source is distinct from device/service verification; see the ledger for partial and unverified behavior.
+Implemented source includes passage controls, bulk tap/range selection, Skip before/after with one-step batch Undo, reader selection/editing, site-scoped head learning, selector preview/rules, a cancellable direct Azure queue, local MP3 encoding, transcript/audio exports, URL tools and best-effort site adapters. Presence in source is distinct from device/service verification; see the ledger for partial and unverified behavior.
 
 ## Run locally
 

@@ -33,5 +33,6 @@ export function appNags(document,roots=pageRoots(document)){
 }
 export function otherDialogOpen(document,excluded,roots=pageRoots(document)){
   return roots.some(root=>[...root.querySelectorAll('dialog[open],[role="dialog"],[aria-modal="true"]')].some(n=>
-    !n.closest(OWN)&&!excluded.some(e=>e===n||e.contains(n))&&!n.hidden&&document.defaultView.getComputedStyle(n).display!=='none'&&document.defaultView.getComputedStyle(n).visibility!=='hidden'));
+    !n.closest(OWN)&&!excluded.some(e=>e===n||e.contains(n))&&!hiddenByAncestor(n,document)));
 }
+function hiddenByAncestor(node,document){for(let n=node;n;n=n.parentElement||n.getRootNode()?.host){if(n.hidden)return true;const css=document.defaultView.getComputedStyle(n);if(css.display==='none'||css.visibility==='hidden')return true;}return false;}

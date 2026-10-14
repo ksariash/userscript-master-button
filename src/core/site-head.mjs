@@ -5,7 +5,7 @@ export class SiteHead {
   refresh(){
     const examples=this.enabled()?[...this.getExamples()].filter(e=>e.enabled!==false&&e.featureVersion===MODEL_CONFIG.promptVersion&&Array.isArray(e.features)&&e.features.length===baseline.weights.length&&e.features.every(x=>Number.isFinite(x)&&Math.abs(x)<=1)).sort((a,b)=>String(a.id).localeCompare(String(b.id))):[];
     const signature=JSON.stringify(examples.map(e=>[e.id,e.label,e.features]));if(signature===this.signature)return false;this.signature=signature;
-    this.head=examples.length?{...fitHead(examples.map(e=>({features:e.features,expected:e.label})),{initial:baseline,epochs:120,rate:.04,l2:0,keepWeight:3,anchor:.3}),threshold:baseline.threshold}:baseline;return true;
+    this.head=examples.length?{...baseline,...fitHead(examples.map(e=>({features:e.features,expected:e.label})),{initial:baseline,epochs:120,rate:.04,l2:0,keepWeight:3,anchor:.3,positive:baseline.positive||[],negative:baseline.negative||[]}),threshold:baseline.threshold}:baseline;return true;
   }
-  classify(features){this.refresh();const base=assessFeatures(features,baseline),learned=assessFeatures(features,this.head);return{label:base.label==='NUISANCE'&&learned.label!=='NUISANCE'?'UNCERTAIN':base.label,baseLabel:base.label,baseActivation:base.activation,siteActivation:learned.activation,learning:'Gradient-trained classification head from explicit site corrections; frozen base language model.'};}
+  classify(features){this.refresh();const base=assessFeatures(features,baseline),learned=assessFeatures(features,this.head),veto=base.label==='NUISANCE'&&(learned.label!=='NUISANCE'||learned.activation<base.activation-.05);return{...base,label:veto?'UNCERTAIN':base.label,validatedExclusion:base.validatedExclusion&&!veto,baseLabel:base.label,baseActivation:base.activation,siteActivation:learned.activation,learning:'Gradient-trained classification head from explicit site corrections; frozen base language model.'};}
 }

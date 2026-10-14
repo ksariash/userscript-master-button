@@ -1,6 +1,6 @@
 # Actual local filtering evaluation
 
-These runs execute real pinned ONNX tensors locally on desktop Node CPU. They are not Safari checks, mock inference, independently audited labels, or a guarantee about arbitrary sites.
+These runs execute real pinned ONNX tensors locally on desktop Node CPU or one-thread WASM. They are not Safari checks, mock inference, independently audited labels, or a guarantee about arbitrary sites.
 
 ## Inputs and results
 
@@ -40,7 +40,7 @@ MB_SPLIT=fresh-held-out node experiments/evaluation/compare-head.mjs
 
 Original public captures are ignored under `.cache/evaluation/`; current-page recaptures may change hashes, indices or wording and need a new label audit. Frozen manifests contain provenance and hashes, not republished prose. Raw feature files contain actual model activations. The head is fitted to development examples only; threshold selection uses development ARTICLE activations plus a margin. Leave-one-page-out results are reported separately and expose weaknesses even when fitted/regression results look good.
 
-The published alpha imports `src/core/baseline-head.json`; its validation flag remains false. Current model identity, descriptions, structural features and abstention policy are shared in `src/core/` and by the executable evaluation. Changing them requires new measurements, not inherited metrics from a prior configuration.
+The broad-head validation flag in `src/core/baseline-head.json` remains false. Alpha.5 has a separately evaluated conservative subset, described below. Current model identity, descriptions, structural features and abstention policy are shared in `src/core/` and by the executable evaluation. Changing them requires new measurements, not inherited metrics from a prior configuration.
 
 ## Direct browser runtime and separate WASM evidence
 
@@ -55,4 +55,25 @@ MB_RUNTIME=wasm MB_SPLIT=fresh-held-out node experiments/evaluation/features.mjs
 MB_RUNTIME=wasm MB_SPLIT=fresh-held-out node experiments/evaluation/compare-head.mjs
 ```
 
-The WASM parity command returns nonzero because the measured numerical-equivalence criterion failed. It is a reported evaluation finding, not a mocked failure. No automatic exclusion is enabled by this alpha.
+The WASM parity command returns nonzero because the measured numerical-equivalence criterion failed. It is a reported evaluation finding, not a mocked failure. That earlier alpha did not enable automatic exclusions; current alpha.5 enables only the conservative subset below.
+
+## Current alpha.5: positive article and bounded link evidence
+
+The historical configurations above remain rejected. Current production is **v11**, with actual WASM evidence in `features-wasm-v11.json` and decisions in `results-conservative-v11.json`. The broad v10 head/new-page failure is retained in `results-positive-v10.json`: 21 ARTICLE errors in 222 new cases. Its weights were fitted on 254 old reused development cases plus 60 authored inline-link/citation cases; BBC/new-page labels never fit its weights. A zero-weight group mask is appended for the conservative policy. The base language model stays frozen.
+
+V11 retains positive article narrative, quotation/reference, date/byline, caption and translation evidence. Linked groups use bounded original intro/link/closing context, separately testing recommended reading and supporting citations. Closing prose supplies context without inheriting a group exclusion. Only evaluated reading-link groups, invitations or very strong evidence outside primary/extracted article content can exclude text. All other head predictions are uncertainty, not silent deletion.
+
+**731 author labels / 17 pages, all now reused regression.** Conservative results: no exclusions among 354 ARTICLE rows; 56/377 nuisances excluded, 100% finite-corpus precision, 14.9% recall. This improves a specific useful subset; the original full recall target is **unmet**. No independent audit or untouched final holdout is claimed. Do not describe this subset as a release-quality general classifier.
+
+BBC is exhaustive: 195 rows, 41 ARTICLE/154 NUISANCE. Source reading scope independently selects 64 rows (all 41 ARTICLE + 23 nuisance candidates). Actual conservative inference removes 12 related-book intro/link rows and three promotions, leaving 49 enabled rows. Eight reader nuisances remain. Whole-page model recall is 22.1%; reader nuisance recall is 65.2%. Scope selection is not credited as LM accuracy. The source inventory and original wording stay recoverable.
+
+```sh
+# With the pinned local model cache and original frozen HTML captures available:
+node experiments/evaluation/evaluate-positive.mjs
+# Policy replay only, no new inference:
+node experiments/evaluation/record-conservative.mjs
+```
+
+The first command checks original capture and text hashes, then executes new real tensors with production inputs/runtime/policy and no fitting. It writes a separate rerun artifact. If a current-page fetch changes a capture, prepare/audit new labels before inference; do not force old indices onto changed prose. BBC/fresh labels contain hashes rather than republished article text. Authored inline fixtures are original project prose. The second command reproduces the published conservative counts from measured features and rejects any ARTICLE false exclusion on that finite set.
+
+The initial corrected-context run had 449 cases/618,067 ms; later actual group plus 282 new-case inference took 329,502 ms. Final closing-context refinement executed 85 unique groups in 11,916 ms. Peak evaluator RSS reached 1,548,701,696 bytes, including JSDOM/dependencies. Physical Safari memory/CSP/latency remains unverified. These are real WASM runs, distinct from CI recorded-feature replay and mock integration.

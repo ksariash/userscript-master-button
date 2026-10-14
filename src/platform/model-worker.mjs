@@ -1,11 +1,12 @@
 import * as ort from 'onnxruntime-web/webgpu';
+import {passageEvidence} from '../core/passage-evidence.mjs';
 import { NLIRuntime } from './nli-runtime.mjs';
 import { modelAsset } from './model-assets.mjs';
 import { MODEL_CONFIG } from '../core/model-contract.mjs';
-import { DESCRIPTIONS, featureInput, structuralFeatures } from '../core/language-features.mjs';
+import { DESCRIPTIONS, PASSAGE_DESCRIPTIONS, featureInput, structuralFeatures } from '../core/language-features.mjs';
 const publicFetch = self.fetch.bind(self);
 self.fetch = (input, options = {}) => publicFetch(input, { ...options, credentials: 'omit', referrerPolicy: 'no-referrer' });
-let classifier, backend;
+let classifier, backend;const linkCache=new Map();
 const reply = (id, data) => postMessage({ id, ...data });
 self.onmessage = async event => {
   const { id, action, data } = event.data;
@@ -27,7 +28,7 @@ self.onmessage = async event => {
     if (action === 'classify') {
       const { passage, previous, next } = data, input = featureInput(passage, previous, next), tokens = classifier.tokenCount(input);
       if (tokens > MODEL_CONFIG.maxInputTokens) { reply(id, { result: { features: null, inputTokens: tokens, reason: 'The complete passage exceeds bounded local context. It remains included.' } }); return; }
-      const scores = await classifier.scores(input, DESCRIPTIONS); reply(id, { result: { features: [...scores, ...structuralFeatures(passage)], inputTokens: tokens, model: MODEL_CONFIG.id, backend, promptVersion: MODEL_CONFIG.promptVersion } }); return;
+      const scores = await classifier.scores(input, DESCRIPTIONS), passageScores = await passageEvidence(classifier,passage,linkCache); reply(id, { result: { features: [...scores, ...structuralFeatures(passage), ...passageScores], inputTokens: tokens, model: MODEL_CONFIG.id, backend, promptVersion: MODEL_CONFIG.promptVersion } }); return;
     }
     if (action === 'url') {
       const proposals = [];

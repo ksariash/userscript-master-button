@@ -1,0 +1,1223 @@
+{
+  "id": "bbc-dahl-current",
+  "url": "https://www.bbc.com/culture/article/20160912-the-dark-side-of-roald-dahl",
+  "captured": "2026-10-14",
+  "htmlHash": "283bf62e4c453643690518dbe3c0c7ba92d9514c3206e5157cb1467076bc7314",
+  "labeler": "Implementation author semantic/DOM audit before new inference; not independent or untouched holdout",
+  "articleIndices": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65
+  ],
+  "labels": [
+    {
+      "index": 0,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "ac576a66d4563e600314a2ce6e731725e9826fd88baf2399e05f60bfb177dbc0"
+    },
+    {
+      "index": 1,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "00115a38712c1c445faf9115306a4f329004657dd39c3fc21a858e99b163432a"
+    },
+    {
+      "index": 2,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "3a78695388b38b5cceefaf6796b0137877514593543b91af2752d5a17e3d736c"
+    },
+    {
+      "index": 3,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "69752f2313b2f0173a64afafc8fd7c6342a4a03ebaf47f7fe56792c146082232"
+    },
+    {
+      "index": 4,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "9a085dd854f03306988189d9b57c89b54a9303bdbba275ea9fc5739d64e3b50c"
+    },
+    {
+      "index": 5,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "76f68a75f01ed76f5a02ada71a3765a38ef2c45ba99106ee5a4bd5678d7bbdd0"
+    },
+    {
+      "index": 6,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "3169ce6442acdc8192ea935cfc09f6110dc31899379717f3b43c3b9045a27dd2"
+    },
+    {
+      "index": 7,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "55898449eb74fb2e348d13e5a5d84ab019bb87ea92687b50b3d3302eb409b784"
+    },
+    {
+      "index": 8,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "51d7a2ae4335df1210bcb79c32ebcda7d6043eda3ce4e191454fc78eebdb1fa8"
+    },
+    {
+      "index": 9,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "dac618a536e3a9a7ae7e6071d47ecf5d4c79f55276e9f7c5a3889b8daba19fef"
+    },
+    {
+      "index": 10,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "d2b98fb53714f23cc0aa7b0ad6dbf910dd537237d7debe818a142590a322b992"
+    },
+    {
+      "index": 11,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "b7c9b5ccd3e3ec741ecfa5864b577f5dab1d987bfd3caa4815f1b3f8354a5f16"
+    },
+    {
+      "index": 12,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "bc1b88907d3b748af99cb9d4ffc07a0118dad5dab21a9dbdcc5a17a09641364a"
+    },
+    {
+      "index": 13,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "d534be829e32196b4d1e53b67103cf1e376b1d60071857572598c196abfefbc6"
+    },
+    {
+      "index": 14,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "b64ac05f17e64d037db81a98f51e2688216e292ae9748f979f04dfbac49fd7fc"
+    },
+    {
+      "index": 15,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "551b890d09d28c78b9db9d72af35f4fefb9e99b1481a539afe8106ba032f0168"
+    },
+    {
+      "index": 16,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "f38eaae00dc2f5ee54daa1008c9086626f1da2f393e882c6a1a9b7ba18922d20"
+    },
+    {
+      "index": 17,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "00115a38712c1c445faf9115306a4f329004657dd39c3fc21a858e99b163432a"
+    },
+    {
+      "index": 18,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "97a0b70c915c21c6c295b38ea3ae823b8048eb4be863b49a8c14389e3e4c3357"
+    },
+    {
+      "index": 19,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "ce8ae876b3cce521b9dae34e39836f40b7001e10b39c986ae9e995e1f04e9381"
+    },
+    {
+      "index": 20,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "5342ff8f811ffa10a954c5aee3c80fbdb278183d7e8b86f8abc8eca678e7cce4"
+    },
+    {
+      "index": 21,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "11cb5c9dcac58a2b77795826937d3271c6166b4b8394120d414fd6cf5255fa3c"
+    },
+    {
+      "index": 22,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "437df4442c65ca52cd52d708be12df9f75125395fdd6c6bfaf90703a4ec3009d"
+    },
+    {
+      "index": 23,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "471b2854cb93a8c385bc5094f84f3359b3735f9f49aed5dbfab69fdb2edd66de"
+    },
+    {
+      "index": 24,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "824a91ae5897db250ad39655279b2e49a932b64b052f3fde5606a49934a97f4b"
+    },
+    {
+      "index": 25,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "89d19d047adf448a07c39bb8f421f17fecb522756235b27019963050f657d0f4"
+    },
+    {
+      "index": 26,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "5afbb2cd733a432fcc66b4aa6550c7c95dcaca45b4c26862fa4be9e20fd74afd"
+    },
+    {
+      "index": 27,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "bbdea0e80677e36a98282bb51cb1133240233c891eae55fcdb5cadaaa3b96a1b"
+    },
+    {
+      "index": 28,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "fec166f26616f072107cb78276530b6d7b04b07f4631b2de5387e1e45cfd580f"
+    },
+    {
+      "index": 29,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "a637867a8ccc4f7e9ce3255fee2431167d8c3dce5f1a172575c5a142d9d669cf"
+    },
+    {
+      "index": 30,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "88606d697dadd3b0007d93d395301e8181238db03159392c55f78af93cdd3ef2"
+    },
+    {
+      "index": 31,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "26becc6be93c2288bbc550c8e49f5e596b07094fafaf5f2033aef3721825da3b"
+    },
+    {
+      "index": 32,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "0139aff42460c21017dec5353c73d2b17eb4482cd25f4d32553107adbb3f1881"
+    },
+    {
+      "index": 33,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "1112910cc655f04e382c443aea25ddd6c86f88d008148e9ea6054b269859c78b"
+    },
+    {
+      "index": 34,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "d2d6d6618893d42af1db500804c3df0b6efc260ac10b4faab253340abf55687f"
+    },
+    {
+      "index": 35,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "0611161479a6ef72dfaa9db273cab9b631272b32dad19a779105bae608c04dd1"
+    },
+    {
+      "index": 36,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "9a3f25167877629b83391ae91aedefa43a5d2b244177d0fc0da72d41aa800645"
+    },
+    {
+      "index": 37,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "4b8056162054b40bf16034d35bbdeb642348f026a587ef0edbc3f590239bbc89"
+    },
+    {
+      "index": 38,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "38b000dcdd55a1eb0bc18ee00f7eca546702e399832b8d46f8acb2f26383b887"
+    },
+    {
+      "index": 39,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "1dd0cc07b9b60b2019b2757cc523ba6b50b0312f51973816589bae5892004331"
+    },
+    {
+      "index": 40,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "1112910cc655f04e382c443aea25ddd6c86f88d008148e9ea6054b269859c78b"
+    },
+    {
+      "index": 41,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "66162965a62603caeb0546c5c7d9b03a364a730d2c817adbbd62dc887bbcc1e7"
+    },
+    {
+      "index": 42,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "255631ebefd47fe96ed023c56c33496cd12581cbf46420aaf2442a62892c79d3"
+    },
+    {
+      "index": 43,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "e0e54903f76ef1a43c36c08aeca0b5e92c23e8029734c74721b8972259cbf742"
+    },
+    {
+      "index": 44,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "73b5dd37793b4d4f8292e6331551dbee6c0deac7acc4f654756d29625e8b9c33"
+    },
+    {
+      "index": 45,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "90a08f5553d3bbaa16d7f354f19d312eb70e391f4926589671860921d61a6bfb"
+    },
+    {
+      "index": 46,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "717e9fc04a837b2319131adb17dfca40407de57712822bc2c0412874d84994c0"
+    },
+    {
+      "index": 47,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "1345273ee3c62319e4c5ca8d3c92599e908eb4cf55c770c982f86575574a1b20"
+    },
+    {
+      "index": 48,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "6d0dcbf301408c4e5e9b6a3588071d8c7c2e42d77c7850d558583119b45cc62c"
+    },
+    {
+      "index": 49,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "1fe94474a86e78a4efafdd5bf2028ce616d0eff57a4755fb3b5dd31257d8414d"
+    },
+    {
+      "index": 50,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "6ccadd19c8e7ca2956c841f9696a38e81bfa59d45e79f766da3e9ac0b49c4788"
+    },
+    {
+      "index": 51,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "90a08f5553d3bbaa16d7f354f19d312eb70e391f4926589671860921d61a6bfb"
+    },
+    {
+      "index": 52,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "308089c3b1aca6e9983642272f545134ff0b7356d9d5e4c9c799f06c0cebc2be"
+    },
+    {
+      "index": 53,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "24153e15877c0d1b765cdac6ef4a7a2a2f9e6bd7450d373e4e5e866c5f36a093"
+    },
+    {
+      "index": 54,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "ebb3469eeed81018d9ab05f2b1328c0193e627cc95ffcd25b5c84edf1650da20"
+    },
+    {
+      "index": 55,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "5261946772da46cee589b5244876b0616d1ac20d65e6cb4ba79a02a564d3b02d"
+    },
+    {
+      "index": 56,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "a542acc96613e8074b82bb0a92b2af504d3e003c8dc148fa821d77ca44537a2b"
+    },
+    {
+      "index": 57,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "3488d53dbb94e70142a9e670bd425b1281403e8f464b23610353dc5066a4d86d"
+    },
+    {
+      "index": 58,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "90a08f5553d3bbaa16d7f354f19d312eb70e391f4926589671860921d61a6bfb"
+    },
+    {
+      "index": 59,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "5a934af4d291924c1cd1170388b9f1e3fc587983e39a7a7ccdf16d0ec959240d"
+    },
+    {
+      "index": 60,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "cde41e42147df847398ab16294f34b54e9c7ce5224b149cc915c65bf9515f3d8"
+    },
+    {
+      "index": 61,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "ee1469b1ec5edcccd60c4bcadf98a9c99354e8657df5c3baa964de18c440c8c6"
+    },
+    {
+      "index": 62,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "5b904e39ec3b5c7b70d228eda0abcbf441792060dcb122cf0f23215cde326660"
+    },
+    {
+      "index": 63,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "2151985df34480d8e22c34875d26c559b4d7bed6442d2682e4e4529f1dd7090d"
+    },
+    {
+      "index": 64,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "9ffe0c471a75a69e1ef3dcb66f582a5017dc2071e8e8c2ddccd16be29d3b386f"
+    },
+    {
+      "index": 65,
+      "label": "ARTICLE",
+      "kind": "main-article",
+      "textHash": "991ef6c17b2cc53b41855a780bee4bd5ac9fa5bb9578e7a1e6691c4af59abebd"
+    },
+    {
+      "index": 66,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "89d19d047adf448a07c39bb8f421f17fecb522756235b27019963050f657d0f4"
+    },
+    {
+      "index": 67,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "5afbb2cd733a432fcc66b4aa6550c7c95dcaca45b4c26862fa4be9e20fd74afd"
+    },
+    {
+      "index": 68,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "bbdea0e80677e36a98282bb51cb1133240233c891eae55fcdb5cadaaa3b96a1b"
+    },
+    {
+      "index": 69,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "fec166f26616f072107cb78276530b6d7b04b07f4631b2de5387e1e45cfd580f"
+    },
+    {
+      "index": 70,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "a637867a8ccc4f7e9ce3255fee2431167d8c3dce5f1a172575c5a142d9d669cf"
+    },
+    {
+      "index": 71,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "88606d697dadd3b0007d93d395301e8181238db03159392c55f78af93cdd3ef2"
+    },
+    {
+      "index": 72,
+      "label": "NUISANCE",
+      "kind": "related-books",
+      "textHash": "26becc6be93c2288bbc550c8e49f5e596b07094fafaf5f2033aef3721825da3b"
+    },
+    {
+      "index": 73,
+      "label": "NUISANCE",
+      "kind": "promotion",
+      "textHash": "ed5d31aba177654e066461653e5c7d390f7323b34f40808aad808df7a85031a8"
+    },
+    {
+      "index": 74,
+      "label": "NUISANCE",
+      "kind": "promotion",
+      "textHash": "2d58170d9d0fb04c6276d51a9f06e3c363f110429e435ce8e2786813695360a0"
+    },
+    {
+      "index": 75,
+      "label": "NUISANCE",
+      "kind": "promotion",
+      "textHash": "6123d51f07d0a2211ecf58638014f6db46b59f73f1a1a7ac69251560cf18724a"
+    },
+    {
+      "index": 76,
+      "label": "NUISANCE",
+      "kind": "promotion",
+      "textHash": "6c4bdc75e37fb0771db309f04857069e9455acafbdb0754d9879c682ec264409"
+    },
+    {
+      "index": 77,
+      "label": "NUISANCE",
+      "kind": "article-tags",
+      "textHash": "5afbb2cd733a432fcc66b4aa6550c7c95dcaca45b4c26862fa4be9e20fd74afd"
+    },
+    {
+      "index": 78,
+      "label": "NUISANCE",
+      "kind": "article-tags",
+      "textHash": "0fc8cf2bec25cf49c8f2f81bb9cb4c9f2d4519b7c1e604adf733d19087275daf"
+    },
+    {
+      "index": 79,
+      "label": "NUISANCE",
+      "kind": "article-tags",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 80,
+      "label": "NUISANCE",
+      "kind": "article-tags",
+      "textHash": "0eb045301ef38da83508dc5d4f10042473506daf7ffb7267188ebd5bd20e47f5"
+    },
+    {
+      "index": 81,
+      "label": "NUISANCE",
+      "kind": "article-tags",
+      "textHash": "51e49f593b9bb496176fa5b522be1d322cf6cfcaa84daadead231280206d6074"
+    },
+    {
+      "index": 82,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "a71e757324467ccfe2ae90f483fd759eff5378e6afcfcce4c620de929b3f2dd8"
+    },
+    {
+      "index": 83,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "e835373ed677ae489d2035c0de2526b60cf76de0244f0758468cd13ff4e08cd3"
+    },
+    {
+      "index": 84,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "d651f81bcc8497ff041b1ea20ef07ce6f5fde43a91b8b8d44a3104ccd87a2c05"
+    },
+    {
+      "index": 85,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "27067b843b5e0efcced9d2a7fdf53a13cb729adfecf6ebe818564288b66cefa8"
+    },
+    {
+      "index": 86,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "68005682d210f9cc758bf2820626f567c8006d07d4acc7318f27289fd535afb9"
+    },
+    {
+      "index": 87,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "18d492635bfafe3b6d7158ea81d865d01c43c816e0699fa387e5252bd2dbf37e"
+    },
+    {
+      "index": 88,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "27067b843b5e0efcced9d2a7fdf53a13cb729adfecf6ebe818564288b66cefa8"
+    },
+    {
+      "index": 89,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "928b83995004777e9eb5bed33dd51095d34cf3e29ec61f9754dd040ccfb6125d"
+    },
+    {
+      "index": 90,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "f24df8197a828c47de5e03151804ec28f94af97c024cdf9aa4b73898a20dda1d"
+    },
+    {
+      "index": 91,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 92,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "b531a11ad3713edd1cdaca12d39d5cc0e332f483150dd55f860d1beb616ad4f9"
+    },
+    {
+      "index": 93,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "33aa246a14d77ff69810b8dd66144e3f8889110991bc86ebd78e805e004d648a"
+    },
+    {
+      "index": 94,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 95,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "678fcdddf313e4c1ba433617700d8446afa471db758ef5cbd4a1a00da7ca8983"
+    },
+    {
+      "index": 96,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "d84f009a3133c89c32892f05e7e8537295a4aa66546436d25f50d05d6d3cd649"
+    },
+    {
+      "index": 97,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "27067b843b5e0efcced9d2a7fdf53a13cb729adfecf6ebe818564288b66cefa8"
+    },
+    {
+      "index": 98,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "98e7aa3a70cc7f49b44339c86b3f0b4c513307473cd708d4358cc928de942d5b"
+    },
+    {
+      "index": 99,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "f7383c847c2d517701c42e557d4addc47e131d879c02db4e132fac3b8a57ea9d"
+    },
+    {
+      "index": 100,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 101,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "37ef07710f20d0ec9e0cf31a4894483f0403aba6d7dea48f745f7d4bd7783d29"
+    },
+    {
+      "index": 102,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "d602659ba06f8a75bc7a10930c36f7d9e82e746ab3f395ec22cdcac02a9aa715"
+    },
+    {
+      "index": 103,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "83e90485bec1d1c021f6f4e62e9ebf83eb91068080d59b57bc49013e0957acf1"
+    },
+    {
+      "index": 104,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "2b92c19b1d75219e583d56253628e07b1a844efecf346b14e85ea107bfba2c32"
+    },
+    {
+      "index": 105,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "990dead02508b3a5f0967d8a9a920445936c0751220b3409d3b2d3dc53aa44c4"
+    },
+    {
+      "index": 106,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "51d7a2ae4335df1210bcb79c32ebcda7d6043eda3ce4e191454fc78eebdb1fa8"
+    },
+    {
+      "index": 107,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "c981d69d44534c0b6e0e1c817afb834f7e8a8ad91a19ae75da4a019b0a97394b"
+    },
+    {
+      "index": 108,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "8e60d243fc25ea61f5aef6d4a03bf13918c039e5e3015e81b5c7d59f29e4bc9e"
+    },
+    {
+      "index": 109,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 110,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "c763f820a010b82f5f38ab5a58dcf003beeefee6b4498322a6f902ffd783a6e3"
+    },
+    {
+      "index": 111,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "bfb547eab2664feb28fa8e238b3498286a9b9fef51e4bba56c03099d4c48dd67"
+    },
+    {
+      "index": 112,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 113,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "f9cdae6d24de9d55e78fa3a81bd3a514214d92754859f3d4f0bf65bb38961022"
+    },
+    {
+      "index": 114,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "ec6624d11bf670432a4995cd726816127635895f0a1b0a80bb2a06ca091c1042"
+    },
+    {
+      "index": 115,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 116,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "7d2e2e19753b534c22802a0989f932f61224a6c9dd93f2a3742917aa387837b5"
+    },
+    {
+      "index": 117,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "f4f877011ac8c225d10865365036494ecbe79cd06a86d88d106a7400cdde12f0"
+    },
+    {
+      "index": 118,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 119,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "63134b1eb0260495a221264259feeb7e880a72f6e1ff5f01eb2e36e429bc61e0"
+    },
+    {
+      "index": 120,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "399d489eb8425b4a036330c6707d247721d46e4bd741e516a49b08083f577278"
+    },
+    {
+      "index": 121,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "51d7a2ae4335df1210bcb79c32ebcda7d6043eda3ce4e191454fc78eebdb1fa8"
+    },
+    {
+      "index": 122,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "24f41f21dec26e9880d390e59c8426fcffeb420649cd98d7d9d2334145036d4c"
+    },
+    {
+      "index": 123,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "8b27b79fa449ff17026f5e36b850f15ecac0b51a9a348bcd7a2de4183c48d0a8"
+    },
+    {
+      "index": 124,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 125,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "56c903b4f7ea4f152bc3ebd10500ef8a117e1b7a87ddc1f880cfa4e93215f896"
+    },
+    {
+      "index": 126,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "eb4c88393c94cff8603ff5cc49c5052c868e2fdb62ca3d06168591b1915cc732"
+    },
+    {
+      "index": 127,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 128,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "949296a36e565fde9610f0e226e755bf5fc2609d0cb085183b50ba51694b1b7b"
+    },
+    {
+      "index": 129,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "97870a364c31e6c63d55643640c023e997b7061b0bfc79d232be19c755f4876c"
+    },
+    {
+      "index": 130,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 131,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "dfba20ac3f2adfab719cede00d223d7a89912f1ddded99fa7dbde616da506fa2"
+    },
+    {
+      "index": 132,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "cad2ab42500bd044b6aa773a67cc35a96a60baf2e7c0a584d05cc8054c60c508"
+    },
+    {
+      "index": 133,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 134,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "de26e97665f5761ea3e601195e3640554a6ae761c5f6c49c03b646a7daf2e279"
+    },
+    {
+      "index": 135,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "497ed2d6e0b891db81d6a0eec3f129819a0357bc8150a23544d3741edb86702a"
+    },
+    {
+      "index": 136,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 137,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "480002c5e426015e1637c4032497ec3f75b750ae29241a974bb3b4b25c3fb876"
+    },
+    {
+      "index": 138,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "2f11a280a616882f51b2b52922f88c67cbe2b13ff22691cd5a341baef91abac1"
+    },
+    {
+      "index": 139,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 140,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "6a911789aa03cad6c0a5901e17686787540fcc6a6a56b3b4a91e69723f378aff"
+    },
+    {
+      "index": 141,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "bdf21d92ece7f917505a6302f802dad0a187925640322b60e4a361d9d55e2679"
+    },
+    {
+      "index": 142,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "9da7f76bc81d2f4e5ee6a83817f7a1db2aadbc9ca13726b0c40b6ace756dce0c"
+    },
+    {
+      "index": 143,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "de6346fb3e61bd2700747905ea87995fd2ab0d6ff419b8a32e25f5a5c7bb4c40"
+    },
+    {
+      "index": 144,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "d7ec83bc13b298cfb9de56ead067f512947338f2f0343f6cf6847aa3558fc2e1"
+    },
+    {
+      "index": 145,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "805f3a5ab332f32d2abb93f6caa6c4c6f3f0b47f802f0ae21841a4b5f81b1729"
+    },
+    {
+      "index": 146,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "412b72e5880462bc2f4b486ce1f70c51ec60da0e82eebba5a9fb5566d5cba714"
+    },
+    {
+      "index": 147,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "d7ec83bc13b298cfb9de56ead067f512947338f2f0343f6cf6847aa3558fc2e1"
+    },
+    {
+      "index": 148,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "46463ba858e208f23c638cca40ce98831093457fef7ceece93a30bb21323e787"
+    },
+    {
+      "index": 149,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "8dd84edeb5b67d6e08a027cec1d4e5c72604c2acb5e4046a250bcc4a1ab61fe6"
+    },
+    {
+      "index": 150,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "91ef89fec3b88a326cdbcc86367d6a0eaac6ede07717ff2021927389affc2ee1"
+    },
+    {
+      "index": 151,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "46463ba858e208f23c638cca40ce98831093457fef7ceece93a30bb21323e787"
+    },
+    {
+      "index": 152,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "46463ba858e208f23c638cca40ce98831093457fef7ceece93a30bb21323e787"
+    },
+    {
+      "index": 153,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "62efc3fa57091ded6beaf5bbf6a46de5496b58e0af66ca24fb637dee70d70ff8"
+    },
+    {
+      "index": 154,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "8e558824835bf1af6227007a37a2040233edfa6aae3ddd8ae0659881eb9056ba"
+    },
+    {
+      "index": 155,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "46463ba858e208f23c638cca40ce98831093457fef7ceece93a30bb21323e787"
+    },
+    {
+      "index": 156,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "6faa883aa9730459b5d2e04f69795d300bc2bc287a126997ae0c25afae4a557b"
+    },
+    {
+      "index": 157,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "2c603130116f2caf0c982aba1ed2f23820701c9dfa2fa41daf0a92b867eb82f8"
+    },
+    {
+      "index": 158,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "01b11760661ab5ad1cbf54d359b33bebee50bb74315b2f380cc6e3661d09e0c2"
+    },
+    {
+      "index": 159,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "6faa883aa9730459b5d2e04f69795d300bc2bc287a126997ae0c25afae4a557b"
+    },
+    {
+      "index": 160,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "6faa883aa9730459b5d2e04f69795d300bc2bc287a126997ae0c25afae4a557b"
+    },
+    {
+      "index": 161,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "65de4c515cc9d565c139eba36cb4dc96f9e268deb0612bb3d98d0aa31bb9b90f"
+    },
+    {
+      "index": 162,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "63965f918d66a082e610fdc9869f8986010463e84a45e37738ede98fcebcef00"
+    },
+    {
+      "index": 163,
+      "label": "NUISANCE",
+      "kind": "recommendation",
+      "textHash": "6faa883aa9730459b5d2e04f69795d300bc2bc287a126997ae0c25afae4a557b"
+    },
+    {
+      "index": 164,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "3a78695388b38b5cceefaf6796b0137877514593543b91af2752d5a17e3d736c"
+    },
+    {
+      "index": 165,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "69752f2313b2f0173a64afafc8fd7c6342a4a03ebaf47f7fe56792c146082232"
+    },
+    {
+      "index": 166,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "9a085dd854f03306988189d9b57c89b54a9303bdbba275ea9fc5739d64e3b50c"
+    },
+    {
+      "index": 167,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "76f68a75f01ed76f5a02ada71a3765a38ef2c45ba99106ee5a4bd5678d7bbdd0"
+    },
+    {
+      "index": 168,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "3169ce6442acdc8192ea935cfc09f6110dc31899379717f3b43c3b9045a27dd2"
+    },
+    {
+      "index": 169,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "55898449eb74fb2e348d13e5a5d84ab019bb87ea92687b50b3d3302eb409b784"
+    },
+    {
+      "index": 170,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "51d7a2ae4335df1210bcb79c32ebcda7d6043eda3ce4e191454fc78eebdb1fa8"
+    },
+    {
+      "index": 171,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "dac618a536e3a9a7ae7e6071d47ecf5d4c79f55276e9f7c5a3889b8daba19fef"
+    },
+    {
+      "index": 172,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "d2b98fb53714f23cc0aa7b0ad6dbf910dd537237d7debe818a142590a322b992"
+    },
+    {
+      "index": 173,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "b7c9b5ccd3e3ec741ecfa5864b577f5dab1d987bfd3caa4815f1b3f8354a5f16"
+    },
+    {
+      "index": 174,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "bc1b88907d3b748af99cb9d4ffc07a0118dad5dab21a9dbdcc5a17a09641364a"
+    },
+    {
+      "index": 175,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "d534be829e32196b4d1e53b67103cf1e376b1d60071857572598c196abfefbc6"
+    },
+    {
+      "index": 176,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "b64ac05f17e64d037db81a98f51e2688216e292ae9748f979f04dfbac49fd7fc"
+    },
+    {
+      "index": 177,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "551b890d09d28c78b9db9d72af35f4fefb9e99b1481a539afe8106ba032f0168"
+    },
+    {
+      "index": 178,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "a0bba638124664064545edb48049c05385d1542084b2b79bb6ec0cfea6d636c9"
+    },
+    {
+      "index": 179,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "c9a172480f73fbe4d932671a3b3eda91d3c88fb7067be1779e277011679861b1"
+    },
+    {
+      "index": 180,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "19a0cfab2e1b086161233a0503e03a93e306fc5b7f1034b437b17f72248f0d48"
+    },
+    {
+      "index": 181,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "c9becacf3c8cb127d9f462832f8c06a3b6d77cf398f57fd3662fe6c746ebd7ae"
+    },
+    {
+      "index": 182,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "12a0015fa32217778863154566bce500732726db6ea596518712c12955d9a225"
+    },
+    {
+      "index": 183,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "30546e01032fdb69945ac5428fe99dff8930a600a47f0faffada170c80d7eacc"
+    },
+    {
+      "index": 184,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "a15f49e32c23341e239fefec2f4c99acda6ec5af24778591039d2f71a9aa9d7a"
+    },
+    {
+      "index": 185,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "506ff394621596dd88138642eddfc1e41833b3ae92d95e5c77c94327098abd9a"
+    },
+    {
+      "index": 186,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "141395eb35564fe50baa1839eb43315ec1880ae19f53b926611a483029a5a603"
+    },
+    {
+      "index": 187,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "cc0089d01a697fdf4b5f020567adc1c73cf865dc745eebcaf62fc898391d4cc0"
+    },
+    {
+      "index": 188,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "040cf40dcf20a691bf91ff99b05180bf9d8ea5dc6db772a4e7a50127d97c3385"
+    },
+    {
+      "index": 189,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "86f5f3c052c04d96ed0e51101f9b42786ddb94aea53baa4e14c52b667c41a631"
+    },
+    {
+      "index": 190,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "dfefea31355f2c71c067b1a769a3d59443f30e981336381b3dfa80afa368c3a3"
+    },
+    {
+      "index": 191,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "1132e4472948ebc5b1d478626ff894d5ce30238fb0f70d955a521a9ff427d204"
+    },
+    {
+      "index": 192,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "ad417d6404875b8f8cdfdda957a74a67361dfcee1c5e4d15661c3ad0175a0b07"
+    },
+    {
+      "index": 193,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "9dc5ede876b9195fed9a9a9fdf70f6835dd7a88913cc53d6c55a30abd925ccac"
+    },
+    {
+      "index": 194,
+      "label": "NUISANCE",
+      "kind": "navigation",
+      "textHash": "894e031a468c74c70bdf34f7189823bc7fcd27e924996a67c510f1a38f344852"
+    }
+  ],
+  "hashNote": "Full original passage hashes added from the verified capture after inference; labels and categories were frozen before the first BBC inference and remain unchanged."
+}

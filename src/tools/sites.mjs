@@ -1,5 +1,5 @@
 import { amazonProduct, appleMapsURL, validateURL } from './urls.mjs';
-import {OwnedStyles} from './owned-styles.mjs';
+import {ScrollRecovery} from './scroll-recovery.mjs';
 import {appNags,pageRoots,nagSite,otherDialogOpen} from './nags.mjs';
 import {discoverMedia} from './media.mjs';
 const SOCIAL = /(^|\.)(x.com|twitter.com|instagram.com|facebook.com|linkedin.com)$/;
@@ -24,29 +24,24 @@ export function nuisanceCandidates(document, host) {
 }
 export class SiteUtilities {
   constructor(document,{store=null,onState=()=>{}}={}) {
-    this.document=document;this.store=store;this.onState=onState;this.owned=new Map();this.locks=new Map();this.styles=new OwnedStyles();this.removedClasses=new Map();this.cleanupEnabled=false;this.nagNodes=new Set();this.count=0;this.roots=[];
-    this.unsubscribe=store?.subscribe(event=>{this.restoreKept();if(event.kind==='correction'&&this.cleanupEnabled){clearTimeout(this.timer);this.timer=setTimeout(()=>this.cleanNags(),100);}});
+    this.document=document;this.store=store;this.onState=onState;this.owned=new Map();this.locks=new Map();this.scroll=new ScrollRecovery(document,{allowed:()=>this.cleanupEnabled&&this.nagNodes.size>0&&!this.otherDialogOpen()});this.cleanupEnabled=false;this.nagNodes=new Set();this.count=0;this.roots=[];
+    this.unsubscribe=store?.subscribe(event=>{this.restoreKept();if(event.kind==='correction'&&this.cleanupEnabled)this.scheduleCleanup();});
   }
+  otherDialogOpen(){return otherDialogOpen(this.document,[...this.nagNodes],this.dialogRoots||[this.document]);}
   hasKeep(node){return this.store&&[...this.store.records.values()].some(p=>p.correction?.label==='ARTICLE'&&p.source?.nodes?.some(n=>node.contains(n)));}
   restoreKept(){let changed=false;for(const node of [...this.nagNodes])if(this.hasKeep(node)){this.restoreNode(node);this.nagNodes.delete(node);changed=true;}this.releaseLocksIfNeeded();if(changed)this.sync();}
   startCleanup(){if(!nagSite(new URL(this.document.URL).hostname))return 0;this.cleanupEnabled=true;const count=this.cleanNags();this.observe();return count;}
   observe(){
-    const roots=pageRoots(this.document);for(const root of roots)if(!this.roots.includes(root)){this.roots.push(root);this.observer||=new this.document.defaultView.MutationObserver(records=>{if(!this.cleanupEnabled||!records.some(m=>!m.target.closest?.('[data-master-button]')))return;clearTimeout(this.timer);this.timer=setTimeout(()=>{this.cleanNags();this.observe();},100);});this.observer.observe(root===this.document?this.document.body:root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','aria-hidden']});}
+    const roots=pageRoots(this.document);this.dialogRoots=roots;for(const root of roots)if(!this.roots.includes(root)){this.roots.push(root);this.observer||=new this.document.defaultView.MutationObserver(records=>{if(this.cleanupEnabled&&records.some(m=>!m.target.closest?.('[data-master-button]')))this.scheduleCleanup();});this.observer.observe(root===this.document?this.document.documentElement:root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden','inert','aria-hidden','aria-modal','role']});}
   }
+  scheduleCleanup(){if(this.timer!=null)return;this.timer=setTimeout(()=>{this.timer=null;if(this.cleanupEnabled){this.cleanNags();this.observe();}},100);}
   cleanNags(){
-    let added=0;const nodes=appNags(this.document);for(const node of nodes){if(this.hasKeep(node))continue;const old=this.owned.get(node);if(!old){this.hideOverlay(node);this.nagNodes.add(node);this.count++;added++;}else if(node.style.getPropertyValue('display')!=='none')node.style.setProperty('display','none','important');}
+    let added=0;const roots=pageRoots(this.document);this.dialogRoots=roots;const nodes=appNags(this.document,roots);for(const node of nodes){if(this.hasKeep(node))continue;const old=this.owned.get(node);if(!old){this.hideOverlay(node);this.nagNodes.add(node);this.count++;added++;}else if(node.style.getPropertyValue('display')!=='none'||node.style.getPropertyPriority('display')!=='important')node.style.setProperty('display','none','important');}
     this.releaseLocksIfNeeded();if(this.nagNodes.size)this.restoreNagScroll();this.sync();return added;
   }
   sync(){this.store?.setSiteExclusions([...this.owned.keys()].filter(node=>!this.owned.get(node).reveal));this.onState({enabled:this.cleanupEnabled,count:this.count});}
-  restoreNagScroll(){
-    const nodes=[...this.nagNodes];if(!nodes.length||otherDialogOpen(this.document,nodes))return;
-    for(const el of [this.document.body,this.document.documentElement]){
-      // Release only while a positively identified app nag is suppressed and no other modal is active.
-      for(const name of ['overflow','overflow-y'])if(['hidden','clip'].includes(this.document.defaultView.getComputedStyle(el).getPropertyValue(name)))this.styles.set(el,name,'auto');
-      if(/(^|\.)reddit\.com$/.test(new URL(this.document.URL).hostname))for(const cls of ['rpl-scroll-lock','scroll-is-blocked'])if(el.classList.contains(cls)){const saved=this.removedClasses.get(el)||new Set();saved.add(cls);this.removedClasses.set(el,saved);el.classList.remove(cls);}
-    }
-  }
-  releaseLocksIfNeeded(){if(!this.nagNodes.size||otherDialogOpen(this.document,[...this.nagNodes])){this.styles.clear();for(const [el,classes] of this.removedClasses)for(const cls of classes)el.classList.add(cls);this.removedClasses.clear();}}
+  restoreNagScroll(){this.scroll.release();}
+  releaseLocksIfNeeded(){if(!this.cleanupEnabled||!this.nagNodes.size||this.otherDialogOpen())this.scroll.pause();}
   restoreNode(node){const old=this.owned.get(node);if(!old)return;if(node.style.getPropertyValue('display')==='none'&&node.style.getPropertyPriority('display')==='important')old.value?node.style.setProperty('display',old.value,old.priority):node.style.removeProperty('display');if(old.modal){try{node.showModal?.();}catch{node.setAttribute('open','');}}this.owned.delete(node);}
 
   hideOverlay(node,{ restoreKnownLock=false }={}) {
@@ -63,7 +58,7 @@ export class SiteUtilities {
     }
   }
   undo() {
-    this.cleanupEnabled=false;clearTimeout(this.timer);this.observer?.disconnect();this.roots=[];this.observer=null;this.styles.clear();for(const [el,classes] of this.removedClasses)for(const cls of classes)el.classList.add(cls);this.removedClasses.clear();
+    this.cleanupEnabled=false;clearTimeout(this.timer);this.timer=null;this.observer?.disconnect();this.roots=[];this.dialogRoots=null;this.observer=null;this.scroll.stop();
     for(const [node,old] of this.owned) if(old.reveal) { if(node.style.filter==='none'&&node.style.getPropertyPriority('filter')==='important')old.value?node.style.setProperty('filter',old.value,old.priority):node.style.removeProperty('filter'); } else if(node.style.getPropertyValue('display')==='none'&&node.style.getPropertyPriority('display')==='important') old.value?node.style.setProperty('display',old.value,old.priority):node.style.removeProperty('display');
     for(const [el,old] of this.locks) if(!el.style.getPropertyValue('overflow')&&el.getAttribute('data-scroll-lock-owner')===old.owner) el.style.setProperty('overflow',old.value,old.priority);
     for(const [node,old] of this.owned)if(old.modal){try{node.showModal?.();}catch{node.setAttribute('open','');}}this.owned.clear();this.locks.clear();this.nagNodes.clear();this.count=0;this.sync();

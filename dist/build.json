@@ -1,8 +1,8 @@
 {
-  "version": "2.0.0-alpha.4",
-  "scriptBytes": 872303,
-  "sha256": "ddc757a9e7f08defbfd83410dad97a3581bba263b02fc157414b83c04860a2d4",
-  "modelWorkerBytes": 213158,
+  "version": "2.0.0-alpha.5",
+  "scriptBytes": 894661,
+  "sha256": "00d9eca2f944aa5c67ba28c07a6459be511909f5cd60964631fa2ca366b68db6",
+  "modelWorkerBytes": 214195,
   "dependencies": {
     "@breezystack/lamejs": "1.2.7",
     "@huggingface/tokenizers": "0.2.0",

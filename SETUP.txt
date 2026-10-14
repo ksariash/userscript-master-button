@@ -5,8 +5,9 @@ Enable the installed Master Button userscript for this page.
 The installed alpha.2 or later opens Speech setup automatically.
 If it does not, open its launcher → More → Speech setup.
 Both /main/SETUP.txt and /refs/heads/main/SETUP.txt URLs are supported.
-Alpha.3 fixes the missing Userscripts GM bridge that disabled key entry in alpha.2.
-If controls are still disabled, read the status beside the key controls.
+Alpha.5 shows pasted-key, saving, verified and failure feedback beside Save key.
+If the extension bridge is unavailable, saving explains the failure here.
+A failed save keeps your pasted key. No website storage fallback is used.
 After updating the script, open the Userscripts extension popup fully,
 check access to raw.githubusercontent.com, then reload this document.
 Enter your own Azure Speech resource key, choose its region, and save.
@@ -21,6 +22,6 @@ This dedicated-page workflow still requires a physical Safari/Userscripts check.
 If it is unavailable on your installed extension, do not type the key on an untrusted page.
 Existing separately stored speech keys are preserved and can be imported by their exact extension key name from the same userscript filename.
 
-If entry/save still fails in alpha.4: expand Connection checks, run
-Check extension storage, then Copy support report. No key is needed.
+If entry/save still fails in alpha.5: run Check extension storage beside
+the key controls. Expand Connection checks to Copy support report. No key is needed.
 The report contains no keys, headers, stored values or page content.

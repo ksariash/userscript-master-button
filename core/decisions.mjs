@@ -27,32 +27,43 @@ export class DecisionStore {
   }
   signature() { return JSON.stringify(this.reading().filter(p => this.resolve(p.id).included).map(p => [p.id, p.revision, p.originalText])); }
   subscribe(listener) { this.listeners.add(listener); return () => this.listeners.delete(listener); }
-  changed(id, kind = 'decision') {
+  changed(id, kind = 'decision', ids = id ? [id] : []) {
     const signature = this.signature(), sequenceChanged = signature !== this.fingerprint;
     if (sequenceChanged) { this.sequenceRevision++; this.fingerprint = signature; }
     this.viewRevision++;
-    for (const f of this.listeners) f({ id, kind, revision: this.sequenceRevision, viewRevision: this.viewRevision, sequenceChanged });
+    for (const f of this.listeners) f({ id, ids, kind, revision: this.sequenceRevision, viewRevision: this.viewRevision, sequenceChanged });
   }
   correct(id, label, { teach = false } = {}) {
+    const result=this.correctMany([id],label,{teach});return {taught:result.taught>0};
+  }
+  correctMany(ids, label, { teach = false } = {}) {
     if (!['ARTICLE', 'NUISANCE'].includes(label)) throw new Error('Invalid correction');
-    const p = this.records.get(id); if (!p) throw new Error('Unknown passage');
+    const records=[...new Set(ids)].map(id=>{const p=this.records.get(id);if(!p)throw new Error('Unknown passage');return p;});
+    if(!records.length)return {applied:0,taught:0};
+    const commandId = `${this.documentId}:command:${++this.nextCommand}`,entries=[];let taught=0;
+    for(const [index,p] of records.entries()){
+    const id=p.id;
     const previous = p.correction, previousExample = previous?.exampleId ? this.examples.get(previous.exampleId) : null;
-    const commandId = `${this.documentId}:command:${++this.nextCommand}`;
     if (previous?.exampleId) this.examples.delete(previous.exampleId);
     // Learning is intentional, bounded, and limited to unedited site passages.
-    const exampleId = teach && p.scope === 'page' && p.originalText.length <= 1200 ? commandId : null;
+    const exampleId = teach && p.scope === 'page' && p.originalText.length <= 1200 ? `${commandId}:example:${index}` : null;
     const replacedExamples = [];
     if (exampleId) for (const [key, e] of this.examples) if (e.site === this.site && e.text === p.originalText) { replacedExamples.push([key, e]); this.examples.delete(key); }
     if (exampleId) this.examples.set(exampleId, { id: exampleId, site: this.site, text: p.originalText, label, sourceId: id, revision: p.revision, enabled: true });
     p.correction = { label, commandId, exampleId };
-    this.history.push({ id, revision: p.revision, previous, next: p.correction, previousExample, replacedExamples });
+    entries.push({ id, revision: p.revision, previous, next: p.correction, previousExample, replacedExamples });taught+=Number(!!exampleId);
+    }
+    this.history.push({entries});
     if (this.history.length > 100) this.history.shift();
-    this.changed(id, 'correction');
-    return { taught: !!exampleId };
+    this.changed(records.length===1?records[0].id:null,'correction',records.map(p=>p.id));
+    return {applied:records.length,taught};
   }
   undo() {
     let command;
     while ((command = this.history.pop())) {
+      const ids=[];
+      for(const entry of [...command.entries].reverse()){
+      const command=entry;
       const p = this.records.get(command.id);
       // Commands and background assessments are leases on this exact wording.
       if (!p || p.revision !== command.revision || p.correction?.commandId !== command.next.commandId) continue;
@@ -60,7 +71,9 @@ export class DecisionStore {
       p.correction = command.previous; if (p.correction?.exampleId && this.removedExampleIds.has(p.correction.exampleId)) p.correction = { ...p.correction, exampleId: null };
       if (command.previous?.exampleId && command.previousExample && !this.removedExampleIds.has(command.previous.exampleId)) this.examples.set(command.previous.exampleId, command.previousExample);
       for (const [key, example] of command.replacedExamples || []) if (!this.removedExampleIds.has(key)) this.examples.set(key, example);
-      this.changed(command.id, 'correction'); return true;
+      ids.push(command.id);
+      }
+      if(ids.length){this.changed(ids.length===1?ids[0]:null,'correction',ids);return true;}
     }
     return false;
   }
@@ -89,13 +102,13 @@ export class DecisionStore {
       if (!old) { next.set(p.id, this.record(p)); dirty = true; }
       else {
         const changed = old.originalText !== p.originalText;
-        const evidenceChanged = ['tag','role','groupHeading','sameDocumentLinkRatio','inArticle','nearbyControls','extraction','listMarker','quoted'].some(key => JSON.stringify(old[key]) !== JSON.stringify(p[key]));
+        const evidenceChanged = ['articleTitle','tag','role','groupHeading','linkContext','linkCharacters','sameDocumentLinkRatio','inArticle','nearbyControls','extraction','listMarker','quoted'].some(key => JSON.stringify(old[key]) !== JSON.stringify(p[key]));
         next.set(p.id, { ...old, ...p, revision: old.revision + (changed ? 1 : 0),
           evidenceRevision: old.evidenceRevision + (changed || evidenceChanged ? 1 : 0), correction: changed ? null : old.correction, automatic: changed || evidenceChanged ? null : old.automatic, rule: changed ? null : old.rule });
         dirty ||= changed || evidenceChanged;
       }
     }
-    for (const p of previous.values()) if (p.scope === 'reader') next.set(p.id, p); else if (!next.has(p.id) && this.readingIds?.includes(p.id)) { next.set(p.id, { ...p, scope: 'reader', source: null, sourceState: 'source no longer available · original selected wording preserved', automatic: null, rule: null }); dirty = true; }
+    for (const p of previous.values()) if (p.scope === 'reader') next.set(p.id, p); else if (!next.has(p.id) && this.readingIds?.includes(p.id)) { next.set(p.id, { ...p, scope: 'reader', source: null, evidenceRevision:p.evidenceRevision+1,sourceState: 'source no longer available · original selected wording preserved', automatic: null, rule: null }); dirty = true; }
     dirty ||= [...previous.keys()].join('\n') !== [...next.keys()].join('\n');
     this.records = next; if (dirty) this.changed(null, 'source');
   }
@@ -115,7 +128,7 @@ export class DecisionStore {
     this.setReading(ids);
   }
   forgetExample(id) { this.examples.delete(id); this.removedExampleIds.add(id); for (const p of this.records.values()) if (p.correction?.exampleId === id) p.correction.exampleId = null; this.changed(null, 'learning'); }
-  resetExamples() { for (const c of this.history) { if (c.previous?.exampleId) this.removedExampleIds.add(c.previous.exampleId); for (const [id] of c.replacedExamples || []) this.removedExampleIds.add(id); } for (const id of [...this.examples.keys()]) this.forgetExample(id); }
+  resetExamples() { for (const command of this.history) for(const c of command.entries) { if (c.previous?.exampleId) this.removedExampleIds.add(c.previous.exampleId); for (const [id] of c.replacedExamples || []) this.removedExampleIds.add(id); } for (const id of [...this.examples.keys()]) this.forgetExample(id); }
   clearCorrections() {
     for (const p of this.records.values()) { if (p.correction?.exampleId) this.examples.delete(p.correction.exampleId); p.correction = null; }
     this.history = []; this.changed(null, 'correction');

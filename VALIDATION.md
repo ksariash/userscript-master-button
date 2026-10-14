@@ -1,81 +1,67 @@
-# Validation record — experimental alpha
+# Validation — experimental alpha.5
 
-## Reproduce local checks
+## Local policy and integration checks
 
-```sh
-ONNXRUNTIME_NODE_INSTALL=skip npm ci
-npm test
-npm run build
-npm run build:prototype
-node scripts/build-implementation-prototype.mjs
-```
+`npm test`: **87 tests** on Node 24.19/Linux x64. Real Defuddle, source/decision/storage/URL tests, JSDOM UI, mock model/extension/Azure/media transport, recorded-feature policy replay and actual local MP3 encoding. JSDOM has no layout engine. CI does not download or execute the model, contact Azure, or check Safari.
 
-All **44 tests passed again after recovery**, on Node 24.19.0/Linux x64. These include actual Defuddle extraction, policy/storage/URL tests, JSDOM state checks, mocked Azure/cancellation/cache tests and actual local MP3 encoding. JSDOM has no layout engine. Mock assessments are deliberate contract inputs and provide no model-accuracy evidence. GitHub Actions also passed the 44-test/source-build workflow on commit `855426e7eb4beab7cb79b6a47c26dc06160bac1e` ([run 38482945224](https://github.com/ksariash/userscript-master-button/actions/runs/38482945224)). It ran npm ci, tests, build and a clean generated-file diff; no model download/evaluation, live Azure or physical Safari check.
+New checks cover atomic bulk correction/learning Undo, range and all-included selection, expired wording leases, before/after page-versus-reading scope, no seek during selection, batch export cancellation, immediate key paste/save failures, separation of verified save from failed voices, visible blob/lazy X players and exact delivered media-ID association. They also cover source article scope and dynamic insertions; original linked-group context without assigning closing prose its decision; evidence/title/link-context leases; lost-source late inference; cached head learning/Undo; automatic exclusions/Show skipped/Keep/snapshot consistency; explicit first model load and subsequent Read startup; immediate Stop despite storage failure; article priority within the 200-passage budget; nag fixed-body/inner-container/inert/touch recovery and exact Undo.
 
-## Actual model evaluation
+Build with `npm run build`; repeat and compare `dist/build.json`. Generated script/metadata share alpha.5 and pinned dependencies. GitHub CI verifies tests, build and generated-file diff separately from actual inference.
 
-Real pinned ONNX inference ran separately on desktop CPU: FLAN-T5-small, Qwen3 0.6B and DeBERTa NLI. The initial 169 labels cover eight pages/four layouts; an additional 85 cases cover three new sites. Six initially mislabelled related links were corrected by semantic audit; initial manifests and Qwen results remain. Labels were set by the implementation author, without independent audit. Later debugging reused regression inputs; current reports are not an untouched final holdout.
+## Actual local model evaluation
 
-The current 85-case NLI/head report has **one ARTICLE false exclusion, 95% NUISANCE precision, 82.6% recall and three abstentions**. Abstentions count as nuisance misses. Targets are unmet; `baseline-head.json` keeps `validatedExclusion: false`. Automatic exclusion recall is therefore zero, and original text remains included unless explicitly corrected or matched by a saved rule. Scores are uncalibrated activations.
+Actual one-thread ONNX-WASM ran separately with pinned `Xenova/nli-deberta-v3-xsmall`, revision `2a4f614a701367a02d51389039afc998faeda637`, q8. **731 author-labeled blocks, 17 pages: 11 public captures and six authored layouts.** Labels were frozen before their first inference. Later debugging reused all cases; no independent audit or untouched final holdout is claimed.
 
-Weights: 87,246,587 bytes, pinned revision and integrity in the evaluation/docs. Desktop feature runs took roughly nine seconds to initialize and peaked around 803–875 MB for the whole process. These are not Safari or iPhone resource measurements. See [the raw evaluation record](experiments/evaluation/README.md).
+The broad head fitted to 314 development cases excluded **21/108 ARTICLE rows** in its first 222-case new-page test. That configuration was rejected. Its report remains at `experiments/evaluation/results-positive-v10.json`.
 
-## Actual browser-runtime code in Node
+The final conservative policy excludes **0/354 ARTICLE rows and 56/377 nuisances**: finite-corpus precision 100%, recall **14.9%**, 463 abstentions. It is enabled as a limited experimental subset. **The full 85% recall benchmark has not passed.** Broad-head exclusions remain disabled. Uncertain/unavailable decisions include text. Activations are not calibrated probabilities.
 
-The smaller browser worker uses Hugging Face Tokenizers 0.2.0 and ONNX Runtime Web directly. It omits unrelated model/task registries and embeds only one worker. Against Transformers.js/native CPU on four authored inputs, its native-CPU feature values matched within 5.6e-17 with equal token counts.
+### Requested BBC capture
 
-Real one-thread WASM execution in Node differed from native CPU by up to 0.154 on those inputs. The separate 85-case WASM regression still had one ARTICLE error, 95% precision, 82.6% recall and three abstentions. It took 1,766 ms to initialize from local cached files; median block 665 ms, p95 1,470 ms, total 71,722 ms. Whole-process peak RSS was 1,389,916,160 bytes, including the evaluation process and its imported dependencies. This is actual WASM execution, **not browser or physical iPhone validation**, and not a new independent holdout. Do not transfer native performance/calibration claims to Safari or WebGPU.
+Exact public URL was fetched with HTTP 200 on 2026-10-14 UTC. HTML: 433,097 bytes, SHA256 `283bf62e4c453643690518dbe3c0c7ba92d9514c3206e5157cb1467076bc7314`. The public manifest stores hashes/categories, not prose; the ignored original capture stays local.
 
-Reproduce with `node experiments/evaluation/runtime-parity.mjs`, `MB_RUNTIME=wasm node experiments/evaluation/runtime-parity.mjs`, and `MB_RUNTIME=wasm MB_SPLIT=fresh-held-out node experiments/evaluation/features.mjs`. The WASM parity report deliberately fails the numerical-equivalence criterion; preserve it. The production exclusion validation flag remains false.
+| Measure | Observed |
+| --- | --- |
+| Full source inventory / exact Defuddle members | 195 / 29 |
+| Source article reading scope | 64: all 41 ARTICLE rows plus 23 nuisance candidates |
+| Conservative model exclusions within reader | 15: 12 related-book intro/link rows and three promotions |
+| Enabled reader/narration/export sequence | 49: all 41 ARTICLE rows plus eight remaining nuisances |
+| ARTICLE false exclusions | 0; 24 positively identified, 17 uncertain but included |
+| Reader nuisance precision / recall | 100% / 65.2% |
+| Whole-page nuisance recall | 22.1%; do not substitute reader scope for this measure |
 
-## Actual codec verification
+Headlines, date/byline, standfirst, update note, image credits/captions and body wording remain included. The two related-list campaign tags, five topic tags and one promotion remain in the reader. Keep/Skip correct them through the same store. Reading scope is a source selection, not an LM classification: full-page Review and Read full page inventory retain all rows. There are no BBC URL/text/index special cases in production policy.
 
-The local Lame encoder produced a mono 24 kHz MP3 from two authored tones: FFprobe reported 2.064 s and 24,768 bytes. FFmpeg decoded and sought without error. This proves a desktop codec path, not live Azure output, native iPhone sharing or locked-screen playback. Current speech tests use mock PCM and transport.
+### Runtime and reproduction
 
-## Rendering and browser limits
+The full 449-case corrected-context WASM run took 618,067 ms, initialization 1,714 ms from cached files, whole-process peak RSS 1,478,139,904 bytes. A subsequent group/new-case run took 329,502 ms and peaked at 1,548,701,696 bytes. Final group refinement: 85 actual unique group inferences, 11,916 ms. These processes include evaluator/JSDOM dependencies; they are **not iPhone memory, browser latency or network download measurements**.
 
-Sites publication renders provide screenshot evidence for the actual HTML/CSS/JS study; they are desktop snapshots. The local native Chromium process could not start successfully in this restricted executor (SIGTRAP). The managed preview supervisor mailbox was absent. The separate cloud browser reached the private preview's sign-in gate and required a fresh account login; that path was stopped without collecting credentials. No browser security or private access configuration was changed. Native private publication and its returned screenshot assets used existing connector authorization.
+Weights are 87,246,587 bytes; initial weights/tokenizer/runtime downloads total about 123 MB. Native CPU and WASM differ numerically; prior failed parity and model reports remain. See [evaluation instructions](experiments/evaluation/README.md) and final raw feature/result JSON. `evaluate-positive.mjs` runs new tensors using the production tokenizer/input/policy and fixed labels/head. `record-conservative.mjs` only replays recorded genuine features; it is not another inference run.
 
-Accordingly, publication screenshots do not establish interaction QA, small/landscape viewport results, keyboard behavior, actual touch, or Safari compatibility. JSDOM state checks do not establish geometry or contrast. Native renders have their own capture dimensions and may scale 390×844 study frames; keep that distinction in screenshot records.
+## Actual codec checks
 
-## Physical iPhone gate — not run
+The Lame path encoded authored mono 24 kHz tones: FFprobe found 2.064 seconds/24,768 bytes; FFmpeg decoded and sought successfully. This proves a desktop codec path, not live speech, native iPhone sharing or locked-screen playback.
 
-Record iPhone model, iOS/Safari version, Userscripts app version (`GM.info`), actual visual viewport, backend, model revision/dtype, cache state, and power/thermal conditions. Do not infer any from desktop emulation.
+## Scroll evidence and limits
 
-1. Install a dedicated feasibility userscript with Userscripts content-scope grants and a harmless local fixture. Record key-storage isolation and GM request/abort types without displaying secrets.
-2. Attempt real WASM inference with matching assets, one thread, and no hidden cloud fallback. Repeat under permissive and strict CSP, then test WebGPU only on a supported device. Measure first download, warm reload, model/init latency, long-page work, memory pressure/eviction and recovery, suspension/resume, battery/thermal effects.
-3. Exercise page Skip → matching reader → future enabled selection → Undo, with late inference, duplicate text, short/full-width/nested passages, injected recommendations, source edits and SPA navigation. Ensure links remain operable, utility-owned style/lock cleanup is exact, and malformed saved examples never block correction.
-4. Capture idle/menu, page correction, Why/full excerpt, reader/player, speech/settings in both appearances over clean and cluttered pages. Inspect 320px, 390×844, landscape, keyboard, safe areas/browser chrome, zoom, large text, long labels, reduced motion, focus/VoiceOver, two launcher taps, drag/tap, scroll/selection/drafts, and final reader passages.
-5. Record measured normal menu height (target below roughly 320px) and reader text viewport fraction (target ≥70% at default 390×844). Record exceptions for accessibility sizes. Numerical measures accompany aesthetic review, not replace it.
+The user reported X/Reddit nags now disappear but scrolling stays blocked. This patch releases attributed fixed-body/negative-offset, inner main-ancestor overflow, inert/touch-action and known Reddit class locks only while a recognized app nag is suppressed and no unrelated dialog is open. The observer covers HTML-root locks, inert and open/hidden/modal changes, coalesces without waiting for a quiet page, and checks only scroll ancestors on a 500 ms watchdog and at gesture start. Owned state is restored on Undo; subsequent site writes are preserved. A passive window-capture guard stops later document-level nag handlers from canceling the first vertical movement; controls, horizontal/pinch gestures and the utility reader remain protected.
 
-## Live Azure/audio gate — not run
+Mocks passed. **Physical iPhone scrolling has not been run.** Earlier window-capture cancellation, touchstart cancellation and unknown layouts remain limitations. Official background: [WebKit scrolling architecture](https://trac.webkit.org/wiki/Scrolling). No generic event-handler deletion or access bypass is used.
 
-During speech implementation, use the user's speech resource directly and record region, live voice ID, supported output format, request/response conditions, real duration, and provider event provenance. Keep the key out of page storage, URLs, logs, reports, recordings and repository files.
+## Physical Safari — outstanding
 
-Verify first-segment start, bounded preparation, caching/retry/429/401 behavior, pause/resume/back/forward/seek/rate, cancellation/stale intent, exact selection rechecks, correction cache reuse, and no demo/article overlap. Test transcript follow/manual return behavior using only real timing. Verify format-aware exports in a real player, including seek, enabled order, size and snapshot invalidation.
+Record device/iOS/Safari/Userscripts versions, visual viewport, backend/model/cache state. Test X/Reddit scroll before/after recurring nags, normal dialogs, controls/horizontal media gestures, reader open/close and Undo. On X test videos before/after starting the native player and refreshing Media; blob/playlist-only items must not promise a direct download. On BBC check tap/range/all-included selection, before/after scope, one-step Undo, all article words, related lists, Show skipped/Why/Keep/Undo, source mutations and future speech/export selection.
 
-On a physical iPhone, lock the screen before and during passage transitions, introduce buffering, then unlock/minimize/reopen. Separately play the prepared recording locally. Record unsupported behavior and the practical fallback; neither mock transport nor static player controls pass this gate.
+Measure actual worker/CSP support, first/warm downloads, memory pressure/eviction, long-page work, suspension and battery/thermal effects. Check 320px/390×844/landscape, keyboard/browser bars, large text, text selection/focus/VoiceOver, menu height and reader space. No static render or JSDOM check passes these items.
 
-## Release gate — outstanding
+## Azure and key entry — outstanding
 
-Populate the independent regression corpus and page/site-held-out split; meet the agreed finite-corpus accuracy target or obtain an explicit revision. Complete every ledger row or label a release as partial. Verify migration without deleting unrelated preferences/keys, reproducible source/build/metadata and extension-supported update/reinstall behavior. Publish visual evidence with real content replacing the authored study and incorporate feedback without pausing implementation.
+No key received and no actual Azure request made. The prior physical key-entry failure is unresolved. Alpha.4’s safe Check extension storage/support report remains the diagnosis path. Alpha.5 preserves lexical GM, key readback, opaque header-safe validation and live-catalogue-only voice selection. Trusted setup permits transient key entry even if the bridge is missing; Save then reports the exact safe failure beside the field without page-storage fallback. Input/paste, saving, verified and failure states are inline and live-announced. Failed saves retain the field; storage writes/readback have a 12-second bound. Voices load separately, with their failures next to the dropdown. These are mock-verified behaviors, not physical success.
 
-## Alpha.2 key setup patch evidence
+With a key entered on the dedicated setup document, independently verify regional voices, actual synthesis/format, first-segment playback, retries/cache, seek/rate, cancellation, demo overlap, exact enabled-text checks, recording playback/native sharing and locked-screen transitions. Keys must stay out of chat/GitHub/page storage/logs. Mock transport successes do not establish live Azure success.
 
-`npm test`: 47/47 pass. Three added mock DOM tests exercise both exact raw setup URL forms, automatic form opening, field focus, Save/Forget, GM-only storage with empty page storage and no transport calls, rejected URL variants, unavailable extension storage and `GM.openInTab` navigation. The fake fixture uses a repeated character, never a real resource key. Build repeated with identical SHA256 `368b1d0c1b23cac7884e423c04cb0cee12a5dd3d013fcd74fbbadf63aa9e2097`.
+## Visual evidence
 
-Official platform reference checked: [Userscripts README/API](https://github.com/quoid/userscripts), which documents async granted storage/open-tab APIs, content injection and opening the popup after external file edits. This patch does not establish physical Safari injection, touch/keyboard behavior, extension-storage persistence or live Azure success. Those remain separate outstanding checks. Model evaluation was not rerun because inference is unchanged.
+Existing light/dark gallery and alpha.3 production-menu/media/setup renders have recorded provenance. They use mock integrations and desktop Sites rendering; the private preview remains that study. Alpha.5 adds a compact filter status/Show skipped row, inline key feedback, and a selection toolbar replacing the player during batch filtering, covered by DOM checks but **no new browser/physical screenshot QA**. Native Chromium and managed browser QA were unavailable in this executor; no alternate browser or login was attempted.
 
-## Alpha.3 correction evidence
-
-- **Policy/mock integration:** `npm test` 59/59 passed. Extension startup uses a lexical `{GM}` wrapper matching the [current Userscripts injection code](https://github.com/quoid/userscripts/blob/main/src/ext/content-scripts/entry-userscripts.js). No GM API is copied to a window global. Fake keys only; regional voice and file responses are mocks. The [Azure REST voice-list contract](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech) determines validation/groups. The [HTML popover standard](https://html.spec.whatwg.org/multipage/popover.html) determines the feature-detected nonmodal host.
-- **Actual public markup:** fetched Slashdot’s current public homepage, parsed with real Defuddle/source inventory in desktop JSDOM. 199 source records, 70 selected story rows, all 15 titles and zero selected footer rows; older link found and native search parameter encoded. CSS parsing warnings mean this is not a layout result. No browser navigation performed.
-- **Actual model evaluation:** unchanged from the recorded WASM regression. Not rerun for this UI/adapter/bridge patch; no new accuracy claim.
-- **Physical Safari:** user screenshots prove the previous nags and unavailable bridge, and that alpha.2 auto-opened. They do not verify alpha.3. Pending: key save/reload persistence, voice selection, popup re-insertion/scroll/Undo, native modal stacking, media pick/preview/download/share and Slashdot links/search.
-- **Live Azure:** not run. Pending authenticated regional catalogue and synthesis/playback using the user’s own resource; no key received in chat or repository.
-
-Alpha.3 visual evidence: `prototype/screenshots/tools-light.png` and `tools-dark.png`, both inspected, with exact source/version provenance. These are desktop Sites renders of four 390×844 comparison frames using mock integrations; native browser automation was unavailable and no replacement browser or sign-in was attempted. The source build was repeated identically: SHA256 `af678eb2d950651fad9f5c49c4da0a003e23d77b185662c10876299d3c465c9d`.
-
-## Alpha.4 diagnosis evidence
-
-`npm test`: 64 mock/policy/local tests. New tests separate a preferences failure from key storage, require key write/readback and deletion verification, check opaque header-safe formats, test random-probe cleanup and safe failure codes, exclude secret fixtures from the whitelisted support report, and show no-key Azure diagnosis sends no request. The published alpha.3 bundle was additionally started in a desktop JSDOM lexical-GM wrapper, with storage initialization/launcher present and no window.GM exposure. No physical Safari reproduction or actual Azure request was made. User-reported alpha.3 entry/save failure is unresolved; alpha.4 provides a concrete on-device diagnosis path and repairs observed code defects without claiming a device-level fix.
+Official platform sources checked for this patch: [Userscripts API/content injection](https://github.com/quoid/userscripts#api), [MDN MediaSource](https://developer.mozilla.org/en-US/docs/Web/API/MediaSource), [MDN resource timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming), and [Azure voices REST](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech). Resource timing is bounded and only exact X media IDs connect an observed URL to its player; no private API, URL guessing or stream reconstruction is used.

@@ -20,3 +20,9 @@ test('Removed selected source text remains readable and correctable with an expl
 test('Deleting/resetting remembered examples is not undone by an older passage correction',()=>{
  const s=new DecisionStore([{id:'a',originalText:'Original.'}],{documentId:'d',site:'x.test'});s.correct('a','NUISANCE',{teach:true});s.correct('a','ARTICLE',{teach:true});s.resetExamples();s.undo();assert.equal(s.resolve('a').included,false);assert.equal(s.examples.size,0);assert.equal(s.records.get('a').correction.exampleId,null);
 });
+test('Mock head teaching Skip preserves the conservative policy for other confident passages',()=>{
+ const s=new DecisionStore([{id:'a',originalText:'Explicit page words.'},{id:'b',originalText:'Other page words.'}],{documentId:'d',site:'a.test'}),head=new SiteHead(()=>s.examples.values()),features=Array(baseline.weights.length).fill(0);features[7]=1;features[9]=1;features[10]=1;assert.equal(head.classify(features).label,'NUISANCE');s.correct('a','NUISANCE',{teach:true});const e=[...s.examples.values()][0];e.features=features;e.featureVersion=MODEL_CONFIG.promptVersion;assert.equal(head.classify(features).label,'NUISANCE');assert.equal(head.head.conservativeExclusion,true);
+});
+test('Removing a selected source preserves words but rejects late context-dependent inference',()=>{
+ const s=new DecisionStore([{id:'a',originalText:'Selected source words.'}],{documentId:'d'});s.setReading(['a']);s.sync([]);assert.equal(s.assess('a',{label:'NUISANCE',validatedExclusion:true},{documentId:'d',revision:0,evidenceRevision:0}),false);assert.equal(s.resolve('a').included,true);assert.equal(s.snapshot().passages[0].text,'Selected source words.');
+});
