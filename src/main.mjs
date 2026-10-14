@@ -6,7 +6,7 @@ import { Settings } from './platform/storage.mjs'; import { ArticleController } 
 export async function start({document=globalThis.document,gm=typeof GM==='undefined'?globalThis.GM:GM,version=__VERSION__,workerSource=MODEL_WORKER_SOURCE,WorkerClass=globalThis.Worker,allowFrame=false,audioFactory=()=>document.createElement('audio')}={}){
   if(!document.body||document.documentElement.namespaceURI!=='http://www.w3.org/1999/xhtml')return null;const win=document.defaultView;if(win.top!==win.self&&!allowFrame)return null;
   if(document.querySelector('[data-master-button="host"]'))return null;
-  const settings=new Settings(gm);let storageError='';try{await settings.load();}catch{storageError='Extension storage could not be read. Preferences are temporary; existing data was left untouched.';settings.persistent=false;}
+  const settings=new Settings(gm);let storageError='';try{await settings.load();settings.startupState=settings.persistent?'preferences-loaded':'storage-api-missing';}catch{storageError='Preferences could not load. Existing data was left untouched. Speech setup can check extension storage and retry key saving.';settings.startupState='preferences-load-failed';}
   let app,retired=false;
   function mount(){
     let ui,classifier,speech;const controller=new ArticleController(document,settings,{onNavigate:()=>{if(retired)return;app.stop();mount();},onChange:e=>{ui?.patch(e);if(e.kind==='source')classifier?.scan();}}),store=controller.store;

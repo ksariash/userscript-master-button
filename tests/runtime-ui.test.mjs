@@ -19,6 +19,17 @@ test('Userscripts injection mock: lexical GM works without globalThis.GM or an e
  ui.sheet.querySelector('#speech-key').value='k'.repeat(32);click(ui,'save-key');await tick();assert.equal(values.get('master-button:speech-key'),'k'.repeat(32));assert.equal(dom.window.GM,undefined);
  instance.stop();dom.window.close();
 });
+test('Preferences-read failure does not disable key entry; storage check, verified save and key-free report still work',async()=>{
+ const dom=new JSDOM(fixture,{url:'https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt',runScripts:'dangerously',pretendToBeVisual:true});const values=new Map(),copies=[];
+ const gm={getValue:async(k,d)=>{if(k==='master-button:v2')throw new Error('preferences unavailable');return values.get(k)??d;},setValue:async(k,v)=>values.set(k,v),deleteValue:async k=>values.delete(k),setClipboard:async text=>copies.push(text),info:{scriptHandler:'Userscripts',version:'4.8.2',script:{version:'2.0.0-alpha.4','inject-into':'content'}}};
+ dom.window.eval(result.outputFiles[0].text);const audio=dom.window.document.createElement('audio');audio.pause=()=>{};audio.load=()=>{};const instance=await dom.window.MBTest.start({document:dom.window.document,gm,workerSource:'',audioFactory:()=>audio,version:'2.0.0-alpha.4'});
+ try{const ui=instance.app.ui;assert.equal(instance.settings.startupState,'preferences-load-failed');assert.equal(ui.sheet.querySelector('#speech-key').disabled,false);assert.match(ui.sheet.querySelector('.speech-version').textContent,/alpha.4/);click(ui,'check-storage');await tick();assert.equal(instance.settings.storageCheck.state,'passed');assert.equal(values.size,0);
+ ui.sheet.querySelector('#speech-key').value='k'.repeat(32);click(ui,'save-key');await tick();assert.equal(values.get('master-button:speech-key'),'k'.repeat(32));assert.equal(ui.sheet.querySelector('#speech-key').value,'');click(ui,'copy-support');await tick();assert.equal(JSON.parse(copies[0]).storage.state,'passed');assert.equal(copies[0].includes('k'.repeat(32)),false);
+ }finally{instance.stop();dom.window.close();}
+});
+test('Mock Azure diagnostic without a saved key sends no request and reports only no-key',async()=>{
+ const s=await setup();try{s.ui.open('speech');click(s.ui,'check-azure');await tick();assert.equal(s.calls.length,0);assert.equal(s.ui.azureCheck.code,'no-key');assert.equal(JSON.parse(s.ui.sheet.querySelector('#support-report').value).azure.code,'no-key');}finally{s.instance.stop();s.dom.window.close();}
+});
 test('Mock DOM key setup: both main raw URL forms open a usable form and save only to extension storage',async()=>{
  for(const path of ['main','refs/heads/main']){
   const s=await setup(`https://raw.githubusercontent.com/ksariash/userscript-master-button/${path}/SETUP.txt`);

@@ -25,7 +25,7 @@ export function migrateLegacy(value) {
     speech: v.speech || { region: v.region, voice: v.voice }, legacy: v });
 }
 export class Settings {
-  constructor(gm) { this.gm = gm; this.value = defaults(); this.queue = Promise.resolve(); this.ephemeralSites = new Map(); this.persistent = !!gm?.getValue && !!gm?.setValue; }
+  constructor(gm) { this.gm = gm; this.value = defaults(); this.queue = Promise.resolve(); this.ephemeralSites = new Map(); this.persistent = typeof gm?.getValue==='function' && typeof gm?.setValue==='function';this.startupState='not-read';this.storageCheck={state:'not-run'}; }
   async load() {
     if (!this.persistent) return this.value;
     const current = await this.gm.getValue(SETTINGS_KEY);
@@ -42,13 +42,27 @@ export class Settings {
     if (!this.persistent) return Promise.resolve(false);
     this.queue = this.queue.catch(() => {}).then(() => this.gm.setValue(SETTINGS_KEY, value)); return this.queue;
   }
-  async getKey() { if (!this.persistent) return ''; const v = await this.gm.getValue(SPEECH_KEY, ''); return typeof v === 'string' ? v.trim() : ''; }
+  async getKey() { if (!this.persistent) return '';let v;try{v=await this.gm.getValue(SPEECH_KEY,'');}catch{throw new Error('Userscripts could not read the speech key. Run Check extension storage in Speech setup.');}return typeof v === 'string' ? v.trim() : ''; }
   async replaceKey(key) {
     if (!this.persistent) throw new Error('Extension storage is unavailable. Speech keys cannot be saved on this page.');
-    if (!/^[a-zA-Z0-9]{16,128}$/.test(key.trim())) throw new Error('Enter your Azure Speech resource key.');
-    await this.gm.setValue(SPEECH_KEY, key.trim());
+    // Resource keys are opaque header values, not necessarily hexadecimal.
+    if (typeof key!=='string'||!/^[\x21-\x7e]{16,512}$/.test(key.trim())) throw new Error('Paste the resource key from Azure Keys and Endpoint, without spaces or line breaks.');
+    const value=key.trim();
+    try{await this.gm.setValue(SPEECH_KEY,value);}catch{throw new Error('Userscripts could not write the key. Run Check extension storage below.');}
+    let saved;try{saved=await this.gm.getValue(SPEECH_KEY);}catch{throw new Error('Userscripts could not read the saved key back. Run Check extension storage below.');}
+    if(saved!==value)throw new Error('Userscripts did not retain the saved key. Run Check extension storage below.');
   }
-  async forgetKey() { if (this.gm?.deleteValue) await this.gm.deleteValue(SPEECH_KEY); }
+  async checkStorage(){
+    this.storageCheck={state:'checking'};const gm=this.gm;
+    if(!this.persistent||typeof gm?.deleteValue!=='function')return this.storageCheck={state:'failed',stage:'api',code:'missing-storage-grants'};
+    const token=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`,name=`master-button:storage-probe:${token}`;
+    let stage='read',failure=null,wrote=false;
+    try{await gm.getValue(name);stage='write';wrote=true;await gm.setValue(name,token);stage='verify';if(await gm.getValue(name)!==token)failure={stage,code:'readback-mismatch'};}
+    catch{failure={stage,code:'extension-operation-failed'};}
+    finally{if(wrote){try{await gm.deleteValue(name);if(await gm.getValue(name)!==undefined&&!failure)failure={stage:'cleanup',code:'probe-not-deleted'};}catch{if(!failure)failure={stage:'cleanup',code:'extension-operation-failed'};}}}
+    return this.storageCheck=failure?{state:'failed',...failure}:{state:'passed',stage:'read-write-read-delete'};
+  }
+  async forgetKey() { if (typeof this.gm?.deleteValue!=='function')throw new Error('Userscripts key deletion is unavailable. Check its storage grants.');try{await this.gm.deleteValue(SPEECH_KEY);if(await this.getKey())throw new Error();}catch{throw new Error('Userscripts could not confirm key deletion. Run Check extension storage.');} }
   async keyNames() { if (!this.gm?.listValues) throw new Error('This Userscripts version cannot list stored key names.'); const names = await this.gm.listValues(); return Array.isArray(names) ? names.filter(n => typeof n === 'string' && n !== SPEECH_KEY && n.length < 200 && /(?:azure|speech|tts).*key|key.*(?:azure|speech|tts)/i.test(n)).slice(0,50) : []; }
   async importLegacyKey(storageKey) {
     // The documented old key name is unknown. User selects an exact extension key;

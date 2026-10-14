@@ -33,9 +33,9 @@ export class AzureClient {
       try {
         const response = await promise;
         if (signal?.aborted) throw abortError();
-        if (response.status === 401 || response.status === 403) throw new Error('Azure rejected the key or region. Replace the key or choose its region.');
-        if (response.status === 429 || response.status >= 500) { const e = new Error('Azure is busy. Retry the segment.'); e.retryable = true; throw e; }
-        if (response.status < 200 || response.status >= 300) throw new Error(`Azure request failed (HTTP ${Number(response.status) || 0}). Check the voice and resource.`);
+        if (response.status === 401 || response.status === 403) {const e=new Error('Azure rejected the key or region. Replace the key or choose its region.');e.status=response.status;throw e;}
+        if (response.status === 429 || response.status >= 500) { const e = new Error('Azure is busy. Retry the segment.'); e.retryable = true;e.status=response.status; throw e; }
+        if (response.status < 200 || response.status >= 300) {const e=new Error(`Azure request failed (HTTP ${Number(response.status) || 0}). Check the voice and resource.`);e.status=response.status;throw e;}
         return response;
       } catch (e) {
         if (signal?.aborted || e.name === 'AbortError') throw abortError();
