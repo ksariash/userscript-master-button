@@ -2,7 +2,7 @@
 
 A compact Safari Userscripts utility for source-preserving reading, passage review, Azure narration and clean-link sharing.
 
-**Experimental rebuild, `2.0.0-alpha.1`.** Review/approval gates were removed at the user’s request. Implementation continues autonomously. This is not a validated iPhone release: filtering quality still misses the target, so **automatic exclusions remain disabled**. Explicit Skip/Keep, remembered exceptions and selector rules are implemented. Physical Safari and live Azure verification remain untested.
+**Experimental rebuild, `2.0.0-alpha.3`.** Review/approval gates were removed at the user’s request. Implementation continues autonomously. This is not a validated iPhone release: filtering quality still misses the target, so **automatic exclusions remain disabled**. Explicit Skip/Keep, remembered exceptions and selector rules are implemented. Physical Safari and live Azure verification remain untested.
 
 [Install / update](INSTALL.md) · [Progress and complete requirement ledger](PROGRESS.md) · [Validation](VALIDATION.md) · [Architecture](REBUILD.md) · [Site support](SUPPORT.md)
 

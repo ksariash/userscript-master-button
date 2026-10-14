@@ -1,0 +1,23 @@
+{
+  "kind": "Desktop Sites renders of production UI with mock GM, authored SVG media and a mock regional voice list. No physical iPhone or live Azure verification.",
+  "projectId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c",
+  "captures": [
+    {
+      "file": "tools-light.png",
+      "version": 17,
+      "versionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_e6f4046c28e4819184464e96499e0c40",
+      "commit": "418656c8a397888b46c0e8931151cd80af7e1e1e"
+    },
+    {
+      "file": "tools-dark.png",
+      "version": 18,
+      "versionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_31ae9f6bfd588191a54a054e4a6d08ca",
+      "commit": "fd9d3a2413b45c1a4cbe3a30fa1e1d49c5644c28"
+    }
+  ],
+  "published": {
+    "versionId": "appgprj_6ace6bb660cc8191bb8a7a76834d4b4c~appgver_f7622129938c8191a0cbb26da8b5316e",
+    "commit": "d5a29ca279ff5af8b4ea57c5d7df2a2b9be0f910",
+    "url": "https://master-button-design-study.surebirch18.chatgpt.site"
+  }
+}

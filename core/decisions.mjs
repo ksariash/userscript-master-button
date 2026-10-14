@@ -4,6 +4,7 @@ export class DecisionStore {
     this.documentId = documentId; this.site = site;
     this.sequenceRevision = 0; this.viewRevision = 0; this.automatic = true;
     this.records = new Map(passages.map(p => [p.id, this.record(p)]));
+    this.siteExclusions = new Set();
     this.examples = new Map(); this.removedExampleIds = new Set(); this.history = []; this.listeners = new Set(); this.nextCommand = 0;
     this.readingIds = null; this.fingerprint = this.signature();
   }
@@ -11,6 +12,8 @@ export class DecisionStore {
   resolve(id) {
     const p = this.records.get(id); if (!p) throw new Error('Unknown passage');
     if (p.correction) return { included: p.correction.label === 'ARTICLE', origin: 'correction', reason: p.correction.label === 'ARTICLE' ? 'You kept this passage.' : 'You skipped this passage.' };
+    if (p.source?.nodes?.length && [...this.siteExclusions].some(node=>p.source.nodes.every(n=>node.contains(n))))
+      return {included:false,origin:'site-tool',reason:'A site tool removed this app prompt or page chrome. Undo site cleanup restores it.'};
     if (p.rule?.enabled) return { included: p.rule.label === 'ARTICLE', origin: 'rule', reason: p.rule.reason };
     if (this.automatic && p.automatic?.label === 'NUISANCE' && p.automatic.validatedExclusion === true)
       return { included: false, origin: 'model', reason: p.automatic.reason };
@@ -67,6 +70,7 @@ export class DecisionStore {
     p.automatic = { ...assessment }; this.changed(id, 'assessment'); return true;
   }
   setAutomatic(enabled) { this.automatic = !!enabled; this.changed(null); }
+  setSiteExclusions(nodes) { const next=new Set(nodes);if(next.size===this.siteExclusions.size&&[...next].every(n=>this.siteExclusions.has(n)))return;this.siteExclusions=next;this.changed(null,'site-tool'); }
   setRule(id, rule, notify = true) {
     const p = this.records.get(id); if (!p) return;
     p.rule = rule && ['ARTICLE', 'NUISANCE'].includes(rule.label) && typeof rule.enabled === 'boolean'

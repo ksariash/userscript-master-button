@@ -2,12 +2,23 @@ import test from 'node:test';import assert from 'node:assert/strict';import {JSD
 const result=await build({entryPoints:['src/main.mjs'],bundle:true,write:false,platform:'browser',format:'iife',globalName:'MBTest',loader:{'.css':'text'},define:{__VERSION__:'"test"',__MODEL_WORKER__:'""',__AUTO_START__:'false'}});
 const fixture='<!doctype html><title>Article</title><main><article><h1>Article title</h1><p id="one">The first paragraph is original narrative.</p><aside><p id="promo">Get our newsletter. Sign up now.</p></aside><p id="two"><a href="/source">The closing paragraph keeps a source link.</a></p></article></main>';
 async function setup(url='https://example.org/article'){
- const dom=new JSDOM(fixture,{url,pretendToBeVisual:true,runScripts:'dangerously'});dom.window.eval(result.outputFiles[0].text);const values=new Map(),calls=[];
+ const dom=new JSDOM(fixture,{url,pretendToBeVisual:true,runScripts:'dangerously'});dom.window.HTMLMediaElement.prototype.pause=()=>{};dom.window.HTMLMediaElement.prototype.load=()=>{};dom.window.eval(result.outputFiles[0].text);const values=new Map(),calls=[];
  const gm={getValue:async(k,d)=>values.get(k)??d,setValue:async(k,v)=>values.set(k,v),deleteValue:async k=>values.delete(k),setClipboard:async t=>{calls.push(['copy',t]);return true;},xmlHttpRequest:d=>{calls.push(['request',d]);return Promise.reject(new Error('Mock network unavailable'));}};
  const audio=dom.window.document.createElement('audio');audio.play=async()=>{};audio.pause=()=>{};audio.load=()=>{};
  const instance=await dom.window.MBTest.start({document:dom.window.document,gm,workerSource:'',audioFactory:()=>audio});return{dom,instance,gm,calls,values,ui:instance.app.ui,store:instance.app.store};
 }
 const click=(ui,action)=>ui.shadow.querySelector(`[data-action="${action}"]`).click();const tick=()=>new Promise(r=>setTimeout(r,0));
+test('Userscripts injection mock: lexical GM works without globalThis.GM or an explicitly supplied API',async()=>{
+ const dom=new JSDOM(fixture,{url:'https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt',runScripts:'dangerously',pretendToBeVisual:true});const values=new Map();
+ const gm={getValue:async(k,d)=>values.get(k)??d,setValue:async(k,v)=>values.set(k,v)};
+ assert.equal(dom.window.GM,undefined);
+ const start=dom.window.Function('{GM}',`${result.outputFiles[0].text}; return MBTest.start;`)({GM:gm});
+ const audio=dom.window.document.createElement('audio');audio.pause=()=>{};audio.load=()=>{};
+ const instance=await start({document:dom.window.document,workerSource:'',audioFactory:()=>audio});
+ assert.equal(instance.settings.persistent,true);const ui=instance.app.ui;assert.equal(ui.sheet.querySelector('#speech-key').disabled,false);
+ ui.sheet.querySelector('#speech-key').value='k'.repeat(32);click(ui,'save-key');await tick();assert.equal(values.get('master-button:speech-key'),'k'.repeat(32));assert.equal(dom.window.GM,undefined);
+ instance.stop();dom.window.close();
+});
 test('Mock DOM key setup: both main raw URL forms open a usable form and save only to extension storage',async()=>{
  for(const path of ['main','refs/heads/main']){
   const s=await setup(`https://raw.githubusercontent.com/ksariash/userscript-master-button/${path}/SETUP.txt`);
@@ -16,7 +27,7 @@ test('Mock DOM key setup: both main raw URL forms open a usable form and save on
   field.focus();assert.equal(s.ui.shadow.activeElement,field);field.value='k'.repeat(32);click(s.ui,'save-key');await tick();
   assert.equal(s.values.get('master-button:speech-key'),'k'.repeat(32));assert.equal(field.value,'');
   assert.match(s.ui.sheet.querySelector('.key-status').textContent,/stored in Userscripts/);
-  assert.equal(s.calls.length,0);assert.equal(s.dom.window.localStorage.length,0);assert.equal(s.dom.window.sessionStorage.length,0);
+  assert.ok(s.calls.every(([kind,request])=>kind==='request'&&request.method==='GET'&&request.url.endsWith('/cognitiveservices/voices/list')));assert.equal(s.dom.window.localStorage.length,0);assert.equal(s.dom.window.sessionStorage.length,0);
   click(s.ui,'forget-key');await tick();assert.equal(s.values.has('master-button:speech-key'),false);
   s.instance.stop();s.dom.window.close();
  }
@@ -56,6 +67,26 @@ test('Mock DOM runtime has one instance, two launcher taps toggle, sharing does 
 test('Mock DOM runtime lets selector text be edited without recreating the form or activating site links',async()=>{
  const s=await setup();s.ui.open('rule');const field=s.ui.sheet.querySelector('#selector');field.focus();field.value='aside';field.dispatchEvent(new s.dom.window.Event('input',{bubbles:true}));assert.equal(s.ui.sheet.querySelector('#selector'),field);assert.equal(s.ui.shadow.activeElement,field);assert.equal(s.ui.picker.inspection.matches.length,1);click(s.ui,'preview-rule');assert.match(s.dom.window.document.querySelector('aside').style.outline,/2px/);click(s.ui,'cancel-rule');assert.equal(s.dom.window.document.querySelector('aside').style.outline,'');
  s.instance.stop();s.dom.window.close();
+});
+test('Mock runtime media browser: main-menu discovery, post title, preview, type filtering and page picker',async()=>{
+ const s=await setup('https://x.com/example');try{
+ s.dom.window.document.querySelector('article').insertAdjacentHTML('beforeend','<figure><figcaption>Morning light at the harbor</figcaption><a href="/photo"><img width="500" height="300" src="https://media.example/harbor.jpg"></a><video poster="https://media.example/poster.jpg" src="https://media.example/boat.mp4"></video></figure>');
+ s.ui.open('menu');assert.ok(s.ui.menu.querySelector('[data-action=clean-nags]'));assert.ok(s.ui.menu.querySelector('[data-action=media]'));click(s.ui,'media');
+ assert.equal(s.ui.sheet.querySelectorAll('.media-item').length,2);assert.match(s.ui.sheet.querySelector('.media-item').textContent,/Morning light/);assert.ok(s.ui.sheet.querySelector('.media-thumb img'));
+ s.ui.sheet.querySelector('.media-item').click();assert.equal(s.ui.mode,'media-detail');assert.equal(s.ui.sheet.querySelector('.media-preview img').src,'https://media.example/harbor.jpg');assert.match(s.ui.sheet.querySelector('.media-title').textContent,/Morning light/);
+ click(s.ui,'media-next');assert.ok(s.ui.sheet.querySelector('.media-preview video[controls]'));click(s.ui,'media');const type=s.ui.sheet.querySelector('#media-type');type.value='video';type.dispatchEvent(new s.dom.window.Event('change'));assert.equal(s.ui.sheet.querySelectorAll('.media-item').length,1);
+ click(s.ui,'pick-media');assert.equal(s.ui.mediaPicker.active,true);click(s.ui,'cancel-media-pick');assert.equal(s.ui.mediaPicker.active,false);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock voice UI: regional results only, language groups, searchable labels and stale-region protection',async()=>{
+ const s=await setup();try{
+ await s.instance.settings.replaceKey('k'.repeat(32));const pending=new Map();s.instance.app.speech.client.voices=region=>new Promise(resolve=>pending.set(region,resolve));s.ui.open('speech');await tick();
+ assert.equal(s.ui.sheet.querySelector('#voice').disabled,true);assert.equal(s.ui.sheet.querySelectorAll('#voice option[value="en-US-JennyNeural"]').length,0);
+ const region=s.ui.sheet.querySelector('#region');region.value='westus2';region.dispatchEvent(new s.dom.window.Event('change'));await tick();
+ const voices=[{id:'en-US-AriaNeural',name:'Aria',locale:'en-US',language:'English (United States)',gender:'Female',status:'GA'},{id:'fr-FR-DeniseNeural',name:'Denise',locale:'fr-FR',language:'French (France)',gender:'Female',status:'GA'}];pending.get('westus2')(voices);await tick();pending.get('eastus')([{id:'en-US-StaleNeural',name:'Stale',language:'English'}]);await tick();
+ const select=s.ui.sheet.querySelector('#voice');assert.equal(select.querySelectorAll('optgroup').length,2);assert.equal(select.querySelectorAll('option[value="en-US-StaleNeural"]').length,0);assert.match(select.textContent,/Aria · Female/);
+ select.value='en-US-AriaNeural';select.dispatchEvent(new s.dom.window.Event('change'));const search=s.ui.sheet.querySelector('#voice-search');search.value='French';search.dispatchEvent(new s.dom.window.Event('input'));assert.equal(select.querySelectorAll('optgroup').length,1);assert.equal(s.instance.settings.value.speech.voice,'en-US-AriaNeural');
+ }finally{s.instance.stop();s.dom.window.close();}
 });
 test('Mock DOM selection preserves exact whole-passage identity and labels partial fragments as unmapped',async()=>{
  const s=await setup(),p=[...s.store.records.values()].find(p=>p.source?.node.id==='one'),selection=s.dom.window.getSelection(),range=s.dom.window.document.createRange();range.selectNodeContents(p.source.node);selection.addRange(range);s.ui.open('reader');assert.equal(s.store.reading().length,1);assert.equal(s.store.reading()[0].id,p.id);s.ui.open('idle');selection.removeAllRanges();range.setStart(p.source.nodes[0],4);range.setEnd(p.source.nodes[0],9);selection.addRange(range);s.ui.open('reader');assert.equal(s.store.reading()[0].scope,'reader');assert.equal(s.store.reading()[0].source,null);s.instance.stop();s.dom.window.close();

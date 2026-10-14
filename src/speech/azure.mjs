@@ -1,9 +1,10 @@
+import {parseVoices} from './voices.mjs';
 export const SAMPLE_RATE = 24000;
 export const REGIONS = ['eastus', 'eastus2', 'westus', 'westus2', 'westus3', 'centralus', 'northcentralus', 'southcentralus', 'westcentralus', 'canadacentral', 'brazilsouth', 'northeurope', 'westeurope', 'uksouth', 'francecentral', 'germanywestcentral', 'switzerlandnorth', 'swedencentral', 'australiaeast', 'southeastasia', 'eastasia', 'japaneast', 'koreacentral', 'centralindia', 'southafricanorth'];
 const escapeXML = t => t.replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]);
-export function ssml(text, voice) {
-  if (!/^[a-z]{2,3}-[A-Z]{2}-[\w-]+$/.test(voice)) throw new Error('Select an Azure voice from the voice list.');
-  const language = voice.split('-').slice(0, 2).join('-');
+export function ssml(text, voice, locale=null) {
+  if (!/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,30}){2,8}$/.test(voice)) throw new Error('Select an Azure voice from the voice list.');
+  const language = locale||voice.split('-').slice(0, 2).join('-');
   return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${language}"><voice name="${escapeXML(voice)}">${escapeXML(text)}</voice></speak>`;
 }
 export function endpoint(region, path) {
@@ -49,12 +50,15 @@ export class AzureClient {
     const r = await this.send({ url: endpoint(region, '/cognitiveservices/voices/list'), method: 'GET', responseType: 'text' }, { signal });
     let data; try { data = JSON.parse(r.responseText ?? r.response); } catch { throw new Error('Azure returned an unreadable voice list.'); }
     if (!Array.isArray(data)) throw new Error('Azure returned an unreadable voice list.');
-    const voices = data.filter(v => typeof v.ShortName === 'string' && /^[\w-]+$/.test(v.ShortName) && typeof v.Locale === 'string').map(v => ({ id: v.ShortName, name: v.DisplayName || v.LocalName || v.ShortName, locale: v.Locale, gender: v.Gender || '', type: v.VoiceType || '' })).sort((a, b) => `${a.locale} ${a.name}`.localeCompare(`${b.locale} ${b.name}`));
+    const voices = parseVoices(data);
     this.voicesCache.set(region, voices); return voices;
   }
   async synthesize(text, config, { signal, recheck } = {}) {
+    const voices=await this.voices(config.region,{signal});
+    if(signal?.aborted||recheck&&!recheck())throw abortError();
+    if(!voices.some(v=>v.id===config.voice))throw new Error('This voice is unavailable in your resource region. Open Speech setup and choose a listed voice.');
     const r = await this.send({ url: endpoint(config.region, '/cognitiveservices/v1'), method: 'POST', responseType: 'arraybuffer',
-      headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'raw-24khz-16bit-mono-pcm', 'User-Agent': 'MasterButton' }, data: ssml(text, config.voice) }, { signal, recheck });
+      headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'raw-24khz-16bit-mono-pcm', 'User-Agent': 'MasterButton' }, data: ssml(text, config.voice, voices.find(v=>v.id===config.voice).locale) }, { signal, recheck });
     if (/content-type:[^\r\n]*(?:json|text\/|xml)/i.test(r.responseHeaders || '')) throw new Error('Azure returned a non-audio response.');
     const pcm = await responseBuffer(r.response);
     if (!pcm.byteLength || pcm.byteLength % 2 || pcm.byteLength > 25 * 1024 * 1024 || new TextDecoder().decode(new Uint8Array(pcm, 0, Math.min(4, pcm.byteLength))) === 'RIFF') throw new Error('Azure returned unexpected PCM audio.');

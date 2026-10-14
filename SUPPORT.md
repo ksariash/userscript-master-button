@@ -1,18 +1,18 @@
 # Site tools and support limits
 
-Every adapter is best effort. No current live-site result is claimed; only URL construction/policy and authored DOM checks have run. No tool bypasses account access or fetches restricted content. Most cleanup starts with inspection and a saved selector; hiding is an explicit separate display option.
+Every adapter is best effort. Current public Slashdot HTML was fetched and exercised in JSDOM; this is distinct from browser navigation. X/Reddit DOM regressions are authored from the user’s screenshot wording, not live-site success. No tool bypasses account access or fetches restricted content. On supported social sites, narrowly recognized app nags are removed automatically for the current visit. Remove app nags and Media are directly in the launcher menu. Undo site cleanup restores changes and stops recurrence handling. Other interruptions still use inspected selector rules.
 
 | Site/tool | Implemented behavior | Evidence / outstanding |
 | --- | --- | --- |
 | Any HTML page | Review, gray Skip/Keep, rules, visual picker, Why, reader, selection/edit/paste | DOM/policy tests; physical Safari, collisions, dynamic stress and CSP pending |
 | Amazon | `/dp`, `/gp/product`, `/gp/aw/d` ASIN parsing; canonical regional link; camelcamelcamel route for US/UK/DE/FR/IT/ES/CA/AU | URL tests, not destination availability; Japan/India history unavailable |
-| Reddit | Known app-upsell selector suggestions; saved selectors handle repeated insertions; optional reveal of already delivered CSS-blurred images/video | Source implemented; current Reddit DOM/access behavior unverified; unattributed global scroll locks are not cleared |
-| X / Instagram / Facebook / LinkedIn | Contextual interruption inspection and direct delivered image/video URL picker | Source implemented; current DOM unverified; blob/DRM/restricted media unavailable |
+| Reddit | Screenshot-wording app-nag removal, repeated-insertion observation, open shadow-root lookup; optional delivered-media reveal | Authored DOM recurrence/Undo/scroll tests passed; actual Reddit DOM and physical Safari remain unverified; normal modals are preserved |
+| X / Instagram / Facebook / LinkedIn | Direct app-nag removal and media browser with thumbnails, post titles, filters, page picker, source selection, preview and bounded file preparation | Screenshot-derived X and mock UI/transport tests pass; live DOM/downloads unverified. Blob/DRM/restricted streams cannot be reconstructed |
 | Facebook comments | One visible accessible native View/See/Load more-comments control | English labels only; not live-tested; no posting or account actions |
-| Slashdot | Reader, accessible Older/Next link lookup, explicit search URL editing/open | Source implemented; live navigation/search unverified |
+| Slashdot | Clean stories selects original title/byline/body records; Older » / rel=next lookup; dedicated query form using native fhfilter | Current public HTML: 199 source rows → 70 selected, all 15 titles, no footer rows, pager found. Browser navigation/search unverified |
 | Google Maps | Explicit destination/query/place → Apple Maps URL; query semantics preserved | URL tests; actual iPhone handoff unverified |
 | Cookies | Clearly separates hiding from consent; explains native Reject / Necessary only choices | **No live-validated consent-submission adapter. Required necessary-only automation remains outstanding.** |
-| Scroll locks | Utility reader lock owned/restored exactly; site helper only restores a known overlay’s explicit ownership link | Unit/DOM ownership proof only; production site-specific attribution remains outstanding |
+| Scroll locks | Utility reader lock owned/restored; matched app nag plus absence of any other open modal permits reversible overflow/known Reddit class release | Authored DOM tests preserve subsequent site styles and unrelated dialogs; physical site behavior remains outstanding |
 
 Keep rules and exact-wording Keep memories counter broader Skip rules. Turning a rule off restores script-owned display changes. Show all temporarily restores hidden rule matches without enabling their narration/export text. Source passages remain retained for review.
 

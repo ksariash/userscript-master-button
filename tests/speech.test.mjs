@@ -9,6 +9,11 @@ class FakeAudio extends EventTarget {
 const config = {region:'eastus',voice:'en-US-JennyNeural',rate:1};
 const pcm = () => new ArrayBuffer(48000);
 const waitTick = () => new Promise(r=>setTimeout(r,0));
+test('Mock Azure regional catalogue is required before paid synthesis; unavailable voice never sends text',async()=>{
+ const requests=[];const client=new AzureClient({getKey:async()=> 'k'.repeat(32),request:async d=>{requests.push(d);if(d.method==='GET')return{status:200,responseText:JSON.stringify([{ShortName:'en-US-AriaNeural',DisplayName:'Aria',Locale:'en-US',LocaleName:'English (United States)',Gender:'Female',VoiceType:'Neural',Status:'GA'}])};return{status:200,response:pcm()};}});
+ await assert.rejects(()=>client.synthesize('Do not send',config),/voice is unavailable/);assert.equal(requests.length,1);assert.equal(requests[0].method,'GET');
+ await client.synthesize('Original wording',{...config,voice:'en-US-AriaNeural'});assert.equal(requests.length,2);assert.equal(requests[1].method,'POST');assert.ok(requests[1].data.includes('Original wording'));
+});
 test('Mock cancellation clears only the owned system-media session and releases its audio source',async()=>{
  const navigatorDescriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator'),metadataDescriptor=Object.getOwnPropertyDescriptor(globalThis,'MediaMetadata'),previous={title:'Website player'},handlers=new Map(),media={metadata:previous,setActionHandler:(name,handler)=>handlers.set(name,handler)};
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaSession:media}});Object.defineProperty(globalThis,'MediaMetadata',{configurable:true,value:class{constructor(data){Object.assign(this,data);}}});
@@ -19,6 +24,7 @@ test('Mock cancellation clears only the owned system-media session and releases 
 const setup = request => {
   const store = new DecisionStore([{id:'a',originalText:'Original one.'},{id:'b',originalText:'Original two.'}],{documentId:'d'}), audio = new FakeAudio(), calls=[];
   const client = new AzureClient({getKey: async()=> 'k'.repeat(32),request: details=> {calls.push(details); return request ? request(details) : Promise.resolve({status:200,response:pcm()});}});
+  client.voicesCache.set(config.region,[{id:config.voice,locale:'en-US'}]);
   const speech = new SpeechSession(store,client,{audio,getConfig:()=>config,makeURL:()=>`blob:test:${calls.length}`,revokeURL:()=>{}});
   return {store,audio,calls,speech,client};
 };
@@ -28,6 +34,7 @@ test('Mock late resume cannot turn cancellation into a playing state',async()=>{
 test('Mock Azure transport rechecks inclusion after awaiting the key and never sends a skipped block', async()=>{
   let unlock; const key = new Promise(r=>unlock=r), calls=[], store=new DecisionStore([{id:'a',originalText:'Never send'}],{documentId:'d'});
   const client=new AzureClient({getKey:()=>key,request:d=> {calls.push(d);return Promise.resolve({status:200,response:pcm()});}}), audio=new FakeAudio();
+  client.voicesCache.set(config.region,[{id:config.voice,locale:'en-US'}]);
   const speech=new SpeechSession(store,client,{audio,getConfig:()=>config,makeURL:()=> 'blob:x',revokeURL:()=>{}}); const job=speech.play(); await waitTick(); store.correct('a','NUISANCE'); unlock('k'.repeat(32)); await job;
   assert.equal(calls.length,0); assert.equal(audio.plays,0); speech.stop();
 });
@@ -43,6 +50,7 @@ test('Mock export aborts on selection changes and transcripts use exactly the en
 });
 test('Mock service failure does not retry invalid credentials or leak its response body', async()=>{
   let count=0; const client=new AzureClient({getKey:async()=> 'k'.repeat(32),request:()=>{count++;return Promise.resolve({status:401,responseText:'secret body'});}});
+  client.voicesCache.set(config.region,[{id:config.voice,locale:'en-US'}]);
   await assert.rejects(client.synthesize('Safe text',config),e=>e.message.includes('key or region')&&!e.message.includes('secret')); assert.equal(count,1);
   assert.equal(ssml('<script>& "quote"',config.voice).includes('<script>'),false); assert.throws(()=>ssml('x','evil" onload="x'));
 });
