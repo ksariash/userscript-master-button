@@ -5,12 +5,14 @@ Enable the installed Master Button userscript for this page.
 The installed alpha.2 or later opens Speech setup automatically.
 If it does not, open its launcher → More → Speech setup.
 Both /main/SETUP.txt and /refs/heads/main/SETUP.txt URLs are supported.
-If controls are disabled, read the status beside the key controls.
+Alpha.3 fixes the missing Userscripts GM bridge that disabled key entry in alpha.2.
+If controls are still disabled, read the status beside the key controls.
 After updating the script, open the Userscripts extension popup fully,
 check access to raw.githubusercontent.com, then reload this document.
 Enter your own Azure Speech resource key, choose its region, and save.
 The key is written through Userscripts' extension storage in this userscript's filename scope.
-No synthesis occurs when saving a key. A voice demo, Play, or Prepare MP3 sends a request only when you choose that action.
+No synthesis occurs when saving a key. The selected region’s voice list loads
+automatically from Azure using that key, without sending article text. A voice demo, Play, or Prepare MP3 sends a request only when you choose that action.
 Never put your key in a URL, issue, repository file, screenshot, or chat message.
 
 An arbitrary webpage can observe keyboard events around an injected form.

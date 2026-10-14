@@ -18,7 +18,9 @@ The classification head is trained on actual local model outputs and structural 
 
 Use your own public Azure Speech resource. Speech setup selects region and loads that resource’s searchable voice list. Requests go directly to the selected Microsoft endpoint; synthesis may incur charges. The key is held by Userscripts, not website localStorage.
 
-In alpha.2, this document opens Speech setup automatically. Both `main/SETUP.txt` and `refs/heads/main/SETUP.txt` raw URL forms are accepted. After updating the existing file, open the Userscripts popup fully and reload the setup document; a disabled field now explains whether the page is unsupported or extension storage is unavailable.
+In alpha.3, this document opens Speech setup automatically. Both `main/SETUP.txt` and `refs/heads/main/SETUP.txt` raw URL forms are accepted. After updating the existing file, open the Userscripts popup fully and reload the setup document; a disabled field now explains whether the page is unsupported or extension storage is unavailable.
+
+The extension bridge now uses Userscripts’ lexical `GM` injection argument. Keys are never copied into webpage globals. Saving the key automatically fetches the selected region’s voice catalogue (GET, no article text or synthesis); the searchable dropdown groups only returned supported neural voices by language, labels preview voices, and rejects stale region results. Synthesis checks availability before sending text.
 
 New key entry is enabled only on the repository’s [plain-text setup document](https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt). An injected key form on an arbitrary website cannot guarantee protection from host-page keyboard listeners. The dedicated document reduces that exposure; its actual Safari injection/storage behavior is still unverified. Existing separately stored keys are untouched: use the stored-key-name list or import their exact name from the same userscript filename’s storage. The rebuild does not guess or overwrite undocumented old key names.
 
@@ -41,3 +43,9 @@ node scripts/build-implementation-prototype.mjs
 ```
 
 `dist/build.json` records the generated script hash, bytes, and pinned dependencies. Run the build twice and compare hashes. Public model weights and temporary article captures are ignored, not bundled or committed. Consult [THIRD_PARTY.md](THIRD_PARTY.md) for licenses.
+
+## Site tools and media
+
+On supported social sites, recognized app-install nags are removed automatically for the current visit; the launcher menu exposes **Remove app nags** and **Media** directly. Site tools → Undo site cleanup restores the overlays/styles and switches recurring removal off for that visit. Normal account/consent dialogs are preserved. Unrecognized nags remain available for the visual selector picker. No account access restrictions are bypassed.
+
+Slashdot’s launcher offers Clean stories and Site tools with Older stories and a real search field. Clean stories selects original story records rather than site chrome. In Media, filter images/videos or post titles, Pick on page without activating its link, choose a preview/source, then Open or Prepare file → Save / share file. Preparation is explicit, cancellable and capped at 80 MB; a streaming playlist, blob-only player or denied file gets an unavailable path instead of claimed download success. Preview requests use already delivered image/poster URLs.

@@ -1,7 +1,9 @@
 import {isKeySetupURL} from './platform/key-setup.mjs';
 import { MODEL_WORKER_SOURCE } from './platform/worker-source.mjs';
 import { Settings } from './platform/storage.mjs'; import { ArticleController } from './core/controller.mjs'; import { LocalClassifier } from './platform/classifier.mjs'; import { AzureClient } from './speech/azure.mjs'; import { SpeechSession } from './speech/session.mjs'; import { ExportJob } from './speech/export.mjs'; import { UtilityUI } from './ui/app.mjs';
-export async function start({document=globalThis.document,gm=globalThis.GM,version=__VERSION__,workerSource=MODEL_WORKER_SOURCE,WorkerClass=globalThis.Worker,allowFrame=false,audioFactory=()=>document.createElement('audio')}={}){
+// Userscripts supplies GM as a lexical injection argument, not a window property.
+// Keep it inside the userscript closure; never copy privileged APIs onto the page.
+export async function start({document=globalThis.document,gm=typeof GM==='undefined'?globalThis.GM:GM,version=__VERSION__,workerSource=MODEL_WORKER_SOURCE,WorkerClass=globalThis.Worker,allowFrame=false,audioFactory=()=>document.createElement('audio')}={}){
   if(!document.body||document.documentElement.namespaceURI!=='http://www.w3.org/1999/xhtml')return null;const win=document.defaultView;if(win.top!==win.self&&!allowFrame)return null;
   if(document.querySelector('[data-master-button="host"]'))return null;
   const settings=new Settings(gm);let storageError='';try{await settings.load();}catch{storageError='Extension storage could not be read. Preferences are temporary; existing data was left untouched.';settings.persistent=false;}
