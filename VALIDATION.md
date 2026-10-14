@@ -59,3 +59,9 @@ On a physical iPhone, lock the screen before and during passage transitions, int
 ## Release gate — outstanding
 
 Populate the independent regression corpus and page/site-held-out split; meet the agreed finite-corpus accuracy target or obtain an explicit revision. Complete every ledger row or label a release as partial. Verify migration without deleting unrelated preferences/keys, reproducible source/build/metadata and extension-supported update/reinstall behavior. Publish visual evidence with real content replacing the authored study and incorporate feedback without pausing implementation.
+
+## Alpha.2 key setup patch evidence
+
+`npm test`: 47/47 pass. Three added mock DOM tests exercise both exact raw setup URL forms, automatic form opening, field focus, Save/Forget, GM-only storage with empty page storage and no transport calls, rejected URL variants, unavailable extension storage and `GM.openInTab` navigation. The fake fixture uses a repeated character, never a real resource key. Build repeated with identical SHA256 `368b1d0c1b23cac7884e423c04cb0cee12a5dd3d013fcd74fbbadf63aa9e2097`.
+
+Official platform reference checked: [Userscripts README/API](https://github.com/quoid/userscripts), which documents async granted storage/open-tab APIs, content injection and opening the popup after external file edits. This patch does not establish physical Safari injection, touch/keyboard behavior, extension-storage persistence or live Azure success. Those remain separate outstanding checks. Model evaluation was not rerun because inference is unchanged.

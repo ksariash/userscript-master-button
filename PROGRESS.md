@@ -76,3 +76,9 @@ Implemented means present in the alpha source, not verified on iPhone. **Blocked
 ## Next work
 
 Improve filtering with independent labels and a fresh holdout; retain the exclusion safety flag until targets pass. Cached-head reassessment, owned MediaSession cancellation and the observed touch target were fixed. Continue mutation optimization and physical picker/layout validation. Run the separate physical Safari, live Azure and live-site/necessary-only consent checklists. Keep this ledger current when evidence changes.
+
+## Azure key setup correction — alpha.2
+
+The setup allowlist previously recognized only `/main/SETUP.txt`; the equivalent `/refs/heads/main/SETUP.txt` raw URL left entry and Save disabled. Both exact repository/main file paths are now accepted. Setup automatically opens Speech, and unavailable storage or an unsupported page gets an actionable explanation. Other hosts, repositories, branches and files remain blocked. The reported device URL was not captured, so this is a reproduced URL-policy defect rather than a confirmed physical-device diagnosis.
+
+47 local tests pass, including positive key entry/focus/save/forget on both raw URL forms, negative URL checks, unavailable extension storage and canonical navigation. Storage/network are mocks; no actual credential was used, no Azure call was made, and no physical Safari check was performed. No model or inference logic changed. Alpha.2 source, metadata and generated bundle match.
