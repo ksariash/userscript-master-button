@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Master Button
 // @namespace    https://github.com/ksariash/userscript-master-button
-// @version      2.0.0-alpha.1
+// @version      2.0.0-alpha.2
 // @description  Source-preserving article review, local classification, and Azure reading. Experimental rebuild.
 // @match        https://*/*
 // @match        http://*/*

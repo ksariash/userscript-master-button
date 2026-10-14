@@ -8,6 +8,34 @@ async function setup(url='https://example.org/article'){
  const instance=await dom.window.MBTest.start({document:dom.window.document,gm,workerSource:'',audioFactory:()=>audio});return{dom,instance,gm,calls,values,ui:instance.app.ui,store:instance.app.store};
 }
 const click=(ui,action)=>ui.shadow.querySelector(`[data-action="${action}"]`).click();const tick=()=>new Promise(r=>setTimeout(r,0));
+test('Mock DOM key setup: both main raw URL forms open a usable form and save only to extension storage',async()=>{
+ for(const path of ['main','refs/heads/main']){
+  const s=await setup(`https://raw.githubusercontent.com/ksariash/userscript-master-button/${path}/SETUP.txt`);
+  assert.equal(s.ui.mode,'speech');const field=s.ui.sheet.querySelector('#speech-key');
+  assert.equal(field.disabled,false);assert.equal(s.ui.sheet.querySelector('[data-action=save-key]').disabled,false);
+  field.focus();assert.equal(s.ui.shadow.activeElement,field);field.value='k'.repeat(32);click(s.ui,'save-key');await tick();
+  assert.equal(s.values.get('master-button:speech-key'),'k'.repeat(32));assert.equal(field.value,'');
+  assert.match(s.ui.sheet.querySelector('.key-status').textContent,/stored in Userscripts/);
+  assert.equal(s.calls.length,0);assert.equal(s.dom.window.localStorage.length,0);assert.equal(s.dom.window.sessionStorage.length,0);
+  click(s.ui,'forget-key');await tick();assert.equal(s.values.has('master-button:speech-key'),false);
+  s.instance.stop();s.dom.window.close();
+ }
+});
+test('Mock DOM key setup: other repositories, branches, hostnames, file paths and GitHub HTML stay blocked',async()=>{
+ for(const url of ['https://raw.githubusercontent.com/other/userscript-master-button/main/SETUP.txt','https://raw.githubusercontent.com/ksariash/userscript-master-button/refs/heads/other/SETUP.txt','https://raw.githubusercontent.com.evil.example/ksariash/userscript-master-button/main/SETUP.txt','https://raw.githubusercontent.com/ksariash/userscript-master-button/main/OTHER.txt','https://github.com/ksariash/userscript-master-button/blob/main/SETUP.txt']){
+  const s=await setup(url);s.ui.open('speech');assert.equal(s.ui.sheet.querySelector('#speech-key').disabled,true);
+  assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/Open the dedicated/);
+  await s.ui.click({target:s.ui.sheet.querySelector('[data-action=save-key]')});assert.equal(s.values.has('master-button:speech-key'),false);
+  s.instance.stop();s.dom.window.close();
+ }
+});
+test('Mock DOM key setup: missing extension storage explains disabled controls; setup action opens canonical document',async()=>{
+ const s=await setup('https://raw.githubusercontent.com/ksariash/userscript-master-button/refs/heads/main/SETUP.txt');
+ s.instance.settings.persistent=false;s.ui.open('speech');assert.equal(s.ui.sheet.querySelector('#speech-key').disabled,true);
+ assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/storage is unavailable/);s.instance.stop();s.dom.window.close();
+ const other=await setup();const tabs=[];other.gm.openInTab=async(...args)=>tabs.push(args);other.ui.open('speech');click(other.ui,'open-key-setup');await tick();
+ assert.deepEqual(tabs,[['https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt',false]]);other.instance.stop();other.dom.window.close();
+});
 test('Mock DOM runtime: source Skip/Keep, reader, narration/export snapshot, late assessment and Undo share one identity',async()=>{
  const s=await setup(),p=[...s.store.records.values()].find(p=>p.source?.node.id==='promo');s.ui.open('review');s.ui.select(p.id);click(s.ui,'why');s.ui.shadow.querySelector('#remember').checked=true;click(s.ui,'correct');
  assert.equal(s.store.resolve(p.id).included,false);assert.equal(s.store.snapshot().passages.some(x=>x.id===p.id),false);assert.equal(s.store.examples.size,1);assert.ok(s.dom.window.document.querySelector('#promo [data-mb-tone]'));
