@@ -18,7 +18,7 @@ The classification head is trained on actual local model outputs and structural 
 
 Use your own public Azure Speech resource. Speech setup selects region and loads that resource’s searchable voice list. Requests go directly to the selected Microsoft endpoint; synthesis may incur charges. The key is held by Userscripts, not website localStorage.
 
-In alpha.3, this document opens Speech setup automatically. Both `main/SETUP.txt` and `refs/heads/main/SETUP.txt` raw URL forms are accepted. After updating the existing file, open the Userscripts popup fully and reload the setup document; a disabled field now explains whether the page is unsupported or extension storage is unavailable.
+In alpha.4, this document opens Speech setup automatically. Both `main/SETUP.txt` and `refs/heads/main/SETUP.txt` raw URL forms are accepted. After updating the existing file, open the Userscripts popup fully and reload the setup document; a disabled field now explains whether the page is unsupported or extension storage is unavailable.
 
 The extension bridge now uses Userscripts’ lexical `GM` injection argument. Keys are never copied into webpage globals. Saving the key automatically fetches the selected region’s voice catalogue (GET, no article text or synthesis); the searchable dropdown groups only returned supported neural voices by language, labels preview voices, and rejects stale region results. Synthesis checks availability before sending text.
 
@@ -49,3 +49,9 @@ node scripts/build-implementation-prototype.mjs
 On supported social sites, recognized app-install nags are removed automatically for the current visit; the launcher menu exposes **Remove app nags** and **Media** directly. Site tools → Undo site cleanup restores the overlays/styles and switches recurring removal off for that visit. Normal account/consent dialogs are preserved. Unrecognized nags remain available for the visual selector picker. No account access restrictions are bypassed.
 
 Slashdot’s launcher offers Clean stories and Site tools with Older stories and a real search field. Clean stories selects original story records rather than site chrome. In Media, filter images/videos or post titles, Pick on page without activating its link, choose a preview/source, then Open or Prepare file → Save / share file. Preparation is explicit, cancellable and capped at 80 MB; a streaming playlist, blob-only player or denied file gets an unavailable path instead of claimed download success. Preview requests use already delivered image/poster URLs.
+
+## If key entry or saving fails
+
+Confirm the version shown at the top of Speech is alpha.4 or later. Expand Connection checks → Check extension storage. This writes, reads back and deletes a random non-secret probe; it needs no Azure key and sends no network request. Copy support report contains only version/API flags, fixed failure-stage codes and optional voice-test counts/status. It excludes keys, storage values, error bodies, URLs and article text. If clipboard access is missing, the report is selected for manual Copy.
+
+Preferences-load failures no longer disable otherwise available storage APIs. Save confirms the key by extension-storage readback before clearing its field. Test Azure connection uses the saved key directly for a regional voice-list GET; it sends no article text and does not synthesize. Live testing has still not been performed by the maintainer. Do not paste credentials into chat or GitHub issues.

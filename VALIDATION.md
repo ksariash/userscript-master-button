@@ -75,3 +75,7 @@ Official platform reference checked: [Userscripts README/API](https://github.com
 - **Live Azure:** not run. Pending authenticated regional catalogue and synthesis/playback using the user’s own resource; no key received in chat or repository.
 
 Alpha.3 visual evidence: `prototype/screenshots/tools-light.png` and `tools-dark.png`, both inspected, with exact source/version provenance. These are desktop Sites renders of four 390×844 comparison frames using mock integrations; native browser automation was unavailable and no replacement browser or sign-in was attempted. The source build was repeated identically: SHA256 `af678eb2d950651fad9f5c49c4da0a003e23d77b185662c10876299d3c465c9d`.
+
+## Alpha.4 diagnosis evidence
+
+`npm test`: 64 mock/policy/local tests. New tests separate a preferences failure from key storage, require key write/readback and deletion verification, check opaque header-safe formats, test random-probe cleanup and safe failure codes, exclude secret fixtures from the whitelisted support report, and show no-key Azure diagnosis sends no request. The published alpha.3 bundle was additionally started in a desktop JSDOM lexical-GM wrapper, with storage initialization/launcher present and no window.GM exposure. No physical Safari reproduction or actual Azure request was made. User-reported alpha.3 entry/save failure is unresolved; alpha.4 provides a concrete on-device diagnosis path and repairs observed code defects without claiming a device-level fix.

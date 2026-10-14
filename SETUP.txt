@@ -20,3 +20,7 @@ Master Button therefore disables new key entry on other webpages.
 This dedicated-page workflow still requires a physical Safari/Userscripts check.
 If it is unavailable on your installed extension, do not type the key on an untrusted page.
 Existing separately stored speech keys are preserved and can be imported by their exact extension key name from the same userscript filename.
+
+If entry/save still fails in alpha.4: expand Connection checks, run
+Check extension storage, then Copy support report. No key is needed.
+The report contains no keys, headers, stored values or page content.
