@@ -51,10 +51,9 @@ test('Mock DOM key setup: other repositories, branches, hostnames, file paths an
   s.instance.stop();s.dom.window.close();
  }
 });
-test('Mock DOM key setup: missing extension storage explains disabled controls; setup action opens canonical document',async()=>{
+test('Mock DOM key setup: missing extension storage permits paste and gives an adjacent save failure; setup action opens canonical document',async()=>{
  const s=await setup('https://raw.githubusercontent.com/ksariash/userscript-master-button/refs/heads/main/SETUP.txt');
- s.instance.settings.persistent=false;s.ui.open('speech');assert.equal(s.ui.sheet.querySelector('#speech-key').disabled,true);
- assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/storage is unavailable/);s.instance.stop();s.dom.window.close();
+ try{s.instance.settings.persistent=false;s.ui.open('speech');const field=s.ui.sheet.querySelector('#speech-key');assert.equal(field.disabled,false);assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/storage is unavailable/);field.value='k'.repeat(32);field.dispatchEvent(new s.dom.window.Event('input',{bubbles:true}));assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/Key entered/);click(s.ui,'save-key');await tick();assert.match(s.ui.sheet.querySelector('.key-entry-state').textContent,/storage is unavailable/);assert.equal(field.value,'k'.repeat(32));assert.equal(s.values.has('master-button:speech-key'),false);}finally{s.instance.stop();s.dom.window.close();}
  const other=await setup();const tabs=[];other.gm.openInTab=async(...args)=>tabs.push(args);other.ui.open('speech');click(other.ui,'open-key-setup');await tick();
  assert.deepEqual(tabs,[['https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt',false]]);other.instance.stop();other.dom.window.close();
 });
@@ -101,4 +100,40 @@ test('Mock voice UI: regional results only, language groups, searchable labels a
 });
 test('Mock DOM selection preserves exact whole-passage identity and labels partial fragments as unmapped',async()=>{
  const s=await setup(),p=[...s.store.records.values()].find(p=>p.source?.node.id==='one'),selection=s.dom.window.getSelection(),range=s.dom.window.document.createRange();range.selectNodeContents(p.source.node);selection.addRange(range);s.ui.open('reader');assert.equal(s.store.reading().length,1);assert.equal(s.store.reading()[0].id,p.id);s.ui.open('idle');selection.removeAllRanges();range.setStart(p.source.nodes[0],4);range.setEnd(p.source.nodes[0],9);selection.addRange(range);s.ui.open('reader');assert.equal(s.store.reading()[0].scope,'reader');assert.equal(s.store.reading()[0].source,null);s.instance.stop();s.dom.window.close();
+});
+test('Mock automatic exclusions, reader visibility, source Keep/Undo and transcript snapshot stay synchronized',async()=>{
+ const s=await setup(),p=[...s.store.records.values()].find(p=>p.source?.node.id==='promo');
+ try{s.ui.open('reader');s.store.assess(p.id,{label:'NUISANCE',validatedExclusion:true,reason:'Mock invitation result'},{documentId:s.store.documentId,revision:p.revision,evidenceRevision:p.evidenceRevision});const node=s.ui.nodes.get(p.id);assert.equal(node.hidden,true);assert.equal(s.store.snapshot().passages.some(r=>r.id===p.id),false);const revision=s.store.sequenceRevision;click(s.ui,'show-skipped');assert.equal(node.hidden,false);assert.equal(s.store.sequenceRevision,revision);
+ s.ui.select(p.id);s.ui.open('why');click(s.ui,'correct');assert.equal(s.store.resolve(p.id).included,true);assert.equal(s.store.snapshot().passages.some(r=>r.id===p.id),true);assert.equal(node.classList.contains('skipped'),false);click(s.ui,'undo');assert.equal(s.store.resolve(p.id).included,false);assert.equal(node.classList.contains('skipped'),true);assert.equal(s.store.snapshot().passages.some(r=>r.id===p.id),false);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock model startup requires explicit first download; later Read starts it, and a storage failure cannot prevent Stop',async()=>{
+ const s=await setup();let loads=0;
+ try{s.instance.app.classifier.load=async()=>{loads++;};s.ui.open('reader');assert.equal(loads,0);click(s.ui,'reader-model');click(s.ui,'load-model');await tick();assert.equal(loads,1);assert.equal(s.instance.settings.value.modelEnabled,true);s.ui.open('idle');s.ui.open('reader');await tick();assert.equal(loads,2);s.ui.open('model');let stopped=false;s.instance.app.classifier.stop=()=>{stopped=true;};s.instance.settings.save=async()=>{throw new Error('Mock storage failure');};click(s.ui,'stop-model');await tick();assert.equal(stopped,true);assert.equal(s.instance.settings.value.modelEnabled,false);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock key entry gives immediate paste/save feedback, preserves failed input, and separates verified save from Azure failure',async()=>{
+ const s=await setup('https://raw.githubusercontent.com/ksariash/userscript-master-button/main/SETUP.txt');
+ try{const field=s.ui.sheet.querySelector('#speech-key'),status=s.ui.sheet.querySelector('.key-entry-state');field.value='k'.repeat(32);field.dispatchEvent(new s.dom.window.Event('paste',{bubbles:true}));await tick();assert.match(status.textContent,/Key entered/);
+ let verify;const originalRead=s.gm.getValue;s.gm.getValue=async(k,d)=>k==='master-button:speech-key'?new Promise(r=>verify=r):originalRead(k,d);click(s.ui,'save-key');await tick();assert.match(status.textContent,/verifying readback/);assert.equal(s.ui.sheet.querySelector('[data-action=save-key]').disabled,true);verify('wrong readback');await tick();assert.match(status.textContent,/did not retain/);assert.equal(field.value,'k'.repeat(32));assert.equal(s.ui.sheet.querySelector('[data-action=save-key]').disabled,false);
+ s.gm.getValue=originalRead;click(s.ui,'save-key');await tick();await tick();assert.equal(field.value,'');assert.match(status.textContent,/Key saved and verified/);assert.match(status.textContent,/could not load voices/);assert.match(s.ui.sheet.querySelector('.voice-status').textContent,/unavailable|could not|request|network/i);assert.equal(s.dom.window.localStorage.length,0);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock bulk reader selection: range and included article, no seek during selection, synchronized Skip/Keep and one Undo',async()=>{
+ const s=await setup();let seeks=0;s.instance.app.speech.play=async()=>{seeks++;};
+ try{s.ui.open('reader');const rows=s.store.reading(),initial=s.store.snapshot();click(s.ui,'select-passages');assert.equal(s.ui.reader.querySelector('.player').hidden,true);click(s.ui,'selection-range');s.ui.nodes.get(rows[0].id).querySelector('.prose').click();assert.match(s.ui.reader.querySelector('.selection-status').textContent,/last passage/);s.ui.nodes.get(rows[2].id).querySelector('.prose').click();assert.equal(seeks,0);assert.equal(s.ui.selection.ids().length,3);const revision=s.store.sequenceRevision;click(s.ui,'selection-skip');assert.equal(s.store.sequenceRevision,revision+1);assert.equal(s.store.history.length,1);assert.equal(s.store.snapshot().passages.length,initial.passages.length-3);assert.ok(s.ui.nodes.get(rows[1].id).classList.contains('skipped'));click(s.ui,'undo');assert.deepEqual(s.store.snapshot().passages.map(p=>p.id),initial.passages.map(p=>p.id));
+ s.store.correct(rows[1].id,'NUISANCE');click(s.ui,'selection-all');assert.equal(s.ui.selection.ids().includes(rows[1].id),false);click(s.ui,'selection-keep');const kept=s.ui.selection.ids();for(const id of kept){s.store.assess(id,{label:'NUISANCE',validatedExclusion:true},{documentId:s.store.documentId,revision:s.store.records.get(id).revision});assert.equal(s.store.resolve(id).included,true);}click(s.ui,'selection-done');assert.equal(s.ui.selection,null);assert.equal(s.ui.reader.querySelector('.player').hidden,false);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock passage range shortcuts respect page/reading scope and leave the current passage unchanged',async()=>{
+ const s=await setup();
+ try{s.ui.open('review');const rows=[...s.store.records.values()].filter(p=>p.scope==='page'),current=rows[2];s.ui.select(current.id);s.ui.open('why');click(s.ui,'skip-before');assert.ok(rows.slice(0,2).every(p=>!s.store.resolve(p.id).included));assert.equal(s.store.resolve(current.id).included,true);assert.equal(s.store.history.length,1);click(s.ui,'undo');assert.ok(rows.every(p=>s.store.resolve(p.id).included));
+ s.store.setReading([rows[1].id,current.id,rows[3].id]);s.ui.open('reader');s.ui.select(current.id);s.ui.open('why');click(s.ui,'skip-after');assert.equal(s.store.resolve(rows[3].id).included,false);assert.equal(s.store.resolve(rows[0].id).included,true);assert.equal(s.store.resolve(current.id).included,true);click(s.ui,'undo');assert.equal(s.store.resolve(rows[3].id).included,true);
+ s.ui.open('review');click(s.ui,'select-passages');assert.equal(s.ui.selection.scope,'page');assert.equal(s.ui.nodes.size,rows.length);click(s.ui,'selection-all');assert.deepEqual([...s.ui.selection.ids()],[...s.instance.app.controller.articleIds()]);click(s.ui,'selection-done');assert.equal(s.ui.base,'review');
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Mock media browser exposes a blob video without a downloadable file and keeps page navigation reachable',async()=>{
+ const s=await setup('https://x.com/a');
+ try{s.dom.window.document.querySelector('article').insertAdjacentHTML('beforeend','<div data-testid="videoComponent"><video src="blob:https://x.com/local" poster="https://pbs.twimg.com/ext_tw_video_thumb/123/poster.jpg"></video></div>');s.ui.open('media');const item=s.ui.mediaItems.find(m=>m.type==='video');assert.ok(item);s.ui.showMedia(item.id);assert.ok(s.ui.sheet.querySelector('.media-preview img'));assert.equal(s.ui.sheet.querySelector('[data-action=download-media]').disabled,true);assert.equal(s.ui.sheet.querySelector('[data-action=open-media]').disabled,true);assert.equal(s.ui.sheet.querySelector('[data-action=media-source]').disabled,false);assert.match(s.ui.sheet.querySelector('.media-info').textContent,/Play this video/);
+ }finally{s.instance.stop();s.dom.window.close();}
 });

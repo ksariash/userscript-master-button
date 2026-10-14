@@ -66,3 +66,7 @@ test('Actual local MP3 encoder produces a compact MPEG recording from PCM, separ
 test('Mock late voice demo is canceled before article playback or settings changes, and retired sessions cannot synthesize',async()=>{
  let release;const s=setup(()=>new Promise(r=>release=r));const demo=s.speech.demo();await waitTick();s.speech.cancel();release({status:200,response:pcm()});await demo;assert.equal(s.audio.plays,0);s.speech.stop();const before=s.calls.length;await assert.rejects(s.speech.play('a'),e=>e.name==='AbortError');assert.equal(s.calls.length,before);
 });
+test('Mock export sees a whole batch correction, cancels its stale job, and one Undo restores the exact transcript',async()=>{
+ let release;const s=setup(()=>new Promise(r=>release=r)),exporter=new ExportJob(s.store,s.speech,{encode:async()=>new Blob(['mock'],{type:'audio/mpeg'})});
+ try{const job=exporter.prepare();await waitTick();s.store.correctMany(['a','b'],'NUISANCE');release({status:200,response:pcm()});await assert.rejects(job,e=>e.name==='AbortError');assert.equal(exporter.currentArtifact(),null);assert.equal(transcript(s.store.snapshot()),'');assert.equal(s.store.undo(),true);assert.equal(transcript(s.store.snapshot()),'Original one.\n\nOriginal two.');}finally{exporter.cancel();s.speech.stop();}
+});

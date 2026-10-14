@@ -1,4 +1,5 @@
 import Defuddle from 'defuddle';
+import{attachLinkContext}from'./link-context.mjs';
 const OWN = '[data-master-button]';
 const OMIT = 'script,style,noscript,template,svg,canvas,textarea,input,select,button,[hidden],[aria-hidden="true"]';
 const OWNER = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,figcaption,pre,td,th,div,section,article,main,nav,aside,header,footer,body';
@@ -8,7 +9,7 @@ export function sourceRole(owner) {
   if (!context) return 'content';
   let role = context.getAttribute('role') === 'navigation' ? 'nav' : context.getAttribute('role') === 'banner' ? 'header' : context.tagName.toLowerCase();
   // An article's own heading/outline is not the site's navigation chrome.
-  if (['header','nav','footer'].includes(role) && context.closest('article,[role="article"]')) role = `article-${role}`;
+  if (['header','nav','footer'].includes(role) && context.closest('article,[role="article"],main,[role="main"]')) role = `article-${role}`;
   return role;
 }
 
@@ -38,7 +39,7 @@ export class SourceInventory {
       const sameDocumentLinks = anchors.filter(a => { try { const u = new URL(a.getAttribute('href'), doc.URL), here = new URL(doc.URL); return u.origin === here.origin && u.pathname === here.pathname && u.search === here.search && !!u.hash; } catch { return false; } }).length;
       let groupHeading = '';
       for (let group = r.owner.parentElement; group && !group.matches('article,main,body'); group = group.parentElement) { const heading = [...group.querySelectorAll('h1,h2,h3,h4')].reverse().find(h => h !== r.owner && (h.compareDocumentPosition(r.owner) & 4)); if (heading) { groupHeading = heading.textContent.trim(); break; } }
-      const inArticle = !!r.owner.closest('article,[role="article"]');
+      const inArticle = !!r.owner.closest('article,[role="article"],main,[role="main"]');
       let nearbyControls = [];
       for (let group = r.owner.parentElement, depth = 0; group && depth < 2 && !group.matches('article,main,body'); group = group.parentElement, depth++) {
         const types = [...group.querySelectorAll('input:not([type=hidden]),select')].slice(0,8).map(n => n.tagName === 'SELECT' ? 'selection control' : `${n.type || 'text'} input`);
@@ -49,13 +50,13 @@ export class SourceInventory {
         if(list.tagName==='UL')listMarker='•';else{const items=[...list.children].filter(n=>n.tagName==='LI');let ordinal=list.hasAttribute('start')?list.start:list.reversed?items.length:1;
           for(const sibling of items){if(sibling.hasAttribute('value')){const value=Number.parseInt(sibling.getAttribute('value'),10);if(Number.isFinite(value))ordinal=value;}if(sibling===item){listMarker=`${ordinal}.`;break;}ordinal+=list.reversed?-1:1;}}
       }
-      return { id, index, originalText: text, tag: r.owner.tagName.toLowerCase(), role: sourceRole(r.owner),listMarker,quoted:!!r.owner.closest('blockquote'),
+      return { id, index, articleTitle:this.title,originalText: text, tag: r.owner.tagName.toLowerCase(), role: sourceRole(r.owner),listMarker,quoted:!!r.owner.closest('blockquote'),
         sameDocumentLinkRatio: anchors.length ? sameDocumentLinks / anchors.length : 0, inArticle, groupHeading, nearbyControls,
         linkCharacters: r.nodes.filter(n => n.parentElement.closest('a')).reduce((n, t) => n + t.data.length, 0),
         source: { node: r.owner, nodes: r.nodes, range }, sourceState: 'original',
         extraction: this.extraction.get(norm(text)) || { member: false, mapping: 'pending' } };
     }).filter(p => p.originalText);
-    return records;
+    return attachLinkContext(records);
   }
   extract(records = this.scan()) {
     // Defuddle works on a detached clone. Async remote extractors are disabled.
@@ -71,7 +72,7 @@ export class SourceInventory {
       const evidence = { member: present && unique, mapping: present ? unique ? 'exact source text in Defuddle output' : 'ambiguous duplicate · included for review' : 'not in Defuddle output · preserved' };
       this.extraction.set(t, evidence); p.extraction = evidence;
     }
-    this.title = result.title || this.document.title;
+    this.title = result.title || this.document.title;for(const p of records)p.articleTitle=this.title;
     return records;
   }
 }

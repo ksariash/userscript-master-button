@@ -19,7 +19,11 @@ Qwen3 0.6B improved the small probe but failed wider accuracy and peaked near 3.
 
 Classifier-head learning is implemented; **full base-LM weight fine-tuning is not**. Keep memories and the personalized head can make inclusion more conservative. They cannot silently enlarge an unvalidated automatic exclusion policy.
 
-The model still misses the complete target, including article translation-link errors and missed short widget headings. Automatic exclusions remain disabled. Existing regression pages were used during debugging; an independent final holdout and independent label audit remain outstanding. Do not turn on the exclusion flag for appearance or green CI.
+The broad head is rejected: it excluded 21 legitimate supporting/metadata rows in a new 222-case run. A separately evaluated conservative subset now applies reading-link groups, invitations and very strong evidence outside primary/extracted article content. Across 731 reused author labels it excludes no ARTICLE rows, but detects only 56/377 nuisances. The full benchmark has not passed. Independent labels/holdout and physical Safari remain outstanding.
+
+Read selects the full primary content container plus exact Defuddle members; this is reading scope, not a nuisance decision. Uncertain rows inside that scope stay included. Read full page inventory restores every source row. A compact reader status exposes model loading/progress/failure. Show skipped changes only visibility; Keep/Skip/Undo, narration and exports still consume the same store.
+
+Link inference uses bounded original introductory/link/closing context. Closing prose informs inference but is never automatically assigned its group’s label. Positive article/caption/reference evidence is recorded separately. Site head gradients can veto conservative exclusions, never enable the rejected broad policy.
 
 Native sharing, playback activation, locked-screen transitions, model execution and key setup require a physical iPhone/extension check. REST supplies PCM and no verified word events; only real segment/sample durations are used. No consent adapter submits choices until validated on a live site.
 
