@@ -1,6 +1,6 @@
 # Progress and remaining scope
 
-**Local development: alpha.7, title exports, targeted scroll recovery, playback caching/seeking, preparation scheduling, bounded model loading, bounded preference storage, coalesced lifecycle/nag tracking, worker MP3 conversion, and slimmer modular interface implemented; 142 tests and 20 desktop screenshot/layout cases pass. Not published.** See [BACKLOG.md](BACKLOG.md).
+**Experimental alpha.7: title exports, targeted scroll recovery, playback caching/seeking, preparation scheduling, bounded model loading, bounded preference storage, coalesced lifecycle/nag tracking, worker MP3 conversion, and slimmer modular interface implemented; 142 tests and 20 desktop screenshot/layout cases pass.** See [BACKLOG.md](BACKLOG.md).
 
 **Published: experimental 2.0.0-alpha.6 (`66d367c`).** CI and Pages succeeded; owner reports setup now works. The subsequent local audit and implementation program is tracked in [BACKLOG.md](BACKLOG.md). Future releases require separate publication authorization.
 

@@ -20,7 +20,7 @@ The classification head is trained on actual local model outputs and structural 
 
 Use your own public Azure Speech resource. Speech setup selects region and loads that resource’s searchable voice list. Requests go directly to the selected Microsoft endpoint; synthesis may incur charges. The key is held by Userscripts, not website localStorage.
 
-In alpha.6, the exact [dedicated setup page](https://ksariash.github.io/userscript-master-button/setup.html) opens Speech automatically. Hosting must first be published as described below. Old raw `SETUP.txt` URLs are no longer trusted for key entry: their CSP sandbox can block Safari extension callbacks even after the panel renders. The updated script shows a native migration link without calling GM on those URLs. Do not keep retrying buttons on alpha.5's raw page.
+In alpha.6 and later, the exact [dedicated setup page](https://ksariash.github.io/userscript-master-button/setup.html) opens Speech automatically. This dedicated page is already published. Old raw `SETUP.txt` URLs are no longer trusted for key entry: their CSP sandbox can block Safari extension callbacks even after the panel renders. The updated script shows a native migration link without calling GM on those URLs. Do not keep retrying buttons on alpha.5's raw page.
 
 After updating the existing userscript file, open the Userscripts popup fully, allow it on the dedicated page, and reload. Run Check extension storage before pasting a key. Saving reports pending, verified or failed storage; a failed save preserves the input. Missing GM APIs never fall back to page storage.
 
@@ -60,12 +60,15 @@ Confirm the version shown at the top of Speech is alpha.6 or later on the dedica
 
 Preferences-load failures no longer disable otherwise available storage APIs. Save confirms the key by extension-storage readback before clearing its field. Test Azure connection uses the saved key directly for a regional voice-list GET; it sends no article text and does not synthesize. Live testing has still not been performed by the maintainer. Do not paste credentials into chat or GitHub issues.
 
-## Publication steps — not performed in this workspace
+## Release and iPhone validation
 
-1. Review and publish the complete alpha.6 changes to `main`, including `docs/setup.html`, `docs/.nojekyll`, `SETUP.txt`, source, tests, package files, regenerated implementation preview and all three regenerated `dist` files. Run the checks above and require the source/build CI to pass. No deployment workflow is added by this fix.
-2. A repository owner must configure GitHub Settings → Pages → Build and deployment → Source: **Deploy from a branch** → branch **main**, folder **/docs** → Save. This publishes only the dedicated static directory. See [GitHub's publishing-source instructions](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site). Hosting configuration was not inspected or changed here; if an existing custom domain redirects this URL, stop and review the trusted destination instead of broadening the allowlist.
-3. Wait for Pages deployment, then verify `https://ksariash.github.io/userscript-master-button/setup.html` returns HTTP 200 HTML at that exact URL, with the reviewed page body and CSP, no response `sandbox` directive and no unexpected scripts/resources. A 404 or redirect is not ready for key entry.
-4. Update the existing iPhone userscript with `dist/master-button.user.js`, preserving its exact filename and content injection. Confirm Speech displays `2.0.0-alpha.6`. Allow Userscripts on `ksariash.github.io`, open the extension popup fully, and reload the setup URL.
-5. Without any key, check that Done closes Speech, reopening works, and Check extension storage passes. Confirm both old raw URL forms show the native migration link and no key form. Record iOS/Safari and Userscripts 1.8.6 results. Do not enter a real key until these device checks pass.
+The dedicated setup page was published with alpha.6; the owner reports that setup works. Alpha.7 is an experimental update. Existing Pages hosting needs no settings change.
 
-Local tests use isolated dummy data and mocked Azure transport; they do not prove iPhone callback or extension-bridge behavior. No live Azure verification is part of this change.
+1. Publish the complete reviewed source, tests, package files, implementation preview and three generated `dist` files together. Require source/build CI and the existing Pages deployment to succeed.
+2. Verify the exact [dedicated setup page](https://ksariash.github.io/userscript-master-button/setup.html) returns HTTP 200 HTML without a redirect, response `sandbox` directive or unexpected scripts/resources. A 404 or redirect is not ready for key entry.
+3. Update the existing iPhone userscript from [the raw release script](https://raw.githubusercontent.com/ksariash/userscript-master-button/main/dist/master-button.user.js), preserving its exact filename and content injection. Confirm Speech displays `2.0.0-alpha.7`.
+4. Allow Userscripts on `ksariash.github.io`, open the extension popup fully, and reload setup. Without any key, check Done, reopening and Check extension storage. Old raw setup URLs should show only the native migration link.
+5. Test the compact reader in both appearances, portrait/landscape and with the keyboard open. Check scrolling after recognized app nags disappear while ordinary dialogs and controls still work.
+6. With your own configured resource, check play/pause, prepared-audio seeking, cross-passage resume, and title-named transcript/MP3 exports. Play and seek in the saved recording. Never send credentials in a support report.
+
+Local tests use isolated dummy data, mocked Azure transport and synthetic audio. They do not prove physical iPhone behavior or live Azure integration. Model accuracy, device memory and broader platform acceptance remain incomplete; see [VALIDATION.md](VALIDATION.md).

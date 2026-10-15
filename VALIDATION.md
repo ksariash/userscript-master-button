@@ -2,7 +2,7 @@
 
 ## Current local improvement checks
 
-Alpha.7 is unpublished. Current changes include title-aware exports, targeted scroll recovery, cached playback state, cross-segment prepared seeking, independent synthesis cancellation, playback-priority transport, shared cold voice lookup, bounded parallel model loading, resource cleanup, and modular/slimmer reader and speech views. 142/142 Node 24.19/Linux tests pass; milestone results are recorded in [BACKLOG.md](BACKLOG.md); no keys or live Azure requests are used.
+Alpha.7 is an experimental owner-test release. Current changes include title-aware exports, targeted scroll recovery, cached playback state, cross-segment prepared seeking, independent synthesis cancellation, playback-priority transport, shared cold voice lookup, bounded parallel model loading, resource cleanup, and modular/slimmer reader and speech views. 142/142 Node 24.19/Linux tests pass; milestone results are recorded in [BACKLOG.md](BACKLOG.md); no keys or live Azure requests are used.
 
 Preparation fixture: 3 concurrent cold syntheses use 4 transport calls instead of 6; synthetic 20 ms-per-request median 85.087 versus 124.053 ms, peak transport concurrency 1. Model-loading fixture: four tiny synthetic responses, median 41.605 versus 82.039 ms, peak downloads 2, warm downloads 0. These are not service, device, real-model or memory benchmarks. Actual inference/accuracy revalidation is blocked because model files are absent and Hugging Face is unavailable through direct DNS and the configured proxy. Classification policy is unchanged.
 
@@ -20,7 +20,7 @@ Local checks cover exact URL restrictions (including credentials/query/fragment/
 
 Both production builds matched byte-for-byte manifest hashes. Prototype and implementation-preview builds completed. Source whitespace checks pass; the generated userscript retains a pre-existing trailing space inside a bundled lamejs diagnostic string (dependency source `dist/lamejs.js`, not an authored code change).
 
-Subsequent release state: alpha.6 was published at `66d367c38d14dbbe97d386455c8b7718b5e221e4` with successful Pages deployment, and the owner reports setup works. Alpha.7 changes remain local and unpublished. Broader device checks remain pending. No real Azure key or live Azure request was used. Actual model evaluation was not rerun for this routing-only fix; previous results below remain historical evidence.
+Subsequent release state: alpha.6 was published at `66d367c38d14dbbe97d386455c8b7718b5e221e4` with successful Pages deployment, and the owner reports setup works. Alpha.7 retains the same trusted setup boundary. Broader device checks remain pending. No real Azure key or live Azure request was used. Actual model evaluation was not rerun for this routing-only fix; previous results below remain historical evidence.
 
 ## Local policy and integration checks
 
