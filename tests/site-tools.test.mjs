@@ -59,3 +59,17 @@ test('Regional voice parsing rejects retired/malformed/duplicate entries and nam
  const valid={ShortName:'en-US-JennyNeural',DisplayName:'Jenny',Locale:'en-US',LocaleName:'English (United States)',Gender:'Female',VoiceType:'Neural',Status:'GA'};
  const list=parseVoices([valid,valid,{...valid,ShortName:'other'},{...valid,Status:'Deprecated'},{...valid,ShortName:'fr-FR-DeniseNeural',Locale:'fr-FR',LocaleName:'French (France)'},{...valid,ShortName:'en-US-TestNeural',Status:'Preview'},{...valid,ShortName:'bad<script>'}]);assert.equal(list.length,3);assert.equal(list[0].language,'English (United States)');assert.ok(list.some(v=>v.status==='Preview'));assert.throws(()=>parseVoices({}));
 });
+test('Idle recovery reuses dialog candidates and mutation scans stay inside the changed branch',async()=>{
+ const s=fixture('<main><p>Delivered words.</p></main>'+redditNag,'https://www.reddit.com/r/test/');
+ try{s.tools.startCleanup();await wait();const doc=s.dom.window.document,original=doc.querySelectorAll.bind(doc);let dialogQueries=0,wholeTree=0;doc.querySelectorAll=selector=>{if(selector==='*')wholeTree++;if(selector.includes('dialog[open]'))dialogQueries++;return original(selector);};
+ for(let i=0;i<20;i++)s.tools.otherDialogOpen();assert.equal(dialogQueries,0);const scans=[],clean=s.tools.cleanNags.bind(s.tools);s.tools.cleanNags=scopes=>{scans.push(scopes);return clean(scopes);};const p=doc.querySelector('main p');for(let i=0;i<100;i++)p.firstChild.data='Updated '+i;await wait();assert.equal(wholeTree,0);assert.equal(dialogQueries,0);assert.ok(scans.some(scopes=>scopes?.includes(p)));assert.ok(scans.length<=2);
+ }finally{s.tools.stop();s.dom.window.close();}
+});
+test('Detached nags and shadow roots are released; remounted nags remain reversible',()=>{
+ const s=fixture('<main><p>Words.</p></main>','https://www.reddit.com/r/test/');
+ try{s.tools.startCleanup();let previous;for(let i=0;i<50;i++){previous?.remove();const node=s.dom.window.document.createElement('div');node.innerHTML=redditNag;s.dom.window.document.body.append(node);s.tools.cleanNags([node]);previous=node;assert.equal(s.tools.nagNodes.size,1);assert.equal(s.tools.owned.size,1);}s.tools.undo();assert.equal(previous.querySelector('.rpl-bottom-sheet').style.display,'');assert.equal(s.tools.owned.size,0);
+ }finally{s.tools.stop();s.dom.window.close();}
+});
+test('New deliberate dialogs block recovery before mutation callbacks run',()=>{
+ const s=fixture('<main><p>Words.</p></main>'+redditNag,'https://www.reddit.com/r/test/');try{s.tools.startCleanup();assert.equal(s.tools.otherDialogOpen(),false);s.dom.window.document.body.insertAdjacentHTML('beforeend','<div role="dialog"><button>Confirm</button></div>');assert.equal(s.tools.otherDialogOpen(),true);s.tools.scroll.release();assert.equal(s.tools.scroll.active,false);}finally{s.tools.stop();s.dom.window.close();}
+});

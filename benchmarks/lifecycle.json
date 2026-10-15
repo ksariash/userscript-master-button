@@ -1,0 +1,20 @@
+{
+  "baseline": "7783a9c",
+  "scope": "Authored 200-paragraph JSDOM fixture, 100 scheduled mutations, two publications; counts are deterministic, CPU timing is one diagnostic run, not browser/iPhone latency.",
+  "rows": [
+    {
+      "mode": "before",
+      "inventoryScans": 2,
+      "scanCPUms": 274.45863099999997,
+      "publishes": 2,
+      "idleDialogQueries20": 20
+    },
+    {
+      "mode": "after",
+      "inventoryScans": 1,
+      "scanCPUms": 143.30761799999982,
+      "publishes": 2,
+      "idleDialogQueries20": 0
+    }
+  ]
+}

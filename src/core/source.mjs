@@ -79,28 +79,40 @@ export class SourceInventory {
 
 /** Observe host changes only; coalesce insertions and retire leases on URL navigation. */
 export class PageLifecycle {
-  constructor(document, inventory, { onScan, onNavigate, delay = 180 } = {}) {
-    this.document = document; this.inventory = inventory; this.onScan = onScan; this.onNavigate = onNavigate;
-    this.url = document.URL; this.delay = delay; this.timer = null; this.extractTimer = null;
-    const win = document.defaultView;
-    this.observer = new win.MutationObserver(list => {
-      if (list.some(m => !m.target.parentElement?.closest(OWN) && !m.target.closest?.(OWN) && (m.type === 'characterData' || m.type === 'attributes' || [...m.addedNodes, ...m.removedNodes].some(n => !n.matches?.(OWN))))) this.schedule();
-    });
-    this.observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class','id','role','hidden','aria-hidden','href','type'] });
-    this.navigate = () => this.checkURL();
-    win.addEventListener('popstate', this.navigate); win.addEventListener('hashchange', this.navigate);
-    // Isolated content scripts cannot replace the page world's history reliably.
-    this.poll = win.setInterval(() => { if (!document.hidden) this.checkURL(); }, 1000);
+  constructor(document, inventory, { onScan, onNavigate, onError=()=>{}, delay=180, extractDelay=1000 } = {}) {
+    Object.assign(this,{document,inventory,onScan,onNavigate,onError,delay,extractDelay});this.url=document.URL;this.version=0;this.stopped=false;this.running=false;
+    const win=document.defaultView;
+    this.observer=new win.MutationObserver(list=>{if(list.some(m=>!m.target.parentElement?.closest(OWN)&&!m.target.closest?.(OWN)&&(m.type==='characterData'||m.type==='attributes'||[...m.addedNodes,...m.removedNodes].some(n=>!n.matches?.(OWN)))))this.schedule();});
+    this.observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','id','role','hidden','aria-hidden','href','type']});
+    this.navigate=()=>this.checkURL();win.addEventListener('popstate',this.navigate);win.addEventListener('hashchange',this.navigate);
+    this.poll=win.setInterval(()=>{if(!document.hidden)this.checkURL();},1000);
   }
-  checkURL() { if (this.document.URL !== this.url) { const previous = new URL(this.url), next = new URL(this.document.URL); this.url = this.document.URL; if (previous.origin !== next.origin || previous.pathname !== next.pathname || previous.search !== next.search || /^#(?:!|\/)/.test(next.hash)) this.onNavigate?.(); } }
-  schedule() {
-    clearTimeout(this.timer); this.timer = setTimeout(() => {
-      this.checkURL(); this.onScan(this.inventory.scan());
-      clearTimeout(this.extractTimer); this.extractTimer = setTimeout(() => { this.onScan(this.inventory.extract()); }, 1000);
-    }, this.delay);
+  checkURL(){
+    if(this.stopped)return true;if(this.document.URL===this.url)return false;
+    const previous=new URL(this.url),next=new URL(this.document.URL);this.url=this.document.URL;
+    if(previous.origin!==next.origin||previous.pathname!==next.pathname||previous.search!==next.search||/^#(?:!|\/)/.test(next.hash)){this.stop();this.onNavigate?.();return true;}return false;
   }
-  stop() {
-    this.observer.disconnect(); clearTimeout(this.timer); clearTimeout(this.extractTimer); clearInterval(this.poll);
-    this.document.defaultView.removeEventListener('popstate', this.navigate); this.document.defaultView.removeEventListener('hashchange', this.navigate);
+  schedule(){
+    if(this.stopped)return;this.version++;clearTimeout(this.extractTimer);
+    // A trailing debounce starves indefinitely on active feeds. One timer owns each burst.
+    if(this.timer==null)this.timer=setTimeout(()=>this.flush(),this.delay);
+  }
+  async flush(){
+    this.timer=null;if(this.checkURL())return;if(this.running){this.rescan=true;return;}this.running=true;const version=this.version;
+    try{
+      const records=await this.inventory.scan();if(this.checkURL()||version!==this.version)return;
+      this.onScan(records);if(this.stopped)return;
+      this.extractTimer=setTimeout(()=>this.extract(records,version),this.extractDelay);
+    }catch{if(!this.stopped)this.onError('Page refresh failed. The previous original text remains available; the next page change will retry.');}
+    finally{this.running=false;if(!this.stopped&&(this.rescan||version!==this.version)){this.rescan=false;this.schedule();}}
+  }
+  async extract(records,version){
+    if(this.checkURL()||version!==this.version)return;
+    try{const result=await this.inventory.extract(records);if(this.checkURL()||version!==this.version)return;this.onScan(result);this.onError('');}
+    catch{if(this.checkURL()||version!==this.version)return;this.inventory.extraction?.clear();this.onScan(records.map(p=>({...p,extraction:{member:false,mapping:'Extraction unavailable · original text preserved'}})));this.onError('Extraction refresh failed. Original text is preserved for manual review; the next page change will retry.');}
+  }
+  stop(){
+    this.stopped=true;this.observer.disconnect();clearTimeout(this.timer);clearTimeout(this.extractTimer);clearInterval(this.poll);this.timer=null;
+    this.document.defaultView.removeEventListener('popstate',this.navigate);this.document.defaultView.removeEventListener('hashchange',this.navigate);
   }
 }

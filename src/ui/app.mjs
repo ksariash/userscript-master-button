@@ -155,7 +155,7 @@ export class UtilityUI {
     }
     this.sheet?.querySelector('.model-status')&&(this.sheet.querySelector('.model-status').textContent=this.modelState.message);this.sheet?.querySelector('.storage-state')&&(this.sheet.querySelector('.storage-state').textContent=this.settings.preferenceMessage());
     if(this.mode==='exports')this.sheet.querySelector('[data-action=share-export]').disabled=!this.exporter.currentArtifact();
-    if(event.kind==='storage-error')this.notify(event.message);this.positionMarkers();
+    if(['storage-error','source-error'].includes(event.kind))this.notify(event.message);this.positionMarkers();
   }
   async startReaderModel(){this.modelStarting=true;try{await this.classifier.load('wasm');}catch{}finally{this.modelStarting=false;}}
   modelUpdate(state){this.modelState=state;this.patch();}

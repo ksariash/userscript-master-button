@@ -15,7 +15,7 @@ export class ArticleController {
       }
       this.tone.render(this.store);this.renderRuleDisplays();this.onChange(e);
     });
-    this.tone.render(this.store);this.lifecycle=new PageLifecycle(document,this.inventory,{onScan:p=>{this.store.sync(p);this.refreshReading();this.applyRules();},onNavigate});
+    this.tone.render(this.store);this.lifecycle=new PageLifecycle(document,this.inventory,{onScan:p=>{this.store.sync(p);this.refreshReading();this.applyRules();},onNavigate,onError:message=>{this.extractionError=message;if(message)this.onChange({kind:'source-error',message});}});
   }
   readArticle(){this.articleReading=true;this.refreshReading();}
   articleIds(){return articleScope(this.document,[...this.store.records.values()].filter(p=>p.scope==='page'));}

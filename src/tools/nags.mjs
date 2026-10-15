@@ -18,8 +18,8 @@ function overlay(node,document){const style=document.defaultView.getComputedStyl
 export function appNags(document,roots=pageRoots(document)){
   const host=new URL(document.URL).hostname;if(!nagSite(host))return[];const found=new Set();
   for(const root of roots){
-    const candidates=[...root.querySelectorAll(ROOTS)];
-    for(const text of root.querySelectorAll('h1,h2,h3,[role="heading"],button,a')){
+    const candidates=[...(root.matches?.(ROOTS)?[root]:[]),...root.querySelectorAll(ROOTS)];
+    for(const text of [...(root.matches?.('h1,h2,h3,[role="heading"],button,a')?[root]:[]),...root.querySelectorAll('h1,h2,h3,[role="heading"],button,a')]){
       if(!/get the full app experience|get the app to keep using reddit|open x|get (?:the )?reddit app|open in (?:the )?app|use reddit in the app/i.test(text.textContent||''))continue;
       for(let n=text.parentElement,depth=0;n&&depth<7;depth++,n=n.parentElement)if(overlay(n,document)&&signature(n,host)){candidates.push(n);break;}
     }
@@ -31,8 +31,14 @@ export function appNags(document,roots=pageRoots(document)){
   }
   return [...found].filter(n=>![...found].some(other=>other!==n&&other.contains(n)));
 }
-export function otherDialogOpen(document,excluded,roots=pageRoots(document)){
-  return roots.some(root=>[...root.querySelectorAll('dialog[open],[role="dialog"],[aria-modal="true"]')].some(n=>
-    !n.closest(OWN)&&!excluded.some(e=>e===n||e.contains(n))&&!hiddenByAncestor(n,document)));
+export function dialogCandidates(roots){return roots.flatMap(root=>[...root.querySelectorAll('dialog[open],[role="dialog"],[aria-modal="true"]')]);}
+export function otherDialogOpen(document,excluded,roots=pageRoots(document),candidates=dialogCandidates(roots)){
+  return candidates.some(n=>n.isConnected&&!n.closest(OWN)&&!excluded.some(e=>e===n||e.contains(n))&&!hiddenByAncestor(n,document));
+}
+/** Include a changed overlay's siblings, but never expand an ordinary paragraph into the whole article. */
+export function nagScope(node,document){
+  let el=node.nodeType===1?node:node.parentElement;if(!el||el.closest(OWN))return null;
+  for(let n=el,depth=0;n&&depth<7&&!n.matches('body,main,article,html');n=n.parentElement,depth++)if(n.matches(ROOTS)||['fixed','absolute'].includes(document.defaultView.getComputedStyle(n).position))return n;
+  return el;
 }
 function hiddenByAncestor(node,document){for(let n=node;n;n=n.parentElement||n.getRootNode()?.host){if(n.hidden)return true;const css=document.defaultView.getComputedStyle(n);if(css.display==='none'||css.visibility==='hidden')return true;}return false;}

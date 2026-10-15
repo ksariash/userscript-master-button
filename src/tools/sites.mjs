@@ -1,6 +1,6 @@
 import { amazonProduct, appleMapsURL, validateURL } from './urls.mjs';
 import {ScrollRecovery} from './scroll-recovery.mjs';
-import {appNags,pageRoots,nagSite,otherDialogOpen} from './nags.mjs';
+import {appNags,pageRoots,nagSite,otherDialogOpen,dialogCandidates,nagScope} from './nags.mjs';
 import {discoverMedia} from './media.mjs';
 const SOCIAL = /(^|\.)(x.com|twitter.com|instagram.com|facebook.com|linkedin.com)$/;
 export function siteActions(url) {
@@ -24,19 +24,44 @@ export function nuisanceCandidates(document, host) {
 }
 export class SiteUtilities {
   constructor(document,{store=null,onState=()=>{}}={}) {
-    this.document=document;this.store=store;this.onState=onState;this.owned=new Map();this.locks=new Map();this.scroll=new ScrollRecovery(document,{allowed:()=>this.cleanupEnabled&&this.nagNodes.size>0&&!this.otherDialogOpen()});this.cleanupEnabled=false;this.nagNodes=new Set();this.count=0;this.roots=[];
+    this.document=document;this.store=store;this.onState=onState;this.owned=new Map();this.locks=new Map();this.scroll=new ScrollRecovery(document,{allowed:()=>this.cleanupEnabled&&this.nagNodes.size>0&&!this.otherDialogOpen()});this.cleanupEnabled=false;this.nagNodes=new Set();this.count=0;this.roots=[];this.dirtyScopes=new Set();
     this.unsubscribe=store?.subscribe(event=>{this.restoreKept();if(event.kind==='correction'&&this.cleanupEnabled)this.scheduleCleanup();});
   }
-  otherDialogOpen(){return otherDialogOpen(this.document,[...this.nagNodes],this.dialogRoots||[this.document]);}
+  otherDialogOpen(){const pending=this.observer?.takeRecords();if(pending?.length)this.receiveMutations(pending);this.dialogs??=dialogCandidates(this.dialogRoots||[this.document]);return otherDialogOpen(this.document,[...this.nagNodes],[],this.dialogs);}
   hasKeep(node){return this.store&&[...this.store.records.values()].some(p=>p.correction?.label==='ARTICLE'&&p.source?.nodes?.some(n=>node.contains(n)));}
   restoreKept(){let changed=false;for(const node of [...this.nagNodes])if(this.hasKeep(node)){this.restoreNode(node);this.nagNodes.delete(node);changed=true;}this.releaseLocksIfNeeded();if(changed)this.sync();}
-  startCleanup(){if(!nagSite(new URL(this.document.URL).hostname))return 0;this.cleanupEnabled=true;const count=this.cleanNags();this.observe();return count;}
+  startCleanup(){if(!nagSite(new URL(this.document.URL).hostname))return 0;this.cleanupEnabled=true;this.observe();return this.cleanNags();}
   observe(){
-    const roots=pageRoots(this.document);this.dialogRoots=roots;for(const root of roots)if(!this.roots.includes(root)){this.roots.push(root);this.observer||=new this.document.defaultView.MutationObserver(records=>{if(this.cleanupEnabled&&records.some(m=>!m.target.closest?.('[data-master-button]')))this.scheduleCleanup();});this.observer.observe(root===this.document?this.document.documentElement:root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden','inert','aria-hidden','aria-modal','role']});}
+    if(this.observer)return;this.dialogRoots=pageRoots(this.document);this.observer=new this.document.defaultView.MutationObserver(records=>this.receiveMutations(records));
+    for(const root of this.dialogRoots)this.observeRoot(root);
   }
-  scheduleCleanup(){if(this.timer!=null)return;this.timer=setTimeout(()=>{this.timer=null;if(this.cleanupEnabled){this.cleanNags();this.observe();}},100);}
-  cleanNags(){
-    let added=0;const roots=pageRoots(this.document);this.dialogRoots=roots;const nodes=appNags(this.document,roots);for(const node of nodes){if(this.hasKeep(node))continue;const old=this.owned.get(node);if(!old){this.hideOverlay(node);this.nagNodes.add(node);this.count++;added++;}else if(node.style.getPropertyValue('display')!=='none'||node.style.getPropertyPriority('display')!=='important')node.style.setProperty('display','none','important');}
+  observeRoot(root){if(this.roots.includes(root))return;this.roots.push(root);this.observer.observe(root===this.document?this.document.documentElement:root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style','open','hidden','inert','aria-hidden','aria-modal','role']});}
+  discoverRoots(node){
+    if(node.nodeType!==1||node.closest('[data-master-button]'))return;
+    for(const el of [node,...node.querySelectorAll('*')])if(el.shadowRoot&&!this.roots.includes(el.shadowRoot)&&this.roots.length<80){this.dialogRoots.push(el.shadowRoot);this.observeRoot(el.shadowRoot);this.addDirty(el.shadowRoot);for(const child of el.shadowRoot.children)this.discoverRoots(child);}
+  }
+  receiveMutations(records){
+    if(!this.cleanupEnabled)return;let changed=false;
+    for(const m of records){const el=m.target.nodeType===1?m.target:m.target.parentElement;if(el?.closest('[data-master-button]'))continue;changed=true;if(m.type==='childList'||['role','open','aria-modal'].includes(m.attributeName))this.dialogs=null;
+      for(const node of m.addedNodes||[])this.discoverRoots(node);
+      const nodes=m.type==='childList'&&m.addedNodes.length?[...m.addedNodes]:[m.target];
+      for(const node of nodes){if(m.type==='attributes'&&['style','inert'].includes(m.attributeName)&&el?.matches('html,body'))continue;const scope=nagScope(node,this.document);if(scope)this.addDirty(scope);}
+    }
+    if(changed)this.scheduleCleanup(false);
+  }
+  addDirty(scope){
+    if(this.fullScan)return;for(const old of this.dirtyScopes)if(old===scope||old.contains(scope))return;
+    for(const old of this.dirtyScopes)if(scope.contains(old))this.dirtyScopes.delete(old);
+    if(this.dirtyScopes.size>=64){this.dirtyScopes.clear();this.fullScan=true;return;}this.dirtyScopes.add(scope);
+  }
+  scheduleCleanup(full=true){if(full)this.fullScan=true;if(this.timer!=null)return;this.timer=setTimeout(()=>{this.timer=null;if(this.cleanupEnabled){const scopes=this.fullScan?undefined:[...this.dirtyScopes].filter(n=>n.isConnected);this.fullScan=false;this.dirtyScopes.clear();this.cleanNags(scopes);}},100);}
+  prune(){
+    for(const node of [...this.owned.keys()])if(!node.isConnected){const old=this.owned.get(node);if(old.reveal){if(node.style.filter==='none')old.value?node.style.setProperty('filter',old.value,old.priority):node.style.removeProperty('filter');this.owned.delete(node);}else this.restoreNode(node);this.nagNodes.delete(node);}
+    const roots=this.roots.filter(r=>r===this.document||r.host?.isConnected);if(roots.length!==this.roots.length){this.observer?.disconnect();this.roots=[];this.dialogRoots=roots;this.dialogs=null;for(const root of roots)this.observeRoot(root);}
+  }
+  cleanNags(scopes){
+    if(scopes===undefined&&this.observer){for(const root of pageRoots(this.document))if(!this.roots.includes(root)){this.dialogRoots.push(root);this.observeRoot(root);this.dialogs=null;}}
+    this.prune();let added=0;const roots=scopes||this.dialogRoots||pageRoots(this.document);const nodes=appNags(this.document,roots);for(const node of nodes){if(this.hasKeep(node))continue;const old=this.owned.get(node);if(!old){this.hideOverlay(node);this.nagNodes.add(node);this.count++;added++;}else if(node.style.getPropertyValue('display')!=='none'||node.style.getPropertyPriority('display')!=='important')node.style.setProperty('display','none','important');}
     this.releaseLocksIfNeeded();if(this.nagNodes.size)this.restoreNagScroll();this.sync();return added;
   }
   sync(){this.store?.setSiteExclusions([...this.owned.keys()].filter(node=>!this.owned.get(node).reveal));this.onState({enabled:this.cleanupEnabled,count:this.count});}
@@ -58,7 +83,7 @@ export class SiteUtilities {
     }
   }
   undo() {
-    this.cleanupEnabled=false;clearTimeout(this.timer);this.timer=null;this.observer?.disconnect();this.roots=[];this.dialogRoots=null;this.observer=null;this.scroll.stop();
+    this.cleanupEnabled=false;clearTimeout(this.timer);this.timer=null;this.observer?.disconnect();this.roots=[];this.dialogRoots=null;this.dialogs=null;this.dirtyScopes.clear();this.fullScan=false;this.observer=null;this.scroll.stop();
     for(const [node,old] of this.owned) if(old.reveal) { if(node.style.filter==='none'&&node.style.getPropertyPriority('filter')==='important')old.value?node.style.setProperty('filter',old.value,old.priority):node.style.removeProperty('filter'); } else if(node.style.getPropertyValue('display')==='none'&&node.style.getPropertyPriority('display')==='important') old.value?node.style.setProperty('display',old.value,old.priority):node.style.removeProperty('display');
     for(const [el,old] of this.locks) if(!el.style.getPropertyValue('overflow')&&el.getAttribute('data-scroll-lock-owner')===old.owner) el.style.setProperty('overflow',old.value,old.priority);
     for(const [node,old] of this.owned)if(old.modal){try{node.showModal?.();}catch{node.setAttribute('open','');}}this.owned.clear();this.locks.clear();this.nagNodes.clear();this.count=0;this.sync();
