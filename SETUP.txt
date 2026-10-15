@@ -1,27 +1,15 @@
-Master Button — dedicated Azure key setup
+Master Button — key setup has moved
 
-This repository-owned plain-text document has no website JavaScript.
-Enable the installed Master Button userscript for this page.
-The installed alpha.2 or later opens Speech setup automatically.
-If it does not, open its launcher → More → Speech setup.
-Both /main/SETUP.txt and /refs/heads/main/SETUP.txt URLs are supported.
-Alpha.5 shows pasted-key, saving, verified and failure feedback beside Save key.
-If the extension bridge is unavailable, saving explains the failure here.
-A failed save keeps your pasted key. No website storage fallback is used.
-After updating the script, open the Userscripts extension popup fully,
-check access to raw.githubusercontent.com, then reload this document.
-Enter your own Azure Speech resource key, choose its region, and save.
-The key is written through Userscripts' extension storage in this userscript's filename scope.
-No synthesis occurs when saving a key. The selected region’s voice list loads
-automatically from Azure using that key, without sending article text. A voice demo, Play, or Prepare MP3 sends a request only when you choose that action.
-Never put your key in a URL, issue, repository file, screenshot, or chat message.
+Do not enter a key on this raw GitHub document.
+Its response uses CSP sandbox. Safari may render the injected panel but block
+its event callbacks, leaving Done and Check extension storage inert.
 
-An arbitrary webpage can observe keyboard events around an injected form.
-Master Button therefore disables new key entry on other webpages.
-This dedicated-page workflow still requires a physical Safari/Userscripts check.
-If it is unavailable on your installed extension, do not type the key on an untrusted page.
-Existing separately stored speech keys are preserved and can be imported by their exact extension key name from the same userscript filename.
+Update the existing userscript to alpha.6 or later, keeping its exact filename.
+Open the dedicated repository-owned, script-free HTML page:
+https://ksariash.github.io/userscript-master-button/setup.html
 
-If entry/save still fails in alpha.5: run Check extension storage beside
-the key controls. Expand Connection checks to Copy support report. No key is needed.
-The report contains no keys, headers, stored values or page content.
+The page must first be published by the repository owner (see INSTALL.md).
+If it returns 404, setup hosting is not ready; do not use an arbitrary website.
+Run Check extension storage there before entering any key.
+Keys remain in GM extension storage; there is no website-storage fallback.
+Never put keys in URLs, issues, screenshots, source files, or chat.

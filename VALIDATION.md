@@ -1,12 +1,24 @@
-# Validation — experimental alpha.5
+# Validation — experimental alpha.6 (unpublished)
+
+## Dedicated setup repair — 2026-10-14
+
+The reported iPhone Safari / Userscripts 1.8.6 failure is consistent with the raw response's `default-src 'none'; style-src 'unsafe-inline'; sandbox` and [WebKit 221283](https://bugs.webkit.org/show_bug.cgi?id=221283), a duplicate of [218086](https://bugs.webkit.org/show_bug.cgi?id=218086): initial extension injection can succeed while event callbacks are blocked. Native disclosure toggling does not prove JavaScript events work. This diagnosis uses the user's device/header evidence and the WebKit reports; it was not reproduced on a physical device here.
+
+The fix changes the trusted key-entry destination to exactly `https://ksariash.github.io/userscript-master-button/setup.html`. The repository's static `docs/setup.html` has no page scripts, remote resources, or form; its CSP denies page scripts and submissions without a sandbox directive. The old raw URL forms render only a native migration link before any GM access. No sandbox removal, privileged globals, arbitrary-host key entry, or webpage-storage fallback is introduced.
+
+Local checks cover exact URL restrictions (including credentials/query/fragment/lookalikes), raw migration with stalled GM, native link idempotency, mock Done/storage, verified dummy-key save/forget/failure, lexical GM isolation, empty page storage, and the actual generated userscript's metadata/hash and execution against mock GM. JSDOM does not enforce CSP or reproduce Safari's extension world; these tests establish routing and integration, not real callback compatibility. Azure transport is mocked, and only dummy keys are used.
+
+Both production builds matched byte-for-byte manifest hashes. Prototype and implementation-preview builds completed. Source whitespace checks pass; the generated userscript retains a pre-existing trailing space inside a bundled lamejs diagnostic string (dependency source `dist/lamejs.js`, not an authored code change).
+
+Pending: repository publication, Pages hosting, served response/body verification, and real iPhone Done/storage testing. Exact publication and device checks are in [INSTALL.md](INSTALL.md#publication-steps--not-performed-in-this-workspace). Nothing was pushed, deployed, enabled, or changed in account/security settings. No real Azure key or live Azure request was used. Actual model evaluation was not rerun for this routing-only fix; previous results below remain historical evidence.
 
 ## Local policy and integration checks
 
-`npm test`: **87 tests** on Node 24.19/Linux x64. Real Defuddle, source/decision/storage/URL tests, JSDOM UI, mock model/extension/Azure/media transport, recorded-feature policy replay and actual local MP3 encoding. JSDOM has no layout engine. CI does not download or execute the model, contact Azure, or check Safari.
+`npm test`: **92 tests** on Node 24.19/Linux x64. Real Defuddle, source/decision/storage/URL tests, JSDOM UI, mock model/extension/Azure/media transport, recorded-feature policy replay and actual local MP3 encoding. JSDOM has no layout engine. CI does not download or execute the model, contact Azure, or check Safari.
 
 New checks cover atomic bulk correction/learning Undo, range and all-included selection, expired wording leases, before/after page-versus-reading scope, no seek during selection, batch export cancellation, immediate key paste/save failures, separation of verified save from failed voices, visible blob/lazy X players and exact delivered media-ID association. They also cover source article scope and dynamic insertions; original linked-group context without assigning closing prose its decision; evidence/title/link-context leases; lost-source late inference; cached head learning/Undo; automatic exclusions/Show skipped/Keep/snapshot consistency; explicit first model load and subsequent Read startup; immediate Stop despite storage failure; article priority within the 200-passage budget; nag fixed-body/inner-container/inert/touch recovery and exact Undo.
 
-Build with `npm run build`; repeat and compare `dist/build.json`. Generated script/metadata share alpha.5 and pinned dependencies. GitHub CI verifies tests, build and generated-file diff separately from actual inference.
+Build with `npm run build`; repeat and compare `dist/build.json`. Generated script/metadata share alpha.6 and pinned dependencies. GitHub CI verifies tests, build and generated-file diff separately from actual inference.
 
 ## Actual local model evaluation
 

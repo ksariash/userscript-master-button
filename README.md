@@ -2,7 +2,7 @@
 
 A compact Safari Userscripts utility for source-preserving reading, passage review, Azure narration and clean-link sharing.
 
-**Experimental rebuild, `2.0.0-alpha.5`.** The user removed review gates. A conservative local-model policy now excludes some evaluated interruptions; the broad head remains disabled because it deletes legitimate references. The overall recall target is still unmet. Physical iPhone and live Azure verification remain untested. Key setup now shows paste/save feedback beside the field; recurring root scroll locks and blob-backed X media are covered by authored regression checks.
+**Experimental rebuild, `2.0.0-alpha.6`.** The user removed review gates. A conservative local-model policy now excludes some evaluated interruptions; the broad head remains disabled because it deletes legitimate references. The overall recall target is still unmet. Physical iPhone and live Azure verification remain untested. Key setup now targets one script-free HTML page (publication pending), with a native migration link from the sandboxed raw document; recurring root scroll locks and blob-backed X media are covered by authored regression checks.
 
 On the requested BBC capture, Read selects 64 original article-region passages. Actual WASM inference excludes 12 related-book intro/link rows and three promotions, preserving all 41 labeled article rows; eight nuisance rows remain included. Full-page Review retains all 195 source rows. [Evidence and limits](experiments/evaluation/README.md).
 

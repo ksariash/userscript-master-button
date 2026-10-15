@@ -1,6 +1,6 @@
 {
   "name": "userscript-master-button",
-  "version": "2.0.0-alpha.5",
+  "version": "2.0.0-alpha.6",
   "private": true,
   "type": "module",
   "description": "Fresh Safari Userscripts rebuild with original-source decisions and explicitly experimental local filtering.",
