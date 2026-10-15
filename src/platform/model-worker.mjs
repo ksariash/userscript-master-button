@@ -1,7 +1,7 @@
 import * as ort from 'onnxruntime-web/webgpu';
 import {passageEvidence} from '../core/passage-evidence.mjs';
 import { NLIRuntime } from './nli-runtime.mjs';
-import { modelAsset } from './model-assets.mjs';
+import { loadModelAssets } from './model-assets.mjs';
 import { MODEL_CONFIG } from '../core/model-contract.mjs';
 import { DESCRIPTIONS, PASSAGE_DESCRIPTIONS, featureInput, structuralFeatures } from '../core/language-features.mjs';
 const publicFetch = self.fetch.bind(self);
@@ -17,11 +17,13 @@ self.onmessage = async event => {
       let cache;
       if (self.caches) { for (const key of await caches.keys()) if (key.startsWith('master-button-model:') && key !== cacheName) await caches.delete(key); cache = await caches.open(cacheName); }
       const assets = { cache, progress: progress => postMessage({ progress }) };
-      const tokenizerJSON = await modelAsset('tokenizer.json', MODEL_CONFIG, assets), tokenizerConfig = await modelAsset('tokenizer_config.json', MODEL_CONFIG, assets), config = await modelAsset('config.json', MODEL_CONFIG, assets);
-      const weights = await modelAsset('onnx/model_quantized.onnx', MODEL_CONFIG, assets);
+      const files = await loadModelAssets(MODEL_CONFIG, assets);
+      const tokenizerJSON=files['tokenizer.json'],tokenizerConfig=files['tokenizer_config.json'],config=files['config.json'],weights=files['onnx/model_quantized.onnx'];
       const factory = URL.createObjectURL(new Blob([__ORT_FACTORY__], { type: 'text/javascript' }));
       ort.env.wasm.wasmPaths = { mjs: factory, wasm: __ORT_WASM_URL__ }; ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false;
-      const session = await ort.InferenceSession.create(weights, { executionProviders: [backend], graphOptimizationLevel: 'all' });
+      let session;
+      try { session = await ort.InferenceSession.create(weights, { executionProviders: [backend], graphOptimizationLevel: 'all' }); }
+      finally { URL.revokeObjectURL(factory); }
       classifier = new NLIRuntime({ tokenizerJSON, tokenizerConfig, config, session, Tensor: ort.Tensor }); reply(id, { result: { backend, model: MODEL_CONFIG.id } }); return;
     }
     if (!classifier) throw new Error('Load the local model first.');

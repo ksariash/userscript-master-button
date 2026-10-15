@@ -13,7 +13,7 @@ export class LocalClassifier {
       this.url=URL.createObjectURL(new Blob([this.workerSource],{type:'text/javascript'}));this.worker=new this.WorkerClass(this.url);
       this.worker.onmessage=e=>{if(e.data.progress){const p=e.data.progress;this.message=p.total?`${p.file||'Model'} · ${Math.round((p.loaded||0)/1024/1024)} / ${Math.round(p.total/1024/1024)} MB`:`Preparing ${p.file||'local inference'}…`;this.state();return;} const waiter=this.pending.get(e.data.id);if(!waiter)return;clearTimeout(waiter.timer);this.pending.delete(e.data.id);e.data.error?waiter.reject(new Error(e.data.error)):waiter.resolve(e.data.result);};
       this.worker.onerror=()=>{if(epoch===this.epoch)this.fail('The local inference worker was blocked or stopped. All uncertain text remains included.');};
-      await this.call('load',{backend},180000);if(epoch!==this.epoch)return;this.status='ready';this.budget=200;this.message=CONSERVATIVE_EXCLUSION?'Conservative local filter ready. Uncertain passages remain included; broader recall still misses the target.':EXCLUSION_VALIDATED?'Local classification ready.':'Experimental local model ready · suggestions only.';this.state();this.scan();
+      await this.call('load',{backend},180000);if(epoch!==this.epoch)return;this.releaseURL();this.status='ready';this.budget=200;this.message=CONSERVATIVE_EXCLUSION?'Conservative local filter ready. Uncertain passages remain included; broader recall still misses the target.':EXCLUSION_VALIDATED?'Local classification ready.':'Experimental local model ready · suggestions only.';this.state();this.scan();
     }catch(e){if(epoch!==this.epoch)return;this.fail(e.message);throw e;}
   }
   call(action,data,timeout=60000){return new Promise((resolve,reject)=>{const id=++this.counter;const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('Local inference timed out. Retry or continue with manual review.'));},timeout);this.pending.set(id,{resolve,reject,timer});this.worker?.postMessage({id,action,data});});}
@@ -43,7 +43,8 @@ export class LocalClassifier {
     }}finally{this.reassessing=false;}
   }
   async proposeURL(url){if(this.status!=='ready')throw new Error('Load the local model in Model settings first.');const u=new URL(url);if(u.username||u.password)throw new Error('Remove embedded credentials first.');return this.call('url',{host:u.hostname,path:u.pathname,parameterNames:[...u.searchParams.keys()]});}
-  fail(message){this.status='failed';this.message=message;this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error(message));}this.pending.clear();this.worker?.terminate();this.state();}
-  stop(){this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error('Local inference canceled.'));}this.pending.clear();this.worker?.terminate();this.worker=null;if(this.url)URL.revokeObjectURL(this.url);this.status='unavailable';this.running=false;}
+  releaseURL(){if(this.url){URL.revokeObjectURL(this.url);this.url=null;}}
+  fail(message){this.status='failed';this.message=message;this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error(message));}this.pending.clear();this.worker?.terminate();this.worker=null;this.running=false;this.releaseURL();this.state();}
+  stop(){this.epoch++;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error('Local inference canceled.'));}this.pending.clear();this.worker?.terminate();this.worker=null;this.releaseURL();this.status='unavailable';this.running=false;}
   dispose(){this.stop();this.unsubscribe();}
 }

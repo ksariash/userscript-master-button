@@ -1,0 +1,96 @@
+{
+  "validation": "Synthetic four asset responses, 20 ms each, tiny payloads. Not real-model download/inference, memory or Safari performance.",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "mode": "sequential",
+      "round": 0,
+      "coldMs": 131.02229499999999,
+      "warmMs": 2.421455000000009,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 1
+    },
+    {
+      "mode": "sequential",
+      "round": 1,
+      "coldMs": 82.75004299999998,
+      "warmMs": 0.6303560000000061,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 1
+    },
+    {
+      "mode": "sequential",
+      "round": 2,
+      "coldMs": 82.038995,
+      "warmMs": 0.4278410000000008,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 1
+    },
+    {
+      "mode": "sequential",
+      "round": 3,
+      "coldMs": 81.89385199999998,
+      "warmMs": 0.46865200000002005,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 1
+    },
+    {
+      "mode": "sequential",
+      "round": 4,
+      "coldMs": 81.66637600000001,
+      "warmMs": 0.4200220000000172,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 1
+    },
+    {
+      "mode": "bounded-parallel",
+      "round": 0,
+      "coldMs": 41.730032999999935,
+      "warmMs": 0.818349000000012,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 2
+    },
+    {
+      "mode": "bounded-parallel",
+      "round": 1,
+      "coldMs": 41.07992999999999,
+      "warmMs": 3.739795000000072,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 2
+    },
+    {
+      "mode": "bounded-parallel",
+      "round": 2,
+      "coldMs": 41.67941499999995,
+      "warmMs": 0.22079199999996035,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 2
+    },
+    {
+      "mode": "bounded-parallel",
+      "round": 3,
+      "coldMs": 41.20254299999999,
+      "warmMs": 0.3631639999999834,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 2
+    },
+    {
+      "mode": "bounded-parallel",
+      "round": 4,
+      "coldMs": 41.60480200000006,
+      "warmMs": 0.229453000000035,
+      "coldRequests": 4,
+      "warmRequests": 0,
+      "peak": 2
+    }
+  ]
+}
