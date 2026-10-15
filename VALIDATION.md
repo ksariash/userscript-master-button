@@ -2,11 +2,13 @@
 
 ## Current local improvement checks
 
-Title-aware export names and targeted scroll recovery are local changes, not a published release. Regression coverage includes Unicode/bounded filenames, unsafe name normalization, recording-title snapshotting, native share/download parity, multi-feed/fixed-root recovery, editor/ARIA/pinch preservation, remount cleanup, deliberate dialogs and inert ownership. All 101 tests pass on Node 24.19/Linux. Production userscript and implementation preview are rebuilt from the same source; two production manifests match. Build SHA-256: `96e62eae48e57c099b1bd09be6ebf976992f840e9834bd53307a4f4e47cf833a`. Both prototype builds pass. See [BACKLOG.md](BACKLOG.md) for measured synthetic CPU baselines and the remaining seek/performance/filter/design stages.
+Alpha.7 is unpublished. Current changes include title-aware exports, targeted scroll recovery, cached playback state, cross-segment prepared seeking, independent synthesis cancellation, playback-priority transport, shared cold voice lookup, bounded parallel model loading, resource cleanup, and modular/slimmer reader and speech views. 124/124 Node 24.19/Linux tests pass; milestone results are recorded in [BACKLOG.md](BACKLOG.md); no keys or live Azure requests are used.
 
-The owner reports alpha.6 setup works on their iPhone. That does not establish other device features. No real keys or live Azure requests are used in these checks. Runtime speed and model accuracy claims require the separate measurements in the backlog.
+Preparation fixture: 3 concurrent cold syntheses use 4 transport calls instead of 6; synthetic 20 ms-per-request median 85.087 versus 124.053 ms, peak transport concurrency 1. Model-loading fixture: four tiny synthetic responses, median 41.605 versus 82.039 ms, peak downloads 2, warm downloads 0. These are not service, device, real-model or memory benchmarks. Actual inference/accuracy revalidation is blocked because model files are absent and Hugging Face is unavailable through direct DNS and the configured proxy. Classification policy is unchanged.
 
-Optional real-layout check: `node scripts/check-scroll-browser.mjs` builds a bundled loopback fixture with a mocked adapter URL and no external resources. It is not in the standard test suite. This environment’s Chromium 154 timed out without a DOM result after 20 seconds, including outside the filesystem sandbox; an independent `about:blank` headless smoke check also timed out. D-Bus/cache warnings were logged, but the root cause is not established. No Chromium layout pass, screenshot or iPhone touch pass is claimed. The command is retained for a working browser environment.
+`node scripts/check-reader-browser.mjs` uses a local mock-GM implementation preview and desktop Chromium DevTools. The [screenshots and layout report](prototype/screenshots/layout.json) cover light/dark, 320 px, 390×844, landscape, reading options, 28 px text, menu, Why, speech and reduced-height speech. Default transcript ratio at 390×844 is 82.1%. Visible controls are checked for 44 px targets and horizontal/fixed-surface overflow. Scrollable offscreen contents are allowed. Screenshots were visually inspected; this does not prove VoiceOver, Safari safe areas, a real keyboard, zoom, or iPhone gestures. Previous dump-DOM browser attempts timed out; the DevTools-based harness is working.
+
+The owner reports alpha.6 setup works on their iPhone. Wider device/live-Azure gates remain pending. Production userscript and implementation preview are rebuilt from the same source; release files must reproduce with `npm run build` and have no diff.
 
 ## Dedicated setup repair — 2026-10-14
 
@@ -18,7 +20,7 @@ Local checks cover exact URL restrictions (including credentials/query/fragment/
 
 Both production builds matched byte-for-byte manifest hashes. Prototype and implementation-preview builds completed. Source whitespace checks pass; the generated userscript retains a pre-existing trailing space inside a bundled lamejs diagnostic string (dependency source `dist/lamejs.js`, not an authored code change).
 
-Pending: repository publication, Pages hosting, served response/body verification, and real iPhone Done/storage testing. Exact publication and device checks are in [INSTALL.md](INSTALL.md#publication-steps--not-performed-in-this-workspace). Nothing was pushed, deployed, enabled, or changed in account/security settings. No real Azure key or live Azure request was used. Actual model evaluation was not rerun for this routing-only fix; previous results below remain historical evidence.
+Subsequent release state: alpha.6 was published at `66d367c38d14dbbe97d386455c8b7718b5e221e4` with successful Pages deployment, and the owner reports setup works. Alpha.7 changes remain local and unpublished. Broader device checks remain pending. No real Azure key or live Azure request was used. Actual model evaluation was not rerun for this routing-only fix; previous results below remain historical evidence.
 
 ## Local policy and integration checks
 

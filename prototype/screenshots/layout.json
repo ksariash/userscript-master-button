@@ -1,0 +1,4080 @@
+[
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "theme": "light",
+    "screenshot": "reader-390x844-light.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 338.5625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 382.5625
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 487.1875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 531.1875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 573.5,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 617.5
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 722.125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 766.125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 777,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 821
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 894.46875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 938.46875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "theme": "dark",
+    "screenshot": "reader-390x844-dark.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 338.5625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 382.5625
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 487.1875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 531.1875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 573.5,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 617.5
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 722.125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 766.125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 777,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 821
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 894.46875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 938.46875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "view": "reader",
+    "theme": "light",
+    "screenshot": "reader-320x568-light.png",
+    "transcriptRatio": 0.7341549295774648,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 320,
+        "height": 417,
+        "right": 320,
+        "bottom": 469
+      },
+      "player": {
+        "x": 0,
+        "y": 469,
+        "width": 320,
+        "height": 99,
+        "right": 320,
+        "bottom": 568
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 4,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 48,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 224,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 272,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 316,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 257,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 257,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 257,
+          "y": 227.71875,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 271.71875
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 257,
+          "y": 407.5,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 451.5
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 257,
+          "y": 587.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 631.28125
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 257,
+          "y": 704.75,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 748.75
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 257,
+          "y": 884.53125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 928.53125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 257,
+          "y": 970.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1014.28125
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 257,
+          "y": 1150.0625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1194.0625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 8,
+          "y": 470,
+          "width": 250.421875,
+          "height": 44,
+          "right": 258.421875,
+          "bottom": 514
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 134,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 178,
+          "bottom": 559
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 178,
+          "y": 514,
+          "width": 46,
+          "height": 46,
+          "right": 224,
+          "bottom": 560
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 224,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 559
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 268,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 312,
+          "bottom": 559
+        }
+      ]
+    }
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "view": "reader",
+    "theme": "dark",
+    "screenshot": "reader-320x568-dark.png",
+    "transcriptRatio": 0.7341549295774648,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 320,
+        "height": 417,
+        "right": 320,
+        "bottom": 469
+      },
+      "player": {
+        "x": 0,
+        "y": 469,
+        "width": 320,
+        "height": 99,
+        "right": 320,
+        "bottom": 568
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 4,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 48,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 224,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 272,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 316,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 257,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 257,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 257,
+          "y": 227.71875,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 271.71875
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 257,
+          "y": 407.5,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 451.5
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 257,
+          "y": 587.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 631.28125
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 257,
+          "y": 704.75,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 748.75
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 257,
+          "y": 884.53125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 928.53125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 257,
+          "y": 970.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1014.28125
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 257,
+          "y": 1150.0625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1194.0625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 8,
+          "y": 470,
+          "width": 250.421875,
+          "height": 44,
+          "right": 258.421875,
+          "bottom": 514
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 134,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 178,
+          "bottom": 559
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 178,
+          "y": 514,
+          "width": 46,
+          "height": 46,
+          "right": 224,
+          "bottom": 560
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 224,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 559
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 268,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 312,
+          "bottom": 559
+        }
+      ]
+    }
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "view": "reader",
+    "theme": "light",
+    "screenshot": "reader-844x390-light.png",
+    "transcriptRatio": 0.6128205128205129,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 844,
+        "height": 239,
+        "right": 844,
+        "bottom": 291
+      },
+      "player": {
+        "x": 0,
+        "y": 291,
+        "width": 844,
+        "height": 99,
+        "right": 844,
+        "bottom": 390
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 744,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 788,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 792,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 836,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 276.25,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 320.25
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 362.5625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 406.5625
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 417.71875,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 461.71875
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 504.03125,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 548.03125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 558.90625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 602.90625
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 645.21875,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 689.21875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 292,
+          "width": 766.421875,
+          "height": 44,
+          "right": 778.421875,
+          "bottom": 336
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 642,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 686,
+          "bottom": 381
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 690,
+          "y": 336,
+          "width": 46,
+          "height": 46,
+          "right": 736,
+          "bottom": 382
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 740,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 784,
+          "bottom": 381
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 788,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 832,
+          "bottom": 381
+        }
+      ]
+    }
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "view": "reader",
+    "theme": "dark",
+    "screenshot": "reader-844x390-dark.png",
+    "transcriptRatio": 0.6128205128205129,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 844,
+        "height": 239,
+        "right": 844,
+        "bottom": 291
+      },
+      "player": {
+        "x": 0,
+        "y": 291,
+        "width": 844,
+        "height": 99,
+        "right": 844,
+        "bottom": 390
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "right": 844,
+        "bottom": 390
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 744,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 788,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 792,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 836,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 276.25,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 320.25
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 362.5625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 406.5625
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 417.71875,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 461.71875
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 504.03125,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 548.03125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 558.90625,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 602.90625
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 734.5,
+          "y": 645.21875,
+          "width": 44,
+          "height": 44,
+          "right": 778.5,
+          "bottom": 689.21875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 292,
+          "width": 766.421875,
+          "height": 44,
+          "right": 778.421875,
+          "bottom": 336
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 642,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 686,
+          "bottom": 381
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 690,
+          "y": 336,
+          "width": 46,
+          "height": 46,
+          "right": 736,
+          "bottom": 382
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 740,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 784,
+          "bottom": 381
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 788,
+          "y": 337,
+          "width": 44,
+          "height": 44,
+          "right": 832,
+          "bottom": 381
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "menu",
+    "theme": "light",
+    "screenshot": "menu-390x844-light.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 95.375,
+        "y": 430.265625,
+        "width": 260,
+        "height": 298.390625,
+        "right": 355.375,
+        "bottom": 728.65625
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 740.265625,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 788.265625
+        },
+        {
+          "name": "Read Article",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 470.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 518.65625
+        },
+        {
+          "name": "Review Passages",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 518.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 566.65625
+        },
+        {
+          "name": "Browse media",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 567.65625,
+          "width": 104.703125,
+          "height": 44,
+          "right": 209.078125,
+          "bottom": 611.65625
+        },
+        {
+          "name": "Share clean link",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 612.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 660.65625
+        },
+        {
+          "name": "More",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 673.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 721.65625
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "menu",
+    "theme": "dark",
+    "screenshot": "menu-390x844-dark.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 95.375,
+        "y": 430.265625,
+        "width": 260,
+        "height": 298.390625,
+        "right": 355.375,
+        "bottom": 728.65625
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 740.265625,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 788.265625
+        },
+        {
+          "name": "Read Article",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 470.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 518.65625
+        },
+        {
+          "name": "Review Passages",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 518.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 566.65625
+        },
+        {
+          "name": "Browse media",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 567.65625,
+          "width": 104.703125,
+          "height": 44,
+          "right": 209.078125,
+          "bottom": 611.65625
+        },
+        {
+          "name": "Share clean link",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 612.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 660.65625
+        },
+        {
+          "name": "More",
+          "scrollable": false,
+          "x": 104.375,
+          "y": 673.65625,
+          "width": 242,
+          "height": 48,
+          "right": 346.375,
+          "bottom": 721.65625
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "speech",
+    "theme": "light",
+    "screenshot": "speech-390x844-light.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 146.75,
+        "width": 351,
+        "height": 685.25,
+        "right": 363,
+        "bottom": 832
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 740.265625,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 788.265625
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 290.140625,
+          "y": 155.75,
+          "width": 59.859375,
+          "height": 44,
+          "right": 350,
+          "bottom": 199.75
+        },
+        {
+          "name": "Azure key and storage",
+          "scrollable": true,
+          "x": 31,
+          "y": 203.75,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 247.75
+        },
+        {
+          "name": "eastuseastus2westuswestus2westus3centralusnorthcentralussouthcentraluswestcentraluscanadacentralbrazilsouthnortheuropewesteuropeuksouthfrancecentralgermanywestcentralswitzerlandnorthswedencentralaustraliaeastsoutheastasiaeastasiajapaneastkoreacentralcentralindiasouthafricanorth",
+          "scrollable": true,
+          "x": 31,
+          "y": 289.59375,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 333.59375
+        },
+        {
+          "name": "",
+          "scrollable": true,
+          "x": 31,
+          "y": 370.4375,
+          "width": 313,
+          "height": 45.1875,
+          "right": 344,
+          "bottom": 415.625
+        },
+        {
+          "name": "Choose a voiceAria · FemaleJenny · FemaleDenise · Female",
+          "scrollable": true,
+          "x": 31,
+          "y": 452.46875,
+          "width": 263,
+          "height": 44,
+          "right": 294,
+          "bottom": 496.46875
+        },
+        {
+          "name": "Play voice demo",
+          "scrollable": true,
+          "x": 300,
+          "y": 452.46875,
+          "width": 44,
+          "height": 44,
+          "right": 344,
+          "bottom": 496.46875
+        },
+        {
+          "name": "Refresh voices",
+          "scrollable": true,
+          "x": 31,
+          "y": 496.46875,
+          "width": 123.21875,
+          "height": 44,
+          "right": 154.21875,
+          "bottom": 540.46875
+        },
+        {
+          "name": "Open dedicated key setup",
+          "scrollable": true,
+          "x": 31,
+          "y": 579.3125,
+          "width": 198.296875,
+          "height": 44,
+          "right": 229.296875,
+          "bottom": 623.3125
+        },
+        {
+          "name": "Key privacy",
+          "scrollable": true,
+          "x": 31,
+          "y": 623.3125,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 667.3125
+        },
+        {
+          "name": "Connection checks",
+          "scrollable": true,
+          "x": 31,
+          "y": 725,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 769
+        },
+        {
+          "name": "Existing key and platform",
+          "scrollable": true,
+          "x": 31,
+          "y": 769,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 813
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "speech",
+    "theme": "dark",
+    "screenshot": "speech-390x844-dark.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 146.75,
+        "width": 351,
+        "height": 685.25,
+        "right": 363,
+        "bottom": 832
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 740.265625,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 788.265625
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 290.140625,
+          "y": 155.75,
+          "width": 59.859375,
+          "height": 44,
+          "right": 350,
+          "bottom": 199.75
+        },
+        {
+          "name": "Azure key and storage",
+          "scrollable": true,
+          "x": 31,
+          "y": 203.75,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 247.75
+        },
+        {
+          "name": "eastuseastus2westuswestus2westus3centralusnorthcentralussouthcentraluswestcentraluscanadacentralbrazilsouthnortheuropewesteuropeuksouthfrancecentralgermanywestcentralswitzerlandnorthswedencentralaustraliaeastsoutheastasiaeastasiajapaneastkoreacentralcentralindiasouthafricanorth",
+          "scrollable": true,
+          "x": 31,
+          "y": 289.59375,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 333.59375
+        },
+        {
+          "name": "",
+          "scrollable": true,
+          "x": 31,
+          "y": 370.4375,
+          "width": 313,
+          "height": 45.1875,
+          "right": 344,
+          "bottom": 415.625
+        },
+        {
+          "name": "Choose a voiceAria · FemaleJenny · FemaleDenise · Female",
+          "scrollable": true,
+          "x": 31,
+          "y": 452.46875,
+          "width": 263,
+          "height": 44,
+          "right": 294,
+          "bottom": 496.46875
+        },
+        {
+          "name": "Play voice demo",
+          "scrollable": true,
+          "x": 300,
+          "y": 452.46875,
+          "width": 44,
+          "height": 44,
+          "right": 344,
+          "bottom": 496.46875
+        },
+        {
+          "name": "Refresh voices",
+          "scrollable": true,
+          "x": 31,
+          "y": 496.46875,
+          "width": 123.21875,
+          "height": 44,
+          "right": 154.21875,
+          "bottom": 540.46875
+        },
+        {
+          "name": "Open dedicated key setup",
+          "scrollable": true,
+          "x": 31,
+          "y": 579.3125,
+          "width": 198.296875,
+          "height": 44,
+          "right": 229.296875,
+          "bottom": 623.3125
+        },
+        {
+          "name": "Key privacy",
+          "scrollable": true,
+          "x": 31,
+          "y": 623.3125,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 667.3125
+        },
+        {
+          "name": "Connection checks",
+          "scrollable": true,
+          "x": 31,
+          "y": 725,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 769
+        },
+        {
+          "name": "Existing key and platform",
+          "scrollable": true,
+          "x": 31,
+          "y": 769,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 813
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "why",
+    "theme": "light",
+    "screenshot": "why-390x844-light.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 463.46875,
+        "width": 351,
+        "height": 368.53125,
+        "right": 363,
+        "bottom": 832
+      },
+      "controls": [
+        {
+          "name": "Review passage: On the first Sunday of every month, the market opens an hour late",
+          "scrollable": false,
+          "x": 2,
+          "y": 92.65625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 136.65625
+        },
+        {
+          "name": "Review passage: A baker sets a chair outside her shop. A child draws a river in c",
+          "scrollable": false,
+          "x": 2,
+          "y": 235.40625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 279.40625
+        },
+        {
+          "name": "Review passage: Get our weekly city newsletter. Sign up today and never miss an u",
+          "scrollable": false,
+          "x": 2,
+          "y": 396.15625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 440.15625
+        },
+        {
+          "name": "Review passage: That pause is the point. The first trees were planted by voluntee",
+          "scrollable": false,
+          "x": 2,
+          "y": 489.15625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 533.15625
+        },
+        {
+          "name": "Review passage: Room for an ordinary day",
+          "scrollable": false,
+          "x": 2,
+          "y": 635.90625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 679.90625
+        },
+        {
+          "name": "Review passage: Residents kept the old benches and repaired the paving around the",
+          "scrollable": false,
+          "x": 2,
+          "y": 693.28125,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 737.28125
+        },
+        {
+          "name": "Undo",
+          "scrollable": false,
+          "x": 243.84375,
+          "y": 715.609375,
+          "width": 55.078125,
+          "height": 44,
+          "right": 298.921875,
+          "bottom": 759.609375
+        },
+        {
+          "name": "Done",
+          "scrollable": false,
+          "x": 298.921875,
+          "y": 715.609375,
+          "width": 55.078125,
+          "height": 44,
+          "right": 354,
+          "bottom": 759.609375
+        },
+        {
+          "name": "Previous passage",
+          "scrollable": false,
+          "x": 21,
+          "y": 783,
+          "width": 44,
+          "height": 44,
+          "right": 65,
+          "bottom": 827
+        },
+        {
+          "name": "Next passage",
+          "scrollable": false,
+          "x": 149.84375,
+          "y": 783,
+          "width": 44,
+          "height": 44,
+          "right": 193.84375,
+          "bottom": 827
+        },
+        {
+          "name": "Why",
+          "scrollable": false,
+          "x": 195.84375,
+          "y": 783,
+          "width": 48,
+          "height": 44,
+          "right": 243.84375,
+          "bottom": 827
+        },
+        {
+          "name": "Select",
+          "scrollable": false,
+          "x": 245.84375,
+          "y": 783,
+          "width": 58.921875,
+          "height": 44,
+          "right": 304.765625,
+          "bottom": 827
+        },
+        {
+          "name": "Skip",
+          "scrollable": false,
+          "x": 306.765625,
+          "y": 783,
+          "width": 47.234375,
+          "height": 44,
+          "right": 354,
+          "bottom": 827
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 290.140625,
+          "y": 472.46875,
+          "width": 59.859375,
+          "height": 44,
+          "right": 350,
+          "bottom": 516.46875
+        },
+        {
+          "name": "Skip",
+          "scrollable": true,
+          "x": 31,
+          "y": 681,
+          "width": 53.1875,
+          "height": 44,
+          "right": 84.1875,
+          "bottom": 725
+        },
+        {
+          "name": "Undo",
+          "scrollable": true,
+          "x": 92.1875,
+          "y": 681,
+          "width": 59.859375,
+          "height": 44,
+          "right": 152.046875,
+          "bottom": 725
+        },
+        {
+          "name": "On page",
+          "scrollable": true,
+          "x": 160.046875,
+          "y": 681,
+          "width": 81.546875,
+          "height": 44,
+          "right": 241.59375,
+          "bottom": 725
+        },
+        {
+          "name": "Remember this wording on this site",
+          "scrollable": true,
+          "x": 31,
+          "y": 725,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 769
+        },
+        {
+          "name": "More options",
+          "scrollable": true,
+          "x": 31,
+          "y": 769,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 813
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "why",
+    "theme": "dark",
+    "screenshot": "why-390x844-dark.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 463.46875,
+        "width": 351,
+        "height": 368.53125,
+        "right": 363,
+        "bottom": 832
+      },
+      "controls": [
+        {
+          "name": "Review passage: On the first Sunday of every month, the market opens an hour late",
+          "scrollable": false,
+          "x": 2,
+          "y": 92.65625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 136.65625
+        },
+        {
+          "name": "Review passage: A baker sets a chair outside her shop. A child draws a river in c",
+          "scrollable": false,
+          "x": 2,
+          "y": 235.40625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 279.40625
+        },
+        {
+          "name": "Review passage: Get our weekly city newsletter. Sign up today and never miss an u",
+          "scrollable": false,
+          "x": 2,
+          "y": 396.15625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 440.15625
+        },
+        {
+          "name": "Review passage: That pause is the point. The first trees were planted by voluntee",
+          "scrollable": false,
+          "x": 2,
+          "y": 489.15625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 533.15625
+        },
+        {
+          "name": "Review passage: Room for an ordinary day",
+          "scrollable": false,
+          "x": 2,
+          "y": 635.90625,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 679.90625
+        },
+        {
+          "name": "Review passage: Residents kept the old benches and repaired the paving around the",
+          "scrollable": false,
+          "x": 2,
+          "y": 693.28125,
+          "width": 44,
+          "height": 44,
+          "right": 46,
+          "bottom": 737.28125
+        },
+        {
+          "name": "Undo",
+          "scrollable": false,
+          "x": 243.84375,
+          "y": 715.609375,
+          "width": 55.078125,
+          "height": 44,
+          "right": 298.921875,
+          "bottom": 759.609375
+        },
+        {
+          "name": "Done",
+          "scrollable": false,
+          "x": 298.921875,
+          "y": 715.609375,
+          "width": 55.078125,
+          "height": 44,
+          "right": 354,
+          "bottom": 759.609375
+        },
+        {
+          "name": "Previous passage",
+          "scrollable": false,
+          "x": 21,
+          "y": 783,
+          "width": 44,
+          "height": 44,
+          "right": 65,
+          "bottom": 827
+        },
+        {
+          "name": "Next passage",
+          "scrollable": false,
+          "x": 149.84375,
+          "y": 783,
+          "width": 44,
+          "height": 44,
+          "right": 193.84375,
+          "bottom": 827
+        },
+        {
+          "name": "Why",
+          "scrollable": false,
+          "x": 195.84375,
+          "y": 783,
+          "width": 48,
+          "height": 44,
+          "right": 243.84375,
+          "bottom": 827
+        },
+        {
+          "name": "Select",
+          "scrollable": false,
+          "x": 245.84375,
+          "y": 783,
+          "width": 58.921875,
+          "height": 44,
+          "right": 304.765625,
+          "bottom": 827
+        },
+        {
+          "name": "Skip",
+          "scrollable": false,
+          "x": 306.765625,
+          "y": 783,
+          "width": 47.234375,
+          "height": 44,
+          "right": 354,
+          "bottom": 827
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 290.140625,
+          "y": 472.46875,
+          "width": 59.859375,
+          "height": 44,
+          "right": 350,
+          "bottom": 516.46875
+        },
+        {
+          "name": "Skip",
+          "scrollable": true,
+          "x": 31,
+          "y": 681,
+          "width": 53.1875,
+          "height": 44,
+          "right": 84.1875,
+          "bottom": 725
+        },
+        {
+          "name": "Undo",
+          "scrollable": true,
+          "x": 92.1875,
+          "y": 681,
+          "width": 59.859375,
+          "height": 44,
+          "right": 152.046875,
+          "bottom": 725
+        },
+        {
+          "name": "On page",
+          "scrollable": true,
+          "x": 160.046875,
+          "y": 681,
+          "width": 81.546875,
+          "height": 44,
+          "right": 241.59375,
+          "bottom": 725
+        },
+        {
+          "name": "Remember this wording on this site",
+          "scrollable": true,
+          "x": 31,
+          "y": 725,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 769
+        },
+        {
+          "name": "More options",
+          "scrollable": true,
+          "x": 31,
+          "y": 769,
+          "width": 313,
+          "height": 44,
+          "right": 344,
+          "bottom": 813
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "options": true,
+    "theme": "light",
+    "screenshot": "reader-options-390x844-light.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Text size",
+          "scrollable": true,
+          "x": 79,
+          "y": 105.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 149.84375
+        },
+        {
+          "name": "Select passages",
+          "scrollable": true,
+          "x": 79,
+          "y": 149.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 193.84375
+        },
+        {
+          "name": "Set up filter",
+          "scrollable": true,
+          "x": 79,
+          "y": 193.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 237.84375
+        },
+        {
+          "name": "Following",
+          "scrollable": true,
+          "x": 79,
+          "y": 237.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 281.84375
+        },
+        {
+          "name": "Previous segment",
+          "scrollable": true,
+          "x": 79,
+          "y": 281.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 325.84375
+        },
+        {
+          "name": "Export reading",
+          "scrollable": true,
+          "x": 79,
+          "y": 325.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 369.84375
+        },
+        {
+          "name": "More reading tools",
+          "scrollable": true,
+          "x": 79,
+          "y": 369.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 413.84375
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 338.5625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 382.5625
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 487.1875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 531.1875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 573.5,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 617.5
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 722.125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 766.125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 777,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 821
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 894.46875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 938.46875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "options": true,
+    "theme": "dark",
+    "screenshot": "reader-options-390x844-dark.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Text size",
+          "scrollable": true,
+          "x": 79,
+          "y": 105.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 149.84375
+        },
+        {
+          "name": "Select passages",
+          "scrollable": true,
+          "x": 79,
+          "y": 149.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 193.84375
+        },
+        {
+          "name": "Set up filter",
+          "scrollable": true,
+          "x": 79,
+          "y": 193.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 237.84375
+        },
+        {
+          "name": "Following",
+          "scrollable": true,
+          "x": 79,
+          "y": 237.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 281.84375
+        },
+        {
+          "name": "Previous segment",
+          "scrollable": true,
+          "x": 79,
+          "y": 281.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 325.84375
+        },
+        {
+          "name": "Export reading",
+          "scrollable": true,
+          "x": 79,
+          "y": 325.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 369.84375
+        },
+        {
+          "name": "More reading tools",
+          "scrollable": true,
+          "x": 79,
+          "y": 369.84375,
+          "width": 298,
+          "height": 44,
+          "right": 377,
+          "bottom": 413.84375
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 189.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 233.9375
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 338.5625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 382.5625
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 487.1875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 531.1875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 573.5,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 617.5
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 722.125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 766.125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 777,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 821
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 894.46875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 938.46875
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "view": "reader",
+    "options": true,
+    "theme": "light",
+    "screenshot": "reader-options-320x568-light.png",
+    "transcriptRatio": 0.7341549295774648,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 320,
+        "height": 417,
+        "right": 320,
+        "bottom": 469
+      },
+      "player": {
+        "x": 0,
+        "y": 469,
+        "width": 320,
+        "height": 99,
+        "right": 320,
+        "bottom": 568
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 4,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 48,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 224,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 47.5
+        },
+        {
+          "name": "Text size",
+          "scrollable": true,
+          "x": 13,
+          "y": 105.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 149.84375
+        },
+        {
+          "name": "Select passages",
+          "scrollable": true,
+          "x": 13,
+          "y": 149.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 193.84375
+        },
+        {
+          "name": "Set up filter",
+          "scrollable": true,
+          "x": 13,
+          "y": 193.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 237.84375
+        },
+        {
+          "name": "Following",
+          "scrollable": true,
+          "x": 13,
+          "y": 237.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 281.84375
+        },
+        {
+          "name": "Previous segment",
+          "scrollable": true,
+          "x": 13,
+          "y": 281.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 325.84375
+        },
+        {
+          "name": "Export reading",
+          "scrollable": true,
+          "x": 13,
+          "y": 325.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 369.84375
+        },
+        {
+          "name": "More reading tools",
+          "scrollable": true,
+          "x": 13,
+          "y": 369.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 413.84375
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 272,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 316,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 257,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 257,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 257,
+          "y": 227.71875,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 271.71875
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 257,
+          "y": 407.5,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 451.5
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 257,
+          "y": 587.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 631.28125
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 257,
+          "y": 704.75,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 748.75
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 257,
+          "y": 884.53125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 928.53125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 257,
+          "y": 970.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1014.28125
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 257,
+          "y": 1150.0625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1194.0625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 8,
+          "y": 470,
+          "width": 250.421875,
+          "height": 44,
+          "right": 258.421875,
+          "bottom": 514
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 134,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 178,
+          "bottom": 559
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 178,
+          "y": 514,
+          "width": 46,
+          "height": 46,
+          "right": 224,
+          "bottom": 560
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 224,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 559
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 268,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 312,
+          "bottom": 559
+        }
+      ]
+    }
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "view": "reader",
+    "options": true,
+    "theme": "dark",
+    "screenshot": "reader-options-320x568-dark.png",
+    "transcriptRatio": 0.7341549295774648,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 320,
+        "height": 417,
+        "right": 320,
+        "bottom": 469
+      },
+      "player": {
+        "x": 0,
+        "y": 469,
+        "width": 320,
+        "height": 99,
+        "right": 320,
+        "bottom": 568
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 320,
+        "height": 568,
+        "right": 320,
+        "bottom": 568
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 4,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 48,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 224,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 47.5
+        },
+        {
+          "name": "Text size",
+          "scrollable": true,
+          "x": 13,
+          "y": 105.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 149.84375
+        },
+        {
+          "name": "Select passages",
+          "scrollable": true,
+          "x": 13,
+          "y": 149.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 193.84375
+        },
+        {
+          "name": "Set up filter",
+          "scrollable": true,
+          "x": 13,
+          "y": 193.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 237.84375
+        },
+        {
+          "name": "Following",
+          "scrollable": true,
+          "x": 13,
+          "y": 237.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 281.84375
+        },
+        {
+          "name": "Previous segment",
+          "scrollable": true,
+          "x": 13,
+          "y": 281.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 325.84375
+        },
+        {
+          "name": "Export reading",
+          "scrollable": true,
+          "x": 13,
+          "y": 325.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 369.84375
+        },
+        {
+          "name": "More reading tools",
+          "scrollable": true,
+          "x": 13,
+          "y": 369.84375,
+          "width": 294,
+          "height": 44,
+          "right": 307,
+          "bottom": 413.84375
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 272,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 316,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 257,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 257,
+          "y": 128.15625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 172.15625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 257,
+          "y": 227.71875,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 271.71875
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 257,
+          "y": 407.5,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 451.5
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 257,
+          "y": 587.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 631.28125
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 257,
+          "y": 704.75,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 748.75
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 257,
+          "y": 884.53125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 928.53125
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 257,
+          "y": 970.28125,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1014.28125
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 257,
+          "y": 1150.0625,
+          "width": 44,
+          "height": 44,
+          "right": 301,
+          "bottom": 1194.0625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 8,
+          "y": 470,
+          "width": 250.421875,
+          "height": 44,
+          "right": 258.421875,
+          "bottom": 514
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 134,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 178,
+          "bottom": 559
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 178,
+          "y": 514,
+          "width": 46,
+          "height": 46,
+          "right": 224,
+          "bottom": 560
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 224,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 268,
+          "bottom": 559
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 268,
+          "y": 515,
+          "width": 44,
+          "height": 44,
+          "right": 312,
+          "bottom": 559
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "large": true,
+    "theme": "light",
+    "screenshot": "reader-large-text-390x844-light.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 142.90625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 186.90625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 278.25,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 322.25
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 531.78125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 575.78125
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 831.21875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 875.21875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 992.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1036.9375
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 1292.375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1336.375
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 1407.375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1451.375
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 1660.90625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1704.90625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "view": "reader",
+    "large": true,
+    "theme": "dark",
+    "screenshot": "reader-large-text-390x844-dark.png",
+    "transcriptRatio": 0.8210900473933649,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "transcript": {
+        "x": 0,
+        "y": 52,
+        "width": 390,
+        "height": 693,
+        "right": 390,
+        "bottom": 745
+      },
+      "player": {
+        "x": 0,
+        "y": 745,
+        "width": 390,
+        "height": 99,
+        "right": 390,
+        "bottom": 844
+      },
+      "surface": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "right": 390,
+        "bottom": 844
+      },
+      "controls": [
+        {
+          "name": "Close reader",
+          "scrollable": false,
+          "x": 8,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 52,
+          "bottom": 47.5
+        },
+        {
+          "name": "Reading options",
+          "scrollable": false,
+          "x": 290,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 334,
+          "bottom": 47.5
+        },
+        {
+          "name": "Minimize player",
+          "scrollable": false,
+          "x": 338,
+          "y": 3.5,
+          "width": 44,
+          "height": 44,
+          "right": 382,
+          "bottom": 47.5
+        },
+        {
+          "name": "Correct passage: Cities · A field study",
+          "scrollable": true,
+          "x": 327,
+          "y": 73,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 117
+        },
+        {
+          "name": "Correct passage: A slower kind of city",
+          "scrollable": true,
+          "x": 327,
+          "y": 142.90625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 186.90625
+        },
+        {
+          "name": "Correct passage: On the first Sunday of every month, the market opens an",
+          "scrollable": true,
+          "x": 327,
+          "y": 278.25,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 322.25
+        },
+        {
+          "name": "Correct passage: A baker sets a chair outside her shop. A child draws a ",
+          "scrollable": true,
+          "x": 327,
+          "y": 531.78125,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 575.78125
+        },
+        {
+          "name": "Correct passage: Get our weekly city newsletter. Sign up today and never",
+          "scrollable": true,
+          "x": 327,
+          "y": 831.21875,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 875.21875
+        },
+        {
+          "name": "Correct passage: That pause is the point. The first trees were planted b",
+          "scrollable": true,
+          "x": 327,
+          "y": 992.9375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1036.9375
+        },
+        {
+          "name": "Correct passage: Room for an ordinary day",
+          "scrollable": true,
+          "x": 327,
+          "y": 1292.375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1336.375
+        },
+        {
+          "name": "Correct passage: Residents kept the old benches and repaired the paving ",
+          "scrollable": true,
+          "x": 327,
+          "y": 1407.375,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1451.375
+        },
+        {
+          "name": "Correct passage: By evening, the chalk river had faded. The chair was st",
+          "scrollable": true,
+          "x": 327,
+          "y": 1660.90625,
+          "width": 44,
+          "height": 44,
+          "right": 371,
+          "bottom": 1704.90625
+        },
+        {
+          "name": "Seek in prepared reading audio",
+          "scrollable": false,
+          "x": 12,
+          "y": 746,
+          "width": 312.421875,
+          "height": 44,
+          "right": 324.421875,
+          "bottom": 790
+        },
+        {
+          "name": "Back 15 seconds",
+          "scrollable": false,
+          "x": 188,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 232,
+          "bottom": 835
+        },
+        {
+          "name": "Play or pause",
+          "scrollable": false,
+          "x": 236,
+          "y": 790,
+          "width": 46,
+          "height": 46,
+          "right": 282,
+          "bottom": 836
+        },
+        {
+          "name": "Forward 15 seconds",
+          "scrollable": false,
+          "x": 286,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 330,
+          "bottom": 835
+        },
+        {
+          "name": "Playback speed",
+          "scrollable": false,
+          "x": 334,
+          "y": 791,
+          "width": 44,
+          "height": 44,
+          "right": 378,
+          "bottom": 835
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 420,
+    "view": "speech",
+    "theme": "light",
+    "screenshot": "speech-390x420-light.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 24,
+        "width": 351,
+        "height": 388,
+        "right": 363,
+        "bottom": 412
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 345.953125,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 393.953125
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 275.140625,
+          "y": 33,
+          "width": 59.859375,
+          "height": 44,
+          "right": 335,
+          "bottom": 77
+        },
+        {
+          "name": "Azure key and storage",
+          "scrollable": true,
+          "x": 31,
+          "y": 81,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 125
+        },
+        {
+          "name": "eastuseastus2westuswestus2westus3centralusnorthcentralussouthcentraluswestcentraluscanadacentralbrazilsouthnortheuropewesteuropeuksouthfrancecentralgermanywestcentralswitzerlandnorthswedencentralaustraliaeastsoutheastasiaeastasiajapaneastkoreacentralcentralindiasouthafricanorth",
+          "scrollable": true,
+          "x": 31,
+          "y": 166.84375,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 210.84375
+        },
+        {
+          "name": "",
+          "scrollable": true,
+          "x": 31,
+          "y": 247.6875,
+          "width": 298,
+          "height": 45.1875,
+          "right": 329,
+          "bottom": 292.875
+        },
+        {
+          "name": "Choose a voiceAria · FemaleJenny · FemaleDenise · Female",
+          "scrollable": true,
+          "x": 31,
+          "y": 329.71875,
+          "width": 248,
+          "height": 44,
+          "right": 279,
+          "bottom": 373.71875
+        },
+        {
+          "name": "Play voice demo",
+          "scrollable": true,
+          "x": 285,
+          "y": 329.71875,
+          "width": 44,
+          "height": 44,
+          "right": 329,
+          "bottom": 373.71875
+        },
+        {
+          "name": "Refresh voices",
+          "scrollable": true,
+          "x": 31,
+          "y": 373.71875,
+          "width": 123.21875,
+          "height": 44,
+          "right": 154.21875,
+          "bottom": 417.71875
+        },
+        {
+          "name": "Open dedicated key setup",
+          "scrollable": true,
+          "x": 31,
+          "y": 456.5625,
+          "width": 198.296875,
+          "height": 44,
+          "right": 229.296875,
+          "bottom": 500.5625
+        },
+        {
+          "name": "Key privacy",
+          "scrollable": true,
+          "x": 31,
+          "y": 500.5625,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 544.5625
+        },
+        {
+          "name": "Connection checks",
+          "scrollable": true,
+          "x": 31,
+          "y": 602.25,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 646.25
+        },
+        {
+          "name": "Existing key and platform",
+          "scrollable": true,
+          "x": 31,
+          "y": 646.25,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 690.25
+        }
+      ]
+    }
+  },
+  {
+    "width": 390,
+    "height": 420,
+    "view": "speech",
+    "theme": "dark",
+    "screenshot": "speech-390x420-dark.png",
+    "transcriptRatio": null,
+    "small": [],
+    "overflow": [],
+    "passed": true,
+    "metrics": {
+      "reader": null,
+      "transcript": null,
+      "player": null,
+      "surface": {
+        "x": 12,
+        "y": 24,
+        "width": 351,
+        "height": 388,
+        "right": 363,
+        "bottom": 412
+      },
+      "controls": [
+        {
+          "name": "Master Button",
+          "scrollable": false,
+          "x": 307.375,
+          "y": 345.953125,
+          "width": 48,
+          "height": 48,
+          "right": 355.375,
+          "bottom": 393.953125
+        },
+        {
+          "name": "Done",
+          "scrollable": true,
+          "x": 275.140625,
+          "y": 33,
+          "width": 59.859375,
+          "height": 44,
+          "right": 335,
+          "bottom": 77
+        },
+        {
+          "name": "Azure key and storage",
+          "scrollable": true,
+          "x": 31,
+          "y": 81,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 125
+        },
+        {
+          "name": "eastuseastus2westuswestus2westus3centralusnorthcentralussouthcentraluswestcentraluscanadacentralbrazilsouthnortheuropewesteuropeuksouthfrancecentralgermanywestcentralswitzerlandnorthswedencentralaustraliaeastsoutheastasiaeastasiajapaneastkoreacentralcentralindiasouthafricanorth",
+          "scrollable": true,
+          "x": 31,
+          "y": 166.84375,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 210.84375
+        },
+        {
+          "name": "",
+          "scrollable": true,
+          "x": 31,
+          "y": 247.6875,
+          "width": 298,
+          "height": 45.1875,
+          "right": 329,
+          "bottom": 292.875
+        },
+        {
+          "name": "Choose a voiceAria · FemaleJenny · FemaleDenise · Female",
+          "scrollable": true,
+          "x": 31,
+          "y": 329.71875,
+          "width": 248,
+          "height": 44,
+          "right": 279,
+          "bottom": 373.71875
+        },
+        {
+          "name": "Play voice demo",
+          "scrollable": true,
+          "x": 285,
+          "y": 329.71875,
+          "width": 44,
+          "height": 44,
+          "right": 329,
+          "bottom": 373.71875
+        },
+        {
+          "name": "Refresh voices",
+          "scrollable": true,
+          "x": 31,
+          "y": 373.71875,
+          "width": 123.21875,
+          "height": 44,
+          "right": 154.21875,
+          "bottom": 417.71875
+        },
+        {
+          "name": "Open dedicated key setup",
+          "scrollable": true,
+          "x": 31,
+          "y": 456.5625,
+          "width": 198.296875,
+          "height": 44,
+          "right": 229.296875,
+          "bottom": 500.5625
+        },
+        {
+          "name": "Key privacy",
+          "scrollable": true,
+          "x": 31,
+          "y": 500.5625,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 544.5625
+        },
+        {
+          "name": "Connection checks",
+          "scrollable": true,
+          "x": 31,
+          "y": 602.25,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 646.25
+        },
+        {
+          "name": "Existing key and platform",
+          "scrollable": true,
+          "x": 31,
+          "y": 646.25,
+          "width": 298,
+          "height": 44,
+          "right": 329,
+          "bottom": 690.25
+        }
+      ]
+    }
+  }
+]

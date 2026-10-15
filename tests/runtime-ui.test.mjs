@@ -185,3 +185,13 @@ test('Reading scrubber exposes prepared extent, preserves dragging, and dispatch
  range.value='17';range.dispatchEvent(new s.dom.window.Event('input'));s.ui.speechUpdate({...state,readingTime:13});assert.equal(range.value,'17');range.dispatchEvent(new s.dom.window.Event('change'));await tick();assert.equal(sought,17);range.dispatchEvent(new s.dom.window.Event('blur'));assert.equal(range.value,'13');s.ui.speechUpdate({...state,seekDuration:0,readingTime:null});assert.equal(range.disabled,true);
  }finally{s.instance.stop();s.dom.window.close();}
 });
+test('Slim reader keeps secondary controls in a native disclosure and preserves it on updates',async()=>{
+ const s=await setup();try{s.ui.open('reader');const reader=s.ui.reader,options=reader.querySelector('.reader-filter');assert.equal(options.tagName,'DETAILS');assert.equal(options.open,false);assert.equal(reader.querySelectorAll(':scope > .reader-filter').length,0);assert.equal(reader.querySelector('.player [data-action=exports]'),null);
+ options.open=true;const row=reader.querySelector('.prose');s.ui.patch();assert.equal(options.open,true);assert.equal(reader.querySelector('.prose'),row);options.querySelector('summary').dispatchEvent(new s.dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(options.open,false);assert.equal(s.ui.mode,'reader');assert.equal(s.ui.shadow.activeElement,options.querySelector('summary'));
+ options.open=true;click(s.ui,'reader-tools');assert.equal(options.open,false);assert.equal(s.ui.mode,'reader-tools');click(s.ui,'back');assert.equal(s.ui.mode,'reader');assert.equal(s.ui.shadow.activeElement,options.querySelector('summary'));
+ let plays=0;s.ui.speech.play=async()=>plays++;options.open=true;row.click();assert.equal(options.open,false);assert.equal(plays,0);
+ }finally{s.instance.stop();s.dom.window.close();}
+});
+test('Speech key disclosure opens only on the dedicated setup page and survives status patches',async()=>{
+ for(const url of [KEY_SETUP_URL,'https://example.org/article']){const s=await setup(url);try{s.ui.open('speech');const detail=s.ui.sheet.querySelector('.key-controls');assert.equal(detail.open,url===KEY_SETUP_URL);assert.equal(s.ui.sheet.querySelector('#speech-key').disabled,url!==KEY_SETUP_URL);detail.open=true;s.ui.patch();assert.equal(detail.open,true);assert.ok(s.ui.sheet.querySelector('.connection-checks .speech-version'));}finally{s.instance.stop();s.dom.window.close();}}
+});

@@ -1,3 +1,4 @@
+import {dialogFocusables} from './focus.mjs';
 import {renderSpeech} from './speech-view.mjs';
 import {mountReader,patchReader} from './reader.mjs';
 import {patchPlayer} from './player.mjs';
@@ -39,6 +40,7 @@ export class UtilityUI {
   notify(message){this.notice.textContent=message;this.notice.hidden=false;clearTimeout(this.noticeTimer);this.noticeTimer=setTimeout(()=>{this.notice.hidden=true;},4500);}
   open(mode){
     this.releaseMediaPreview();
+    if(!this.sheet&&!['idle','menu','reader','review','mini'].includes(mode))this.sheetReturnFocus=this.shadow.activeElement;
     if(mode==='reader'&&this.base!=='reader'&&!this.selection){
       const selection=this.win.getSelection(),text=selection?.toString().trim();if(text){const range=selection.rangeCount?selection.getRangeAt(0):null,matched=range?[...this.store.records.values()].filter(p=>p.scope==='page'&&p.source&&range.compareBoundaryPoints(0,p.source.range)<=0&&range.compareBoundaryPoints(2,p.source.range)>=0):[];const normalized=t=>t.replace(/\s+/g,' ').trim();if(matched.length&&normalized(matched.map(p=>p.originalText).join(' '))===normalized(text))this.store.setReading(matched.map(p=>p.id));else this.store.setReaderText(text,{selected:true});}else if(this.store.readingIds===null&&!this.readingStarted){this.readingStarted=true;this.controller.readArticle();}
     }
@@ -93,7 +95,7 @@ export class UtilityUI {
   renderSheet(mode){
     if(mode==='why'){
       const p=this.store.records.get(this.activeId);if(!p){this.notify('Choose a passage first.');return;}
-      const el=this.sheetFrame('This passage',`<p class="decision"></p><blockquote class="short-excerpt"></blockquote><p class="reason"></p><div class="sheet-actions">${b('Skip','correct','primary')}${b('Undo','undo','accent')}${b('On page','source','accent')}</div><div class="range-actions">${b('Skip before','skip-before','accent','', 'Skip everything before this passage')}${b('Skip after','skip-after','accent','', 'Skip everything after this passage')}${b('Select','select-passages','accent')}</div><p class="range-scope"></p><label class="remember"><input type="checkbox" id="remember">Remember this wording on this site</label><details><summary>Details</summary><p class="details-body"></p>${b('Mute on page only','mute-only','accent')}</details>`);
+      const el=this.sheetFrame('This passage',`<p class="decision"></p><blockquote class="short-excerpt"></blockquote><p class="reason"></p><div class="sheet-actions">${b('Skip','correct','primary')}${b('Undo','undo','accent')}${b('On page','source','accent')}</div><label class="remember"><input type="checkbox" id="remember">Remember this wording on this site</label><details><summary>More options</summary><div class="range-actions">${b('Skip before','skip-before','accent','', 'Skip everything before this passage')}${b('Skip after','skip-after','accent','', 'Skip everything after this passage')}${b('Select','select-passages','accent')}</div><p class="range-scope"></p><p class="details-body"></p>${b('Mute on page only','mute-only','accent')}</details>`);
       el.querySelector('blockquote').textContent=p.originalText;el.querySelector('.range-scope').textContent=`Before/after applies to ${this.base==='review'?'the full page':'the current reading'} and leaves this passage unchanged. Undo restores the batch.`;el.querySelector('#remember').checked=!!p.correction?.exampleId;return;
     }
     if(mode==='more'){
@@ -226,7 +228,7 @@ export class UtilityUI {
     try{
       if(a==='launcher'){if(this.suppressClick){this.suppressClick=false;return;}this.open(this.mode==='menu'?'idle':'menu');return;}
       if(a==='done'){this.selection=null;this.mediaPicker.stop();this.picker.stop();this.open('idle');this.launcher.focus();return;}
-      if(a==='back'){this.picker.stop();this.open(this.base);return;}
+      if(a==='back'){const focus=this.sheetReturnFocus;this.picker.stop();this.open(this.base);if(focus?.isConnected&&!focus.closest('[hidden]'))focus.focus();return;}
       if(a==='correct'){const p=this.store.records.get(this.activeId);if(p){const teach=!!this.sheet?.querySelector('#remember')?.checked,result=this.store.correct(p.id,this.store.resolve(p.id).included?'NUISANCE':'ARTICLE',{teach});if(teach&&!result.taught)this.notify('Correction applied. Long or edited passages are not stored as learning examples.');}return;}
       if(a==='undo'){if(!this.store.undo())this.notify('No current correction to undo.');return;}
       if(a==='select'){this.select(target.dataset.id);return;}
@@ -318,6 +320,6 @@ export class UtilityUI {
       if(['reader','review','more','why','speech','model','reader-tools','editor','exports','rules','url','sites','media','settings'].includes(a)){this.open(a);return;}
     }catch(error){this.inlineError(error);}
   }
-  key(e){if(e.key==='Escape'){if(this.selection){const mode=this.selectionReturn||'reader';this.selection=null;this.open(mode);return;}this.picker.stop();this.open(this.sheet?this.base:'idle');return;}if(e.key!=='Tab')return;const surface=this.sheet||(this.base==='reader'?this.reader:null);if(!surface)return;const focus=[...surface.querySelectorAll('button:not([disabled]),input,select,textarea,[tabindex="0"]')].filter(n=>!n.closest('[hidden]'));if(!focus.length)return;const active=this.shadow.activeElement;if(e.shiftKey&&active===focus[0]){e.preventDefault();focus.at(-1).focus();}else if(!e.shiftKey&&active===focus.at(-1)){e.preventDefault();focus[0].focus();}}
+  key(e){if(e.key==='Escape'){if(this.selection){const mode=this.selectionReturn||'reader';this.selection=null;this.open(mode);return;}this.picker.stop();this.open(this.sheet?this.base:'idle');return;}if(e.key!=='Tab')return;const surface=this.sheet||(this.base==='reader'?this.reader:null);if(!surface)return;const focus=dialogFocusables(surface);if(!focus.length)return;const active=this.shadow.activeElement;if(e.shiftKey&&active===focus[0]){e.preventDefault();focus.at(-1).focus();}else if(!e.shiftKey&&active===focus.at(-1)){e.preventDefault();focus[0].focus();}}
   stop(){this.releaseMediaPreview();this.mediaPicker.stop();this.cancelMedia();this.preparedMedia=null;this.cancelVoiceList();clearTimeout(this.noticeTimer);this.unsubscribe();this.picker.stop();this.siteTools.stop();this.unlockPage();this.media?.removeEventListener?.('change',this.themeChanged);this.win.removeEventListener('resize',this.resize);this.win.removeEventListener('scroll',this.resize);this.win.visualViewport?.removeEventListener('resize',this.resize);this.win.visualViewport?.removeEventListener('scroll',this.resize);this.host.remove();}
 }
