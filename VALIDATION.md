@@ -1,4 +1,12 @@
-# Validation — experimental alpha.6 (unpublished)
+# Validation — alpha.7 local development; alpha.6 published
+
+## Current local improvement checks
+
+Title-aware export names and targeted scroll recovery are local changes, not a published release. Regression coverage includes Unicode/bounded filenames, unsafe name normalization, recording-title snapshotting, native share/download parity, multi-feed/fixed-root recovery, editor/ARIA/pinch preservation, remount cleanup, deliberate dialogs and inert ownership. All 101 tests pass on Node 24.19/Linux. Production userscript and implementation preview are rebuilt from the same source; two production manifests match. Build SHA-256: `96e62eae48e57c099b1bd09be6ebf976992f840e9834bd53307a4f4e47cf833a`. Both prototype builds pass. See [BACKLOG.md](BACKLOG.md) for measured synthetic CPU baselines and the remaining seek/performance/filter/design stages.
+
+The owner reports alpha.6 setup works on their iPhone. That does not establish other device features. No real keys or live Azure requests are used in these checks. Runtime speed and model accuracy claims require the separate measurements in the backlog.
+
+Optional real-layout check: `node scripts/check-scroll-browser.mjs` builds a bundled loopback fixture with a mocked adapter URL and no external resources. It is not in the standard test suite. This environment’s Chromium 154 timed out without a DOM result after 20 seconds, including outside the filesystem sandbox; an independent `about:blank` headless smoke check also timed out. D-Bus/cache warnings were logged, but the root cause is not established. No Chromium layout pass, screenshot or iPhone touch pass is claimed. The command is retained for a working browser environment.
 
 ## Dedicated setup repair — 2026-10-14
 

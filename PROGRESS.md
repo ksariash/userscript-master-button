@@ -1,6 +1,6 @@
 # Progress and remaining scope
 
-**Local development: alpha.7, title-aware exports implemented; 96 tests pass. Not published.** See [BACKLOG.md](BACKLOG.md).
+**Local development: alpha.7, title-aware exports and targeted scroll recovery implemented; 101 tests pass. Not published.** See [BACKLOG.md](BACKLOG.md).
 
 **Published: experimental 2.0.0-alpha.6 (`66d367c`).** CI and Pages succeeded; owner reports setup now works. The subsequent local audit and implementation program is tracked in [BACKLOG.md](BACKLOG.md). Future releases require separate publication authorization.
 
