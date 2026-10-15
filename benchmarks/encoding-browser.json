@@ -1,0 +1,14 @@
+{
+  "scope": "Actual local Chromium Worker and Audio decode/seek, synthetic tone; no Azure or iPhone verification.",
+  "resources": {
+    "backend": "worker",
+    "retainedPCMBytes": 144000,
+    "scratchBytes": 2304,
+    "maxTransferBytes": 9216
+  },
+  "mp3Bytes": 36576,
+  "pcmBytes": 144000,
+  "duration": 3.048,
+  "offset": 1,
+  "passed": true
+}

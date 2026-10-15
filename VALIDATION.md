@@ -2,7 +2,7 @@
 
 ## Current local improvement checks
 
-Alpha.7 is unpublished. Current changes include title-aware exports, targeted scroll recovery, cached playback state, cross-segment prepared seeking, independent synthesis cancellation, playback-priority transport, shared cold voice lookup, bounded parallel model loading, resource cleanup, and modular/slimmer reader and speech views. 126/126 Node 24.19/Linux tests pass; milestone results are recorded in [BACKLOG.md](BACKLOG.md); no keys or live Azure requests are used.
+Alpha.7 is unpublished. Current changes include title-aware exports, targeted scroll recovery, cached playback state, cross-segment prepared seeking, independent synthesis cancellation, playback-priority transport, shared cold voice lookup, bounded parallel model loading, resource cleanup, and modular/slimmer reader and speech views. 142/142 Node 24.19/Linux tests pass; milestone results are recorded in [BACKLOG.md](BACKLOG.md); no keys or live Azure requests are used.
 
 Preparation fixture: 3 concurrent cold syntheses use 4 transport calls instead of 6; synthetic 20 ms-per-request median 85.087 versus 124.053 ms, peak transport concurrency 1. Model-loading fixture: four tiny synthetic responses, median 41.605 versus 82.039 ms, peak downloads 2, warm downloads 0. These are not service, device, real-model or memory benchmarks. Actual inference/accuracy revalidation is blocked because model files are absent and Hugging Face is unavailable through direct DNS and the configured proxy. Classification policy is unchanged.
 
@@ -91,3 +91,7 @@ Official platform sources checked for this patch: [Userscripts API/content injec
 ## Candidate release review
 
 Commit 3669c31 was independently rerun: 124 tests, production build, original prototype and implementation-preview builds all passed; regeneration had no tracked diff. Review found and fixed two playback state regressions (buffering after an unrelated correction; resume after seeking from ended state). Both new tests failed before the fix and pass after it; the full corrected suite is 126 tests. Existing 20 screenshot/layout cases are UI evidence for the unchanged reader layout. See BACKLOG.md for explicit unfulfilled acceptance gates and benchmarks/release-review.json for fresh synthetic diagnostics. This is an experimental candidate, not full-product acceptance.
+
+## Storage, lifecycle and conversion follow-up
+
+L2 bounded preference operations and coalesced writes passed at 130 tests. S2/L1 retirement, extraction recovery, scoped nag cleanup and bounded detached-node retention passed at 137. Final suite is 142 tests with worker encoding and artifact cleanup. Desktop layout remains 20/20. `benchmarks/lifecycle.json`, `benchmarks/encoding.json`, and `benchmarks/encoding-browser.json` contain workload definitions and observations. Worker encoding reduces main-thread heartbeat gaps but costs additional total duration and process RSS in the synthetic fixture. Total live memory and actual iPhone behavior remain unverified; 64 MB cache plus 256 MB preparation limits do not cap total process memory.

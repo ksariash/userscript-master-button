@@ -1,28 +1,14 @@
 import { exportFilename } from './filename.mjs';
-import { Mp3Encoder } from '@breezystack/lamejs';
-import { SAMPLE_RATE, abortError } from './azure.mjs';
-import { segmentsFor } from './audio.mjs';
-export const QUALITY = { compact: 64, standard: 96, high: 128 };
-/** One PCM stream through one encoder. Never concatenate independently encoded MP3s. */
-export async function encodeMP3(buffers, { quality = 'standard', signal, onProgress = () => {}, yieldTask = () => new Promise(r => setTimeout(r, 0)) } = {}) {
-  const encoder = new Mp3Encoder(1, SAMPLE_RATE, QUALITY[quality] || 96), parts = [], total = buffers.reduce((n, b) => n + b.byteLength / 2, 0); let processed = 0;
-  for (const buffer of buffers) {
-    const view = new DataView(buffer), samples = new Int16Array(buffer.byteLength / 2);
-    for (let i = 0; i < samples.length; i++) samples[i] = view.getInt16(i * 2, true);
-    for (let i = 0; i < samples.length; i += 1152) {
-      if (signal?.aborted) throw abortError(); const output = encoder.encodeBuffer(samples.subarray(i, i + 1152)); if (output.length) parts.push(new Uint8Array(output));
-      processed += Math.min(1152, samples.length - i);
-      if (i % (1152 * 20) === 0) { onProgress(processed / total); await yieldTask(); }
-    }
-  }
-  if (signal?.aborted) throw abortError(); const end = encoder.flush(); if (end.length) parts.push(new Uint8Array(end)); onProgress(1);
-  return new Blob(parts, { type: 'audio/mpeg' });
-}
+import {abortError} from './azure.mjs';
+import {segmentsFor} from './audio.mjs';
+import {encodeMP3} from './encoding.mjs';
+export {encodeMP3,QUALITY} from './encoding.mjs';
 export class ExportJob {
-  constructor(store, speech, { encode = encodeMP3, maxPCMBytes = 256 * 1024 * 1024 } = {}) { this.store = store; this.speech = speech; this.encode = encode; this.maxPCMBytes = maxPCMBytes; this.controller = null; this.artifact = null; }
-  cancel() { this.controller?.abort(); }
+  constructor(store, speech, { encode = encodeMP3, maxPCMBytes = 256 * 1024 * 1024 } = {}) { this.store = store; this.speech = speech; this.encode = encode; this.maxPCMBytes = maxPCMBytes; this.controller = null; this.artifact = null;this.closed=false;this.unsubscribe=store.subscribe(e=>{if(e.sequenceChanged)this.artifact=null;}); }
+  cancel() { this.controller?.abort();this.artifact=null; }
+  dispose(){this.closed=true;this.cancel();this.unsubscribe();}
   async prepare({ title = '', quality = 'standard', onProgress = () => {} } = {}) {
-    this.cancel(); const filename = exportFilename(title, 'mp3'), controller = this.controller = new AbortController(), snapshot = this.store.snapshot(), config = { ...this.speech.getConfig() }, buffers = [], timings = []; let bytes = 0, seconds = 0;
+    if(this.closed)throw abortError();this.cancel(); const filename = exportFilename(title, 'mp3'), controller = this.controller = new AbortController(), snapshot = this.store.snapshot(), config = { ...this.speech.getConfig() }, buffers = [], timings = []; let bytes = 0, seconds = 0;
     const valid = () => this.store.documentId === snapshot.documentId && this.store.sequenceRevision === snapshot.revision && config.region === this.speech.getConfig().region && config.voice === this.speech.getConfig().voice;
     const off = this.store.subscribe(e => { if (e.sequenceChanged) controller.abort(); });
     try {
@@ -37,9 +23,9 @@ export class ExportJob {
       const blob = await this.encode(buffers, { quality, signal: controller.signal, onProgress: p => onProgress({ stage: 'encoding', progress: p }) });
       if (controller.signal.aborted || !valid()) throw abortError();
       return this.artifact = { filename, blob, snapshot, config, quality, timings, duration: seconds };
-    } finally { off(); if (this.controller === controller) this.controller = null; }
+    } finally { buffers.length=0;off(); if (this.controller === controller) this.controller = null; }
   }
-  currentArtifact() { return this.artifact?.snapshot.documentId === this.store.documentId && this.artifact.snapshot.revision === this.store.sequenceRevision && this.artifact.config.region === this.speech.getConfig().region && this.artifact.config.voice === this.speech.getConfig().voice && this.artifact.quality === (this.speech.getConfig().quality || 'standard') ? this.artifact : null; }
+  currentArtifact() { this.artifact=this.artifact?.snapshot.documentId === this.store.documentId && this.artifact.snapshot.revision === this.store.sequenceRevision && this.artifact.config.region === this.speech.getConfig().region && this.artifact.config.voice === this.speech.getConfig().voice && this.artifact.quality === (this.speech.getConfig().quality || 'standard') ? this.artifact : null;return this.artifact; }
 }
 export function transcript(snapshot, timings = null) {
   return snapshot.passages.map(p => {

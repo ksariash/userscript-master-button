@@ -1,0 +1,132 @@
+{
+  "scope": "Actual MP3 encoding of a 10-second synthetic 440 Hz tone in isolated Node processes; 5 ms main-thread heartbeat. Worker uses actual bundled encoder in node:worker_threads, not Safari. RSS includes full process/worker overhead, not just PCM.",
+  "node": "v24.19.0",
+  "rows": [
+    {
+      "round": 0,
+      "mode": "before",
+      "elapsedMs": 643.799793,
+      "maxHeartbeatGapMs": 133.16151499999998,
+      "heartbeatTicks": 13,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 102023168
+    },
+    {
+      "round": 1,
+      "mode": "before",
+      "elapsedMs": 507.95198200000004,
+      "maxHeartbeatGapMs": 86.19512599999999,
+      "heartbeatTicks": 13,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 117309440
+    },
+    {
+      "round": 2,
+      "mode": "before",
+      "elapsedMs": 499.293807,
+      "maxHeartbeatGapMs": 98.98207199999999,
+      "heartbeatTicks": 13,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 118206464
+    },
+    {
+      "round": 0,
+      "mode": "yielding",
+      "elapsedMs": 452.131546,
+      "maxHeartbeatGapMs": 51.46653400000001,
+      "heartbeatTicks": 52,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 104124416,
+      "resources": {
+        "backend": "yielding-main",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 0
+      }
+    },
+    {
+      "round": 1,
+      "mode": "yielding",
+      "elapsedMs": 498.08283600000004,
+      "maxHeartbeatGapMs": 70.110914,
+      "heartbeatTicks": 53,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 100552704,
+      "resources": {
+        "backend": "yielding-main",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 0
+      }
+    },
+    {
+      "round": 2,
+      "mode": "yielding",
+      "elapsedMs": 627.591553,
+      "maxHeartbeatGapMs": 88.75675899999999,
+      "heartbeatTicks": 53,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 109916160,
+      "resources": {
+        "backend": "yielding-main",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 0
+      }
+    },
+    {
+      "round": 0,
+      "mode": "worker",
+      "elapsedMs": 683.489433,
+      "maxHeartbeatGapMs": 11.385939000000008,
+      "heartbeatTicks": 130,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 135110656,
+      "resources": {
+        "backend": "worker",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 9216
+      }
+    },
+    {
+      "round": 1,
+      "mode": "worker",
+      "elapsedMs": 608.4574709999999,
+      "maxHeartbeatGapMs": 9.724470999999994,
+      "heartbeatTicks": 115,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 129105920,
+      "resources": {
+        "backend": "worker",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 9216
+      }
+    },
+    {
+      "round": 2,
+      "mode": "worker",
+      "elapsedMs": 643.966651,
+      "maxHeartbeatGapMs": 12.676813000000038,
+      "heartbeatTicks": 123,
+      "mp3Bytes": 120672,
+      "pcmBytes": 480000,
+      "peakProcessRssBytes": 133668864,
+      "resources": {
+        "backend": "worker",
+        "retainedPCMBytes": 480000,
+        "scratchBytes": 2304,
+        "maxTransferBytes": 9216
+      }
+    }
+  ]
+}

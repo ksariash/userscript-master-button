@@ -1,6 +1,6 @@
 # Progress and remaining scope
 
-**Local development: alpha.7, title exports, targeted scroll recovery, playback caching/seeking, preparation scheduling, bounded model loading, and slimmer modular interface implemented; 126 tests and 20 desktop screenshot/layout cases pass. Not published.** See [BACKLOG.md](BACKLOG.md).
+**Local development: alpha.7, title exports, targeted scroll recovery, playback caching/seeking, preparation scheduling, bounded model loading, bounded preference storage, coalesced lifecycle/nag tracking, worker MP3 conversion, and slimmer modular interface implemented; 142 tests and 20 desktop screenshot/layout cases pass. Not published.** See [BACKLOG.md](BACKLOG.md).
 
 **Published: experimental 2.0.0-alpha.6 (`66d367c`).** CI and Pages succeeded; owner reports setup now works. The subsequent local audit and implementation program is tracked in [BACKLOG.md](BACKLOG.md). Future releases require separate publication authorization.
 
@@ -10,7 +10,7 @@ The current patch adds immediate key paste/save/readback feedback beside the fie
 
 | Evidence class | Observed result | Limit |
 | --- | --- | --- |
-| Policy / Defuddle / mock DOM and speech integration | 126 local tests passed | No physical geometry, live service or model-accuracy claim |
+| Policy / Defuddle / mock DOM and speech integration | 142 local tests passed | No physical geometry, live service or model-accuracy claim |
 | Actual model inference | Pinned FLAN, Qwen and NLI ONNX tensors on desktop Node CPU; raw reports under experiments | Author labels; reused regression, no independent audit or pristine final holdout |
 | Current filtering quality | 731-case conservative regression: 0 ARTICLE exclusions, 100% finite-corpus precision, 56/377 nuisance exclusions (14.9% recall) | Overall recall target unmet; conservative subset active, broad head disabled |
 | Actual MP3 encoding/decoding | One encoder over authored PCM tones; desktop FFmpeg decode/seek succeeded | Not Azure speech or iPhone playback |

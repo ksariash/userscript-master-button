@@ -41,12 +41,15 @@ export class SiteUtilities {
     for(const el of [node,...node.querySelectorAll('*')])if(el.shadowRoot&&!this.roots.includes(el.shadowRoot)&&this.roots.length<80){this.dialogRoots.push(el.shadowRoot);this.observeRoot(el.shadowRoot);this.addDirty(el.shadowRoot);for(const child of el.shadowRoot.children)this.discoverRoots(child);}
   }
   receiveMutations(records){
-    if(!this.cleanupEnabled)return;let changed=false;
+    if(!this.cleanupEnabled)return;let changed=false;const nodes=new Set(),added=new Set();
     for(const m of records){const el=m.target.nodeType===1?m.target:m.target.parentElement;if(el?.closest('[data-master-button]'))continue;changed=true;if(m.type==='childList'||['role','open','aria-modal'].includes(m.attributeName))this.dialogs=null;
-      for(const node of m.addedNodes||[])this.discoverRoots(node);
-      const nodes=m.type==='childList'&&m.addedNodes.length?[...m.addedNodes]:[m.target];
-      for(const node of nodes){if(m.type==='attributes'&&['style','inert'].includes(m.attributeName)&&el?.matches('html,body'))continue;const scope=nagScope(node,this.document);if(scope)this.addDirty(scope);}
+      for(const node of m.addedNodes||[])added.add(node);
+      if(m.type==='attributes'&&['style','inert'].includes(m.attributeName)&&el?.matches('html,body'))continue;
+      for(const node of m.type==='childList'&&m.addedNodes.length?[...m.addedNodes]:[m.target]){const target=node.nodeType===1?node:node.parentElement;if(target)nodes.add(target);}
     }
+    // Many mutation records can describe the same text owner. Resolve its scope once.
+    for(const node of added)this.discoverRoots(node);
+    for(const node of nodes){const scope=nagScope(node,this.document);if(scope)this.addDirty(scope);}
     if(changed)this.scheduleCleanup(false);
   }
   addDirty(scope){

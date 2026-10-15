@@ -15,7 +15,7 @@ export async function start({document=globalThis.document,gm=typeof GM==='undefi
     const client=new AzureClient({request:gm?.xmlHttpRequest?.bind(gm),getKey:()=>settings.getKey()}),audio=audioFactory();audio.className='utility-audio';audio.preload='auto';audio.setAttribute?.('playsinline','');
     speech=new SpeechSession(store,client,{audio,getConfig:()=>({...settings.value.speech,rate:settings.value.rate}),onState:s=>ui?.speechUpdate(s)});speech.title=controller.inventory.title;const exporter=new ExportJob(store,speech);
     ui=new UtilityUI({document,controller,settings,gm,classifier,speech,exporter,version});ui.shadow.append(audio);if(isKeySetupURL(document.URL))ui.open('speech');if(storageError)ui.notify(storageError);if(controller.extractionError)ui.notify(controller.extractionError);
-    app={controller,store,classifier,speech,exporter,ui,stop(){exporter.cancel();classifier.dispose();speech.stop();ui.stop();controller.stop();}};
+    app={controller,store,classifier,speech,exporter,ui,stop(){exporter.dispose();classifier.dispose();speech.stop();ui.stop();controller.stop();}};
     const visibility=()=>{if(!document.hidden)classifier.scan();};document.addEventListener('visibilitychange',visibility);const originalStop=app.stop;app.stop=()=>{document.removeEventListener('visibilitychange',visibility);originalStop();};
   }
   mount();return {get app(){return app;},settings,stop(){retired=true;app.stop();}};

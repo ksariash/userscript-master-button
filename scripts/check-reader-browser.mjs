@@ -4,7 +4,7 @@ import {mkdtemp,readFile,writeFile,mkdir,rm} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
-const dir=await mkdtemp(join(tmpdir(),'mb-reader-')),output=resolve('prototype/screenshots');
+const dir=await mkdtemp(join(tmpdir(),'mb-reader-')),output=resolve(process.env.MB_SCREENSHOTS_DIR||'prototype/screenshots');
 const html=await readFile('prototype/implementation.html');
 const server=createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end(html);});await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const browser=spawn(process.env.MB_CHROMIUM||'/usr/lib/chromium/chromium',['--headless','--no-sandbox','--disable-extensions','--disable-gpu','--disable-background-networking','--disable-dev-shm-usage','--no-first-run','--no-proxy-server','--remote-debugging-port=0',`--user-data-dir=${dir}/profile`,'about:blank'],{detached:true,env:{...process.env,XDG_CONFIG_HOME:dir,XDG_CACHE_HOME:dir}});
