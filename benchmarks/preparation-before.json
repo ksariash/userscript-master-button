@@ -1,0 +1,48 @@
+{
+  "validation": "Synthetic serial transport, 20 ms/request, dummy key/audio; no Azure or device requests. Warm catalogue only, not PCM cache.",
+  "node": "v24.19.0",
+  "rounds": [
+    {
+      "coldMs": 196.33617,
+      "warmMs": 61.281564,
+      "coldRequests": 6,
+      "warmRequests": 3,
+      "peak": 1
+    },
+    {
+      "coldMs": 123.97261600000002,
+      "warmMs": 61.490452000000005,
+      "coldRequests": 6,
+      "warmRequests": 3,
+      "peak": 1
+    },
+    {
+      "coldMs": 127.41883699999994,
+      "warmMs": 61.756102000000055,
+      "coldRequests": 6,
+      "warmRequests": 3,
+      "peak": 1
+    },
+    {
+      "coldMs": 123.79250000000002,
+      "warmMs": 62.87723499999993,
+      "coldRequests": 6,
+      "warmRequests": 3,
+      "peak": 1
+    },
+    {
+      "coldMs": 124.05292499999996,
+      "warmMs": 61.98053600000003,
+      "coldRequests": 6,
+      "warmRequests": 3,
+      "peak": 1
+    }
+  ],
+  "median": {
+    "coldMs": 124.05292499999996,
+    "warmMs": 61.756102000000055,
+    "coldRequests": 6,
+    "warmRequests": 3,
+    "peak": 1
+  }
+}

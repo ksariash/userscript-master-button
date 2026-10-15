@@ -33,10 +33,10 @@ export class SpeechSession {
     const p = this.store.records.get(s.passageId), current = this.getConfig();
     return !!p && p.revision === s.revision && p.originalText === s.passageText && this.store.reading().some(x => x.id === p.id) && this.store.resolve(p.id).included && current.region === config.region && current.voice === config.voice;
   }
-  async ensure(s, { signal = this.controller.signal, config = this.getConfig() } = {}) {
+  async ensure(s, { signal = this.controller.signal, config = this.getConfig(), priority = 0 } = {}) {
     if (this.closed || !this.valid(s, config) || signal.aborted) throw abortError();
     const key = this.cache.key(s.text, config), cached = this.cache.get(key); if (cached) return cached;
-    return this.pool.join(key,{signal,valid:()=>!this.closed&&this.valid(s,config)},(signal,recheck)=>this.client.synthesize(s.text,config,{signal,recheck}));
+    return this.pool.join(key,{signal,priority,valid:()=>!this.closed&&this.valid(s,config)},(signal,recheck,priority)=>this.client.synthesize(s.text,config,{signal,recheck,priority}));
   }
 
   async play(passageId, offset = 0) {
@@ -70,7 +70,7 @@ export class SpeechSession {
   async playSegment(s,{offset=0,resume=true}={}) {
     if (this.closed) throw abortError(); this.stopDemo();this.audio.pause();this.releaseAudio(); const epoch = ++this.epoch, config = { ...this.getConfig() }; this.current = s; this.status = 'buffering'; this.wantPlay = resume; this.error='';this.emit();
     try {
-      const item = await this.ensure(s, { config }); if (epoch !== this.epoch || !this.valid(s, config)) return;
+      const item = await this.ensure(s, { config, priority: 10 }); if (epoch !== this.epoch || !this.valid(s, config)) return;
       this.audio.pause(); if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.currentTime = Math.max(0,Math.min(offset,item.duration)); this.audio.playbackRate = config.rate || 1;
       this.status='paused';if(this.wantPlay){await this.audio.play();if(epoch!==this.epoch||!this.valid(s,config))return;if(this.wantPlay)this.status='playing';else this.audio.pause();}this.mediaSession();this.emit();if(this.wantPlay)this.prefetch(s);
     } catch (e) { if (epoch === this.epoch && e.name !== 'AbortError') { this.fail(e); throw e; } }
@@ -113,7 +113,7 @@ export class SpeechSession {
   async demo(text = 'A quiet moment to listen. This is your selected reading voice.') {
     if (this.closed) throw abortError(); this.cancel(); this.stopDemo(); const controller = this.demoController = new AbortController(), config = { ...this.getConfig() }, key = this.cache.key(text, config);
     try {
-      const item = this.cache.get(key) || await this.client.synthesize(text, config, { signal: controller.signal });
+      const item = this.cache.get(key) || await this.client.synthesize(text, config, { signal: controller.signal, priority:()=>10 });
       if (this.closed || controller.signal.aborted) return; this.cache.put(key, item);
       if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.playbackRate = config.rate || 1; this.current = null; this.demoActive = true; this.status = 'demo'; await this.audio.play(); this.emit();
     } catch (e) { if (e.name !== 'AbortError') { this.fail(e); throw e; } }

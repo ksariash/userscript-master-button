@@ -1,3 +1,5 @@
+import {SpeechQueue} from './queue.mjs';
+import {PreparationPool} from './preparation.mjs';
 import {parseVoices} from './voices.mjs';
 export const SAMPLE_RATE = 24000;
 export const REGIONS = ['eastus', 'eastus2', 'westus', 'westus2', 'westus3', 'centralus', 'northcentralus', 'southcentralus', 'westcentralus', 'canadacentral', 'brazilsouth', 'northeurope', 'westeurope', 'uksouth', 'francecentral', 'germanywestcentral', 'switzerlandnorth', 'swedencentral', 'australiaeast', 'southeastasia', 'eastasia', 'japaneast', 'koreacentral', 'centralindia', 'southafricanorth'];
@@ -20,8 +22,8 @@ export async function responseBuffer(value) {
 }
 /** GM transport goes directly to Microsoft's endpoint. No page fetch or relay. */
 export class AzureClient {
-  constructor({ request, getKey }) { this.request = request; this.getKey = getKey; this.tail = Promise.resolve(); this.voicesCache = new Map(); }
-  async send(details, { signal, recheck = () => true } = {}) {
+  constructor({ request, getKey }) { this.request = request; this.getKey = getKey; this.queue = new SpeechQueue(); this.voicesCache = new Map(); this.voiceJobs = new PreparationPool((region,voices)=>this.voicesCache.set(region,voices)); }
+  async send(details, { signal, recheck = () => true, priority = () => 0 } = {}) {
     const run = async () => {
       if (signal?.aborted || !recheck()) throw abortError();
       const key = await this.getKey(); if (!key) throw new Error('Add your Azure Speech key in Speech setup.');
@@ -43,22 +45,24 @@ export class AzureClient {
         throw new Error('Speech request failed. Check your connection and retry.');
       } finally { signal?.removeEventListener('abort', abort); }
     };
-    const result = this.tail.catch(() => {}).then(run); this.tail = result.catch(() => {}); return result;
+    return this.queue.run(run,{signal,priority});
   }
-  async voices(region, { signal, refresh = false } = {}) {
+  clearVoices() { this.voiceJobs.stop(); this.voicesCache.clear(); }
+  async voices(region, { signal, refresh = false, priority = () => 0 } = {}) {
     if (!refresh && this.voicesCache.has(region)) return this.voicesCache.get(region);
-    const r = await this.send({ url: endpoint(region, '/cognitiveservices/voices/list'), method: 'GET', responseType: 'text' }, { signal });
-    let data; try { data = JSON.parse(r.responseText ?? r.response); } catch { throw new Error('Azure returned an unreadable voice list.'); }
-    if (!Array.isArray(data)) throw new Error('Azure returned an unreadable voice list.');
-    const voices = parseVoices(data);
-    this.voicesCache.set(region, voices); return voices;
+    return this.voiceJobs.join(region,{signal,valid:()=>true,priority:priority()},async (signal,_recheck,getPriority)=>{
+      const r = await this.send({ url: endpoint(region, '/cognitiveservices/voices/list'), method: 'GET', responseType: 'text' }, { signal, priority:getPriority });
+      let data; try { data = JSON.parse(r.responseText ?? r.response); } catch { throw new Error('Azure returned an unreadable voice list.'); }
+      if (!Array.isArray(data)) throw new Error('Azure returned an unreadable voice list.');
+      return parseVoices(data);
+    });
   }
-  async synthesize(text, config, { signal, recheck } = {}) {
-    const voices=await this.voices(config.region,{signal});
+  async synthesize(text, config, { signal, recheck, priority = () => 0 } = {}) {
+    const voices=await this.voices(config.region,{signal,priority});
     if(signal?.aborted||recheck&&!recheck())throw abortError();
     if(!voices.some(v=>v.id===config.voice))throw new Error('This voice is unavailable in your resource region. Open Speech setup and choose a listed voice.');
     const r = await this.send({ url: endpoint(config.region, '/cognitiveservices/v1'), method: 'POST', responseType: 'arraybuffer',
-      headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'raw-24khz-16bit-mono-pcm', 'User-Agent': 'MasterButton' }, data: ssml(text, config.voice, voices.find(v=>v.id===config.voice).locale) }, { signal, recheck });
+      headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'raw-24khz-16bit-mono-pcm', 'User-Agent': 'MasterButton' }, data: ssml(text, config.voice, voices.find(v=>v.id===config.voice).locale) }, { signal, recheck, priority });
     if (/content-type:[^\r\n]*(?:json|text\/|xml)/i.test(r.responseHeaders || '')) throw new Error('Azure returned a non-audio response.');
     const pcm = await responseBuffer(r.response);
     if (!pcm.byteLength || pcm.byteLength % 2 || pcm.byteLength > 25 * 1024 * 1024 || new TextDecoder().decode(new Uint8Array(pcm, 0, Math.min(4, pcm.byteLength))) === 'RIFF') throw new Error('Azure returned unexpected PCM audio.');
