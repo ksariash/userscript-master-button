@@ -1,3 +1,4 @@
+import {PreferenceWriter} from './preference-writer.mjs';
 import { validExamples } from '../../core/decisions.mjs';
 export const SETTINGS_KEY = 'master-button:v2', SPEECH_KEY = 'master-button:speech-key';
 const object = x => x && typeof x === 'object' && !Array.isArray(x) ? x : {};
@@ -28,22 +29,30 @@ export function migrateLegacy(value) {
     speech: v.speech || { region: v.region, voice: v.voice }, legacy: v });
 }
 export class Settings {
-  constructor(gm) { this.gm = gm; this.value = defaults(); this.queue = Promise.resolve(); this.ephemeralSites = new Map(); this.persistent = typeof gm?.getValue==='function' && typeof gm?.setValue==='function';this.startupState='not-read';this.storageCheck={state:'not-run'}; }
+  constructor(gm,{preferenceTimeout=3000}={}) { this.gm = gm;this.preferenceTimeout=preferenceTimeout;this.preferencesReady=false;this.preferenceState={state:'not-read'};this.writer=new PreferenceWriter(value=>this.gm.setValue(SETTINGS_KEY,value),{timeout:preferenceTimeout,onState:state=>{this.preferenceState=state;}}); this.value = defaults(); this.queue = Promise.resolve(); this.ephemeralSites = new Map(); this.persistent = typeof gm?.getValue==='function' && typeof gm?.setValue==='function';this.startupState='not-read';this.storageCheck={state:'not-run'}; }
   async load() {
-    if (!this.persistent) return this.value;
-    const current = await this.gm.getValue(SETTINGS_KEY);
-    if (current === undefined) {
-      this.value = migrateLegacy(await this.gm.getValue('master-button:v1'));
-      await this.gm.setValue(SETTINGS_KEY, this.value); // Original namespace remains untouched.
-    } else this.value = validateSettings(current);
-    return this.value;
+    if (!this.persistent) {this.preferenceState={state:'unavailable'};return this.value;}
+    this.preferencesReady=false;this.preferenceState={state:'loading'};
+    try{
+      const current=await storageOperation(()=>this.gm.getValue(SETTINGS_KEY),this.preferenceTimeout);
+      const value=current===undefined?migrateLegacy(await storageOperation(()=>this.gm.getValue('master-button:v1'),this.preferenceTimeout)):validateSettings(current);
+      this.value=value;this.preferencesReady=true;this.preferenceState={state:'loaded'};
+      if(current===undefined)await this.save(); // Original namespace remains untouched.
+      return this.value;
+    }catch(error){if(!this.preferencesReady)this.preferenceState={state:'failed',operation:'read',message:'Preferences could not load. Changes are temporary; reload to retry. Stored preferences will not be overwritten.'};throw error;}
+  }
+  preferenceMessage(){
+    if(!this.persistent)return 'Extension storage unavailable; changes are temporary and speech keys cannot be saved.';
+    if(this.preferenceState.state==='failed')return this.preferenceState.message;
+    return this.preferencesReady?'Preferences stored by Userscripts.':'Preferences have not loaded; changes are temporary. Reload to retry.';
   }
   site(host) { if (Object.hasOwn(this.value.sites, host)) return this.value.sites[host]; if (!this.ephemeralSites.has(host)) this.ephemeralSites.set(host, { automatic: true, learning: true, mutedOnly: false, examples: [], rules: [] }); return this.ephemeralSites.get(host); }
   saveSite(host) { this.value.sites[host] = this.site(host); return this.save(); }
   save() {
     const value = validateSettings(this.value); this.value = value;
     if (!this.persistent) return Promise.resolve(false);
-    this.queue = this.queue.catch(() => {}).then(() => this.gm.setValue(SETTINGS_KEY, value)); return this.queue;
+    if(!this.preferencesReady)return Promise.reject(new Error('Stored preferences were not read. Changes are temporary; reload to retry without overwriting existing data.'));
+    this.queue=this.writer.save(value);return this.queue;
   }
   async getKey() { if (!this.persistent) return '';let v;try{v=await storageOperation(()=>this.gm.getValue(SPEECH_KEY,''));}catch{throw new Error('Userscripts could not read the speech key. Run Check extension storage in Speech setup.');}return typeof v === 'string' ? v.trim() : ''; }
   async replaceKey(key) {
@@ -65,13 +74,13 @@ export class Settings {
     finally{if(wrote){try{await storageOperation(()=>gm.deleteValue(name));if(await storageOperation(()=>gm.getValue(name))!==undefined&&!failure)failure={stage:'cleanup',code:'probe-not-deleted'};}catch{if(!failure)failure={stage:'cleanup',code:'extension-operation-failed'};}}}
     return this.storageCheck=failure?{state:'failed',...failure}:{state:'passed',stage:'read-write-read-delete'};
   }
-  async forgetKey() { if (typeof this.gm?.deleteValue!=='function')throw new Error('Userscripts key deletion is unavailable. Check its storage grants.');try{await this.gm.deleteValue(SPEECH_KEY);if(await this.getKey())throw new Error();}catch{throw new Error('Userscripts could not confirm key deletion. Run Check extension storage.');} }
-  async keyNames() { if (!this.gm?.listValues) throw new Error('This Userscripts version cannot list stored key names.'); const names = await this.gm.listValues(); return Array.isArray(names) ? names.filter(n => typeof n === 'string' && n !== SPEECH_KEY && n.length < 200 && /(?:azure|speech|tts).*key|key.*(?:azure|speech|tts)/i.test(n)).slice(0,50) : []; }
+  async forgetKey() { if (typeof this.gm?.deleteValue!=='function')throw new Error('Userscripts key deletion is unavailable. Check its storage grants.');try{await storageOperation(()=>this.gm.deleteValue(SPEECH_KEY));if(await this.getKey())throw new Error();}catch{throw new Error('Userscripts could not confirm key deletion. Run Check extension storage.');} }
+  async keyNames() { if (!this.gm?.listValues) throw new Error('This Userscripts version cannot list stored key names.'); const names = await storageOperation(()=>this.gm.listValues()); return Array.isArray(names) ? names.filter(n => typeof n === 'string' && n !== SPEECH_KEY && n.length < 200 && /(?:azure|speech|tts).*key|key.*(?:azure|speech|tts)/i.test(n)).slice(0,50) : []; }
   async importLegacyKey(storageKey) {
     // The documented old key name is unknown. User selects an exact extension key;
     // no enumeration, value logging, destructive migration, or page-storage fallback.
     if (!storageKey || storageKey === SETTINGS_KEY || storageKey === 'master-button:v1') throw new Error('Choose the separately stored speech-key name.');
-    const value = await this.gm.getValue(storageKey); if (typeof value !== 'string') throw new Error('That extension key is not a speech key.');
+    const value = await storageOperation(()=>this.gm.getValue(storageKey)); if (typeof value !== 'string') throw new Error('That extension key is not a speech key.');
     await this.replaceKey(value);
   }
 }
