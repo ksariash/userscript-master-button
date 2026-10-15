@@ -22,14 +22,15 @@ export function segmentsFor(snapshot) {
   return snapshot.passages.flatMap(p => splitText(p.text).map((c, index) => ({ ...c, passageId: p.id, revision: p.revision, passageText: p.text, id: `${p.id}:${p.revision}:${index}` })));
 }
 export class AudioCache {
-  constructor(maxBytes = 64 * 1024 * 1024) { this.maxBytes = maxBytes; this.entries = new Map(); this.bytes = 0; }
+  constructor(maxBytes = 64 * 1024 * 1024) { this.maxBytes = maxBytes; this.entries = new Map(); this.bytes = 0; this.revision = 0; }
   key(text, config) { return JSON.stringify([config.region, config.voice, text]); }
+  peek(key) { return this.entries.get(key) || null; }
   get(key) { const item = this.entries.get(key); if (!item) return null; this.entries.delete(key); this.entries.set(key, item); return item; }
   put(key, item) {
     if (item.pcm.byteLength > this.maxBytes) return;
-    const previous = this.entries.get(key); if (previous) this.bytes -= previous.pcm.byteLength;
+    this.revision++; const previous = this.entries.get(key); if (previous) this.bytes -= previous.pcm.byteLength;
     this.entries.delete(key); this.entries.set(key, item); this.bytes += item.pcm.byteLength;
     while (this.bytes > this.maxBytes) { const [k, v] = this.entries.entries().next().value; this.entries.delete(k); this.bytes -= v.pcm.byteLength; }
   }
-  clear() { this.entries.clear(); this.bytes = 0; }
+  clear() { this.entries.clear(); this.bytes = 0; this.revision++; }
 }

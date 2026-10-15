@@ -10,7 +10,7 @@ export async function start({document=globalThis.document,gm=typeof GM==='undefi
   const settings=new Settings(gm);let storageError='';try{await settings.load();settings.startupState=settings.persistent?'preferences-loaded':'storage-api-missing';}catch{storageError='Preferences could not load. Existing data was left untouched. Speech setup can check extension storage and retry key saving.';settings.startupState='preferences-load-failed';}
   let app,retired=false;
   function mount(){
-    let ui,classifier,speech;const controller=new ArticleController(document,settings,{onNavigate:()=>{if(retired)return;app.stop();mount();},onChange:e=>{ui?.patch(e);if(e.kind==='source')classifier?.scan();}}),store=controller.store;
+    let ui,classifier,speech;const controller=new ArticleController(document,settings,{onNavigate:()=>{if(retired)return;app.stop();mount();},onChange:e=>{if(e.kind==='storage-error')ui?.patch(e);if(e.kind==='source')classifier?.scan();}}),store=controller.store;
     classifier=new LocalClassifier(store,{workerSource,WorkerClass,getSite:()=>settings.site(store.site),onState:state=>ui?.modelUpdate(state)});
     const client=new AzureClient({request:gm?.xmlHttpRequest?.bind(gm),getKey:()=>settings.getKey()}),audio=audioFactory();audio.className='utility-audio';audio.preload='auto';audio.setAttribute?.('playsinline','');
     speech=new SpeechSession(store,client,{audio,getConfig:()=>({...settings.value.speech,rate:settings.value.rate}),onState:s=>ui?.speechUpdate(s)});speech.title=controller.inventory.title;const exporter=new ExportJob(store,speech);

@@ -173,3 +173,9 @@ test('Export actions use the extracted title for text and pass it into recording
  s.ui.exporter.currentArtifact=()=>({blob:new s.dom.window.Blob(['mock'],{type:'audio/mpeg'}),filename:'Prepared title.mp3'});s.ui.patch();s.ui.controller.inventory.title='Later title';click(s.ui,'share-export');await tick();assert.equal(files[1].name,'Prepared title.mp3');
  }finally{s.instance.stop();s.dom.window.close();}
 });
+test('Time updates patch transport only and each assessment triggers one full UI update',async()=>{
+ const s=await setup();try{s.ui.open('reader');let patches=0;const original=s.ui.patch.bind(s.ui);s.ui.patch=(...args)=>{patches++;return original(...args);};const row=s.ui.reader.querySelector('.prose'),icon=s.ui.reader.querySelector('[data-action=play] svg');s.ui.transcript.scrollTop=127;
+ for(let i=0;i<100;i++)s.ui.speechUpdate({status:'paused',currentTime:i,duration:120});assert.equal(patches,0);assert.equal(s.ui.reader.querySelector('.prose'),row);assert.equal(s.ui.reader.querySelector('[data-action=play] svg'),icon);assert.equal(s.ui.transcript.scrollTop,127);assert.match(s.ui.reader.querySelector('.duration').textContent,/1:39/);
+ const p=s.store.reading()[0];s.store.assess(p.id,{label:'ARTICLE'},{documentId:s.store.documentId,revision:p.revision});assert.equal(patches,1);
+ }finally{s.instance.stop();s.dom.window.close();}
+});

@@ -1,0 +1,16 @@
+{
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "linux"
+  },
+  "kind": "synthetic CPU median; not iPhone, real inference, or Azure latency",
+  "metrics": {
+    "inventory_scan_50_ms": 18.609,
+    "extract_50_ms": 112.33,
+    "speech_emit_100x_50_ms": 0.104,
+    "inventory_scan_200_ms": 28.512,
+    "extract_200_ms": 277.872,
+    "speech_emit_100x_200_ms": 0.07,
+    "scroll_release_20x_ms": 10.407
+  }
+}

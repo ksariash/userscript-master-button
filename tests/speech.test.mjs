@@ -64,9 +64,25 @@ test('Actual local MP3 encoder produces a compact MPEG recording from PCM, separ
   const bytes=new Uint8Array(await blob.arrayBuffer()); assert.equal(bytes[0],0xff); assert.equal(bytes[1]&0xe0,0xe0);
 });
 test('Mock late voice demo is canceled before article playback or settings changes, and retired sessions cannot synthesize',async()=>{
- let release;const s=setup(()=>new Promise(r=>release=r));const demo=s.speech.demo();await waitTick();s.speech.cancel();release({status:200,response:pcm()});await demo;assert.equal(s.audio.plays,0);s.speech.stop();const before=s.calls.length;await assert.rejects(s.speech.play('a'),e=>e.name==='AbortError');assert.equal(s.calls.length,before);
+ let release;const s=setup(()=>new Promise(r=>release=r));const demo=s.speech.demo();await waitTick();s.speech.cancel();release({status:200,response:pcm()});await demo;assert.equal(s.audio.plays,0);assert.equal(s.speech.cache.bytes,0);s.speech.stop();const before=s.calls.length;await assert.rejects(s.speech.play('a'),e=>e.name==='AbortError');assert.equal(s.calls.length,before);
 });
 test('Mock export sees a whole batch correction, cancels its stale job, and one Undo restores the exact transcript',async()=>{
  let release;const s=setup(()=>new Promise(r=>release=r)),exporter=new ExportJob(s.store,s.speech,{encode:async()=>new Blob(['mock'],{type:'audio/mpeg'})});
  try{const job=exporter.prepare();await waitTick();s.store.correctMany(['a','b'],'NUISANCE');release({status:200,response:pcm()});await assert.rejects(job,e=>e.name==='AbortError');assert.equal(exporter.currentArtifact(),null);assert.equal(transcript(s.store.snapshot()),'');assert.equal(s.store.undo(),true);assert.equal(transcript(s.store.snapshot()),'Original one.\n\nOriginal two.');}finally{exporter.cancel();s.speech.stop();}
+});
+test('Repeated time updates reuse sequence/preparation work and do not change cache LRU',()=>{
+ const s=setup();let snapshots=0;const original=s.store.snapshot.bind(s.store);s.store.snapshot=()=>{snapshots++;return original();};
+ try{for(const segment of segmentsFor(original()))s.speech.cache.put(s.speech.cache.key(segment.text,config),{pcm:pcm(),duration:1});const keys=[...s.speech.cache.entries.keys()];
+ for(let i=0;i<100;i++)s.speech.emit();assert.equal(snapshots,1);assert.deepEqual([...s.speech.cache.entries.keys()],keys);assert.equal(s.speech.preparation().totalDuration,2);
+ s.store.correct('a','NUISANCE');assert.equal(s.speech.segments().length,1);assert.equal(s.speech.preparation().totalDuration,1);s.speech.cache.clear();assert.equal(s.speech.preparation().totalDuration,null);
+ }finally{s.speech.stop();}
+});
+test('New segment intent pauses old audio immediately, and stop removes listeners and rejects late PCM',async()=>{
+ const s=setup();s.speech.prefetch=()=>{};await s.speech.play('a');let release;s.client.synthesize=()=>new Promise(r=>release=r);const next=s.speech.next();assert.equal(s.audio.paused,true);assert.equal(s.speech.status,'buffering');
+ let removed=0;const remove=s.audio.removeEventListener.bind(s.audio);s.audio.removeEventListener=(...args)=>{removed++;remove(...args);};s.speech.stop();assert.equal(removed,6);release({pcm:pcm(),duration:1});await next;assert.equal(s.speech.cache.bytes,0);s.audio.dispatchEvent(new Event('playing'));assert.equal(s.speech.status,'idle');
+});
+test('Old prefetch completion cannot clear the newer preparation owner',async()=>{
+ const s=setup(),releases=[];s.speech.ensure=()=>new Promise(r=>releases.push(r));
+ try{const first=s.speech.segments()[0];s.speech.prefetch(first);s.speech.epoch++;s.speech.prefetch(first);const owner=s.speech.preparing;releases[0]({});await waitTick();assert.equal(s.speech.preparing,owner);releases[1]({});await waitTick();assert.equal(s.speech.preparing,false);
+ }finally{s.speech.stop();}
 });
