@@ -78,11 +78,41 @@ test('Repeated time updates reuse sequence/preparation work and do not change ca
  }finally{s.speech.stop();}
 });
 test('New segment intent pauses old audio immediately, and stop removes listeners and rejects late PCM',async()=>{
- const s=setup();s.speech.prefetch=()=>{};await s.speech.play('a');let release;s.client.synthesize=()=>new Promise(r=>release=r);const next=s.speech.next();assert.equal(s.audio.paused,true);assert.equal(s.speech.status,'buffering');
+ const s=setup();s.speech.prefetch=()=>{};await s.speech.play('a');let release;s.client.synthesize=()=>new Promise(r=>release=r);const next=s.speech.next();assert.equal(s.audio.paused,true);assert.equal(s.speech.status,'buffering');await waitTick();
  let removed=0;const remove=s.audio.removeEventListener.bind(s.audio);s.audio.removeEventListener=(...args)=>{removed++;remove(...args);};s.speech.stop();assert.equal(removed,6);release({pcm:pcm(),duration:1});await next;assert.equal(s.speech.cache.bytes,0);s.audio.dispatchEvent(new Event('playing'));assert.equal(s.speech.status,'idle');
 });
 test('Old prefetch completion cannot clear the newer preparation owner',async()=>{
  const s=setup(),releases=[];s.speech.ensure=()=>new Promise(r=>releases.push(r));
  try{const first=s.speech.segments()[0];s.speech.prefetch(first);s.speech.epoch++;s.speech.prefetch(first);const owner=s.speech.preparing;releases[0]({});await waitTick();assert.equal(s.speech.preparing,owner);releases[1]({});await waitTick();assert.equal(s.speech.preparing,false);
  }finally{s.speech.stop();}
+});
+test('Prepared reading seek crosses exact boundaries and preserves paused intent',async()=>{
+ const s=setup();s.speech.prefetch=()=>{};
+ try{for(const segment of s.speech.segments())s.speech.cache.put(s.speech.cache.key(segment.text,config),{pcm:pcm(),duration:20});
+ await s.speech.seek(20);assert.equal(s.speech.current.passageId,'b');assert.equal(s.audio.currentTime,0);assert.equal(s.audio.plays,0);
+ await s.speech.seek(5);assert.equal(s.speech.current.passageId,'a');assert.equal(s.audio.currentTime,5);await s.speech.skipSeconds(25);assert.equal(s.speech.current.passageId,'b');assert.equal(s.audio.currentTime,10);assert.equal(s.audio.plays,0);
+ await s.speech.seek(80);assert.equal(s.audio.currentTime,20);await s.speech.seek(-1);assert.equal(s.audio.currentTime,0);assert.equal(s.speech.current.passageId,'a');
+ await s.speech.seek(3,{resume:true});assert.equal(s.audio.paused,false);await s.speech.seek(4,{resume:false});assert.equal(s.audio.paused,true);
+ }finally{s.speech.stop();}
+});
+test('Prepared ranges stop at gaps and recompute after exclusion, voice change and eviction',()=>{
+ const s=setup();let settings={...config};s.speech.getConfig=()=>settings;
+ try{const [a,b]=s.speech.segments();s.speech.cache.put(s.speech.cache.key(b.text,config),{pcm:pcm(),duration:20});assert.equal(s.speech.preparation().seekDuration,0);assert.equal(s.speech.preparation().totalDuration,null);
+ s.speech.cache.put(s.speech.cache.key(a.text,config),{pcm:pcm(),duration:10});assert.equal(s.speech.preparation().seekDuration,30);s.store.correct('a','NUISANCE');assert.equal(s.speech.preparation().seekDuration,20);
+ settings={...config,voice:'en-US-AriaNeural'};assert.equal(s.speech.preparation().seekDuration,0);settings=config;s.speech.cache.clear();assert.equal(s.speech.preparation().seekDuration,0);
+ }finally{s.speech.stop();}
+});
+test('Seek selects later chunks within a long passage without restarting its first chunk',async()=>{
+ const store=new DecisionStore([{id:'long',originalText:'A sentence. '.repeat(160)}],{documentId:'long'}),audio=new FakeAudio(),speech=new SpeechSession(store,{synthesize:()=>{throw new Error('Unexpected request');}},{audio,getConfig:()=>config,makeURL:()=> 'blob:chunks',revokeURL:()=>{}});
+ try{for(const segment of speech.segments())speech.cache.put(speech.cache.key(segment.text,config),{pcm:pcm(),duration:10});const second=speech.segments()[1];await speech.seek(12);assert.equal(speech.current.id,second.id);assert.equal(audio.currentTime,2);assert.equal(audio.plays,0);}finally{speech.stop();}
+});
+test('Pause while buffering prevents late autoplay without restarting preparation',async()=>{
+ const s=setup();let release,count=0;s.client.synthesize=()=>{count++;return new Promise(r=>release=r);};s.speech.prefetch=()=>{};
+ try{const job=s.speech.play('a');await waitTick();await s.speech.toggle();release({pcm:pcm(),duration:1});await job;assert.equal(count,1);assert.equal(s.audio.plays,0);assert.equal(s.speech.status,'paused');}finally{s.speech.stop();}
+});
+test('Playback and export share one synthesis while cancellation belongs to each consumer',async()=>{
+ for(const cancelExport of [true,false]){const s=setup();s.speech.prefetch=()=>{};let release,count=0,signal;s.client.synthesize=(_text,_config,opts)=>{count++;signal=opts.signal;return new Promise(r=>release=r);};const exporter=new ExportJob(s.store,s.speech,{encode:async()=>new Blob(['mock'])});
+ try{const exportJob=exporter.prepare();const caught=exportJob.catch(e=>e);const playback=s.speech.play('a');await waitTick();assert.equal(count,1);if(cancelExport)exporter.cancel();else s.speech.cancel();assert.equal(signal.aborted,false);release({pcm:pcm(),duration:1});await playback;
+ if(cancelExport){assert.equal((await caught).name,'AbortError');assert.equal(s.audio.plays,1);}else{await waitTick();assert.equal(count,2);release({pcm:pcm(),duration:1});assert.ok((await caught).blob);assert.equal(s.audio.plays,0);}
+ }finally{exporter.cancel();s.speech.stop();}}
 });

@@ -1,7 +1,7 @@
 {
   "version": "2.0.0-alpha.7",
-  "scriptBytes": 897867,
-  "sha256": "2d9fcfdca1b1357d4406361f939e04128beb5c055be9bc0121e7e832c9bfe86b",
+  "scriptBytes": 900564,
+  "sha256": "76d5abaf961402b23f5f3c3b270c1bef4c6cb9a2850db7836b8203401aaacbd8",
   "modelWorkerBytes": 214195,
   "dependencies": {
     "@breezystack/lamejs": "1.2.7",

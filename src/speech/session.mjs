@@ -1,10 +1,11 @@
+import {PreparationPool} from './preparation.mjs';
 import { abortError } from './azure.mjs';
 import { AudioCache, segmentsFor, wav } from './audio.mjs';
 /** One bounded speech job and one playback intent, sharing authoritative decisions. */
 export class SpeechSession {
   constructor(store, client, { audio, getConfig, onState = () => {}, makeURL = b => URL.createObjectURL(b), revokeURL = u => URL.revokeObjectURL(u), cache = new AudioCache() } = {}) {
     this.store = store; this.client = client; this.audio = audio; this.getConfig = getConfig; this.onState = onState; this.makeURL = makeURL; this.revokeURL = revokeURL; this.cache = cache;
-    this.closed = false; this.pending = new Map(); this.epoch = 0; this.status = 'idle'; this.error = ''; this.current = null; this.preparing = false; this.wantPlay = false; this.controller = new AbortController(); this.demoController = null; this.demoActive = false;
+    this.closed = false; this.pool = new PreparationPool((key,item)=>{this.cache.put(key,item);this.emit();}); this.epoch = 0; this.status = 'idle'; this.error = ''; this.current = null; this.preparing = false; this.wantPlay = false; this.controller = new AbortController(); this.demoController = null; this.demoActive = false;
     this.unsubscribe = store.subscribe(e => { if (e.sequenceChanged) this.sequenceChanged(); });
     this.audioListeners = [];
     const listen = (type, callback) => { const handler = e => { if (!this.closed) callback(e); }; this.audioListeners.push([type, handler]); audio.addEventListener(type, handler); };
@@ -22,9 +23,9 @@ export class SpeechSession {
   preparation(config = this.getConfig()) {
     const list=this.segments(), key=JSON.stringify([config.region,config.voice]);
     if (!this.preparedState || this.preparedState.list!==list || this.preparedState.key!==key || this.preparedState.revision!==this.cache.revision) {
-      let knownDuration=0,prepared=0;
-      for(const s of list){const item=this.cache.peek(this.cache.key(s.text,config));if(item){knownDuration+=item.duration;prepared++;}}
-      this.preparedState={list,key,revision:this.cache.revision,knownDuration,prepared,totalDuration:prepared===list.length&&list.length?knownDuration:null};
+      let knownDuration=0,prepared=0,contiguous=true,seekDuration=0;const ranges=[];
+      for(const s of list){const item=this.cache.peek(this.cache.key(s.text,config));if(item){knownDuration+=item.duration;prepared++;if(contiguous){ranges.push({segment:s,start:seekDuration,end:seekDuration+item.duration});seekDuration+=item.duration;}}else contiguous=false;}
+      this.preparedState={list,key,revision:this.cache.revision,knownDuration,prepared,ranges,seekDuration,totalDuration:prepared===list.length&&list.length?knownDuration:null};
     }
     return this.preparedState;
   }
@@ -35,27 +36,18 @@ export class SpeechSession {
   async ensure(s, { signal = this.controller.signal, config = this.getConfig() } = {}) {
     if (this.closed || !this.valid(s, config) || signal.aborted) throw abortError();
     const key = this.cache.key(s.text, config), cached = this.cache.get(key); if (cached) return cached;
-    const old = this.pending.get(key); if (old && !old.signal.aborted) return old.promise;
-    const promise = this.client.synthesize(s.text, config, { signal, recheck: () => this.valid(s, config) }).then(item => { if(this.closed||signal.aborted||!this.valid(s,config))throw abortError();this.cache.put(key, item); this.emit(); return item; }).finally(() => { if (this.pending.get(key)?.promise === promise) this.pending.delete(key); });
-    this.pending.set(key, { promise, signal }); return promise;
+    return this.pool.join(key,{signal,valid:()=>!this.closed&&this.valid(s,config)},(signal,recheck)=>this.client.synthesize(s.text,config,{signal,recheck}));
   }
+
   async play(passageId, offset = 0) {
     if (this.closed) throw abortError(); this.stopDemo(); this.wantPlay = true; const list = this.segments();
     const segment = passageId ? list.find(s => s.passageId === passageId) : this.current && list.find(s => s.id === this.current.id) || list[0];
     if (!segment) { this.wantPlay = false; throw new Error('No enabled text to read. Keep a passage first.'); }
-    const epoch = ++this.epoch, config = { ...this.getConfig() };
-    this.audio.pause(); this.current = segment; this.status = 'buffering'; this.error = ''; this.emit();
-    try {
-      const item = await this.ensure(segment, { config });
-      if (epoch !== this.epoch || !this.valid(segment, config) || !this.wantPlay) return;
-      if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url;
-      this.audio.playbackRate = config.rate || 1; this.audio.currentTime = Math.max(0, Math.min(offset, item.duration));
-      await this.audio.play(); if (epoch !== this.epoch) return;
-      this.status = 'playing'; this.mediaSession(); this.emit(); this.prefetch(segment);
-    } catch (e) { if (epoch === this.epoch && e.name !== 'AbortError') { this.fail(e); throw e; } }
+    return this.playSegment(segment,{offset});
   }
+
   async toggle() {
-    if (this.closed) throw abortError(); if (this.status === 'playing') { this.wantPlay = false; this.audio.pause(); return; }
+    if (this.closed) throw abortError(); if (this.status === 'buffering') { this.wantPlay = !this.wantPlay; this.emit(); return; } if (this.status === 'playing') { this.wantPlay = false; this.audio.pause(); return; }
     if (this.current && this.audio.src && this.valid(this.current, this.getConfig()) && this.status === 'paused') { const epoch=this.epoch,current=this.current;this.stopDemo(); this.wantPlay = true; await this.audio.play(); if(this.closed||epoch!==this.epoch||!this.wantPlay||this.current!==current)return;this.status = 'playing'; this.emit(); return; }
     return this.play(this.current?.passageId);
   }
@@ -73,19 +65,32 @@ export class SpeechSession {
     const list = this.segments(), index = list.findIndex(s => s.id === this.current?.id), s = list[index + direction];
     if (!s) { this.wantPlay = false; this.status = 'ended'; this.audio.pause(); this.emit(); return; }
     // Pass the exact segment, including later chunks within a long passage.
-    return this.playSegment(s);
+    return this.playSegment(s,{resume:this.wantPlay});
   }
-  async playSegment(s) {
-    if (this.closed) throw abortError(); this.stopDemo();this.audio.pause(); const epoch = ++this.epoch, config = { ...this.getConfig() }; this.current = s; this.status = 'buffering'; this.wantPlay = true; this.emit();
+  async playSegment(s,{offset=0,resume=true}={}) {
+    if (this.closed) throw abortError(); this.stopDemo();this.audio.pause();this.releaseAudio(); const epoch = ++this.epoch, config = { ...this.getConfig() }; this.current = s; this.status = 'buffering'; this.wantPlay = resume; this.error='';this.emit();
     try {
-      const item = await this.ensure(s, { config }); if (epoch !== this.epoch || !this.valid(s, config) || !this.wantPlay) return;
-      this.audio.pause(); if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.currentTime = 0; this.audio.playbackRate = config.rate || 1;
-      await this.audio.play(); if (epoch !== this.epoch || !this.valid(s, config) || !this.wantPlay) return; this.status = 'playing'; this.mediaSession(); this.emit(); this.prefetch(s);
+      const item = await this.ensure(s, { config }); if (epoch !== this.epoch || !this.valid(s, config)) return;
+      this.audio.pause(); if (this.url) this.revokeURL(this.url); this.url = this.makeURL(wav(item.pcm)); this.audio.src = this.url; this.audio.currentTime = Math.max(0,Math.min(offset,item.duration)); this.audio.playbackRate = config.rate || 1;
+      this.status='paused';if(this.wantPlay){await this.audio.play();if(epoch!==this.epoch||!this.valid(s,config))return;if(this.wantPlay)this.status='playing';else this.audio.pause();}this.mediaSession();this.emit();if(this.wantPlay)this.prefetch(s);
     } catch (e) { if (epoch === this.epoch && e.name !== 'AbortError') { this.fail(e); throw e; } }
   }
+  async seek(seconds,{resume=this.wantPlay}={}) {
+    if(this.closed||!Number.isFinite(seconds))throw abortError();
+    const {ranges,seekDuration}=this.preparation();
+    if(!ranges.length)throw new Error('Prepare audio before seeking.');
+    const time=Math.max(0,Math.min(seconds,seekDuration));
+    const row=ranges.find(r=>time<r.end)||ranges.at(-1),offset=time-row.start;
+    if(this.current?.id===row.segment.id&&this.audio.src&&this.status!=='buffering') {
+      this.audio.currentTime=offset;this.wantPlay=resume;if(!resume)this.audio.pause();else if(this.audio.paused)await this.toggle();this.emit();return;
+    }
+    return this.playSegment(row.segment,{offset,resume});
+  }
   skipSeconds(seconds) {
-    const duration = Number.isFinite(this.audio.duration) ? this.audio.duration : 0;
-    if (duration) this.audio.currentTime = Math.max(0, Math.min(duration, this.audio.currentTime + seconds)); this.emit();
+    const row=this.preparation().ranges.find(r=>r.segment.id===this.current?.id);
+    if(row)return this.seek(row.start+(this.audio.currentTime||0)+seconds);
+    const duration=Number.isFinite(this.audio.duration)?this.audio.duration:0;
+    if(duration)this.audio.currentTime=Math.max(0,Math.min(duration,this.audio.currentTime+seconds));this.emit();return Promise.resolve();
   }
   setRate(rate) { this.audio.playbackRate = rate; this.emit(); }
   releaseAudio() { if(this.audio.removeAttribute){this.audio.removeAttribute('src');this.audio.load?.();}else this.audio.src='';if(this.url){this.revokeURL(this.url);this.url=null;} }
@@ -100,8 +105,9 @@ export class SpeechSession {
   }
   fail(error) { if (this.closed || error.name === 'AbortError') return; if(error.name==='NotAllowedError'&&this.current&&this.audio.src){this.status='paused';this.error='Audio is prepared. Tap Play again to start it in Safari.';this.wantPlay=false;this.emit();return;}this.status = 'error'; this.error = error.message; this.wantPlay = false; this.emit(); }
   emit() {
-    if (this.closed) return; const list=this.segments(), {knownDuration,prepared,totalDuration}=this.preparation();
+    if (this.closed) return; const list=this.segments(), {knownDuration,prepared,totalDuration,ranges,seekDuration}=this.preparation();const row=ranges.find(r=>r.segment.id===this.current?.id);
     this.onState({ status: this.status, error: this.error, currentId: this.current?.passageId, currentSegment: this.current?.id, currentTime: this.audio.currentTime || 0,
+      seekDuration,readingTime:row?row.start+(this.audio.currentTime||0):null,
       duration: Number.isFinite(this.audio.duration) ? this.audio.duration : null, knownDuration, totalDuration, prepared, segments: list.length });
   }
   async demo(text = 'A quiet moment to listen. This is your selected reading voice.') {
@@ -117,13 +123,13 @@ export class SpeechSession {
     const media = globalThis.navigator?.mediaSession; if (!media || !globalThis.MediaMetadata) return;
     try {
       if (globalThis.MediaMetadata) { this.previousMetadata ??= media.metadata; media.metadata = this.ownedMetadata = new MediaMetadata({ title: this.title || 'Master Button reading', artist: this.store.site }); }
-      for (const [name, handler] of Object.entries({ play: () => this.toggle().catch(e => this.fail(e)), pause: () => { this.wantPlay = false; this.audio.pause(); }, seekbackward: d => this.skipSeconds(-(d.seekOffset || 15)), seekforward: d => this.skipSeconds(d.seekOffset || 15), previoustrack: () => this.next(-1).catch(e => this.fail(e)), nexttrack: () => this.next().catch(e => this.fail(e)) })) media.setActionHandler(name, handler);
+      for (const [name, handler] of Object.entries({ play: () => this.toggle().catch(e => this.fail(e)), pause: () => { this.wantPlay = false; this.audio.pause(); }, seekbackward: d => this.skipSeconds(-(d.seekOffset || 15)).catch(e=>this.fail(e)), seekforward: d => this.skipSeconds(d.seekOffset || 15).catch(e=>this.fail(e)), seekto: d => this.seek(d.seekTime).catch(e=>this.fail(e)), previoustrack: () => this.next(-1).catch(e => this.fail(e)), nexttrack: () => this.next().catch(e => this.fail(e)) })) { try { media.setActionHandler(name, handler); } catch { /* Unsupported actions must not disable subsequent actions. */ } }
     } catch { /* Individual system actions may be unavailable; ordinary player remains. */ }
   }
   clearMediaSession() {
     const media=globalThis.navigator?.mediaSession;
-    if(media&&this.ownedMetadata&&media.metadata===this.ownedMetadata){for(const name of ['play','pause','seekbackward','seekforward','previoustrack','nexttrack'])try{media.setActionHandler(name,null);}catch{}media.metadata=this.previousMetadata||null;}
+    if(media&&this.ownedMetadata&&media.metadata===this.ownedMetadata){for(const name of ['play','pause','seekbackward','seekforward','seekto','previoustrack','nexttrack'])try{media.setActionHandler(name,null);}catch{}media.metadata=this.previousMetadata||null;}
     this.ownedMetadata=null;this.previousMetadata=undefined;
   }
-  stop() { for(const [type,handler] of this.audioListeners)this.audio.removeEventListener?.(type,handler);this.audioListeners=[];this.closed = true; this.cancel(); this.unsubscribe(); this.cache.clear(); }
+  stop() { for(const [type,handler] of this.audioListeners)this.audio.removeEventListener?.(type,handler);this.audioListeners=[];this.closed = true; this.pool.stop();this.cancel(); this.unsubscribe(); this.cache.clear(); }
 }
