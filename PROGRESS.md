@@ -1,5 +1,7 @@
 # Progress and remaining scope
 
+**Local development: alpha.7, title-aware exports implemented; 96 tests pass. Not published.** See [BACKLOG.md](BACKLOG.md).
+
 **Published: experimental 2.0.0-alpha.6 (`66d367c`).** CI and Pages succeeded; owner reports setup now works. The subsequent local audit and implementation program is tracked in [BACKLOG.md](BACKLOG.md). Future releases require separate publication authorization.
 
 The current patch adds immediate key paste/save/readback feedback beside the field, recurring HTML-root/inert scroll recovery, and visible blob-backed X videos with exact delivered-media-ID association. It adds tap/range/all-included passage selection and Skip before/after with one-step batch Undo. Read starts with the complete source article scope. Positive article evidence and bounded linked-group inference now support conservative automatic exclusions. BBC reader: 64 candidates → 49 enabled, preserving all 41 ARTICLE labels and excluding 12 related-book rows plus three promotions; eight nuisances remain. Broader filtering recall is still below target.

@@ -166,3 +166,10 @@ test('Script-free setup artifact and mocked Done/storage interactions',async()=>
   click(s.ui,'back');assert.notEqual(s.ui.mode,'speech');assert.equal(s.dom.window.GM,undefined);
  }finally{s.instance.stop();s.dom.window.close();}
 });
+test('Export actions use the extracted title for text and pass it into recording preparation',async()=>{
+ const s=await setup(),files=[];
+ try{s.dom.window.navigator.canShare=()=>true;s.dom.window.navigator.share=async data=>files.push(data.files[0]);s.ui.controller.inventory.title='An article: 東京';s.ui.open('exports');click(s.ui,'export-text');await tick();assert.equal(files[0].name,'An article 東京.txt');
+ let captured;s.ui.exporter.prepare=async options=>{captured=options.title;};click(s.ui,'prepare-export');await tick();assert.equal(captured,'An article: 東京');
+ s.ui.exporter.currentArtifact=()=>({blob:new s.dom.window.Blob(['mock'],{type:'audio/mpeg'}),filename:'Prepared title.mp3'});s.ui.patch();s.ui.controller.inventory.title='Later title';click(s.ui,'share-export');await tick();assert.equal(files[1].name,'Prepared title.mp3');
+ }finally{s.instance.stop();s.dom.window.close();}
+});

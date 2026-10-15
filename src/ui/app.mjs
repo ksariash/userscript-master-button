@@ -1,3 +1,4 @@
+import {exportFilename} from '../speech/filename.mjs';
 import {PassageSelection} from '../core/passage-selection.mjs';
 import {supportReport} from '../platform/support-report.mjs';
 import {MediaPicker,downloadMedia} from '../tools/media.mjs';
@@ -7,7 +8,7 @@ import css from './utility.css'; import {icons,button as b} from './icons.mjs'; 
 const allowedTag=t=>['h1','h2','h3','h4','h5','h6','pre','figcaption'].includes(t)?t:'p';
 const time=s=>s==null?'—':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 export class UtilityUI {
-  constructor({document,controller,settings,gm,classifier,speech,exporter,version='2.0.0-alpha.6'}){
+  constructor({document,controller,settings,gm,classifier,speech,exporter,version='2.0.0-alpha.7'}){
     Object.assign(this,{document,controller,settings,gm,classifier,speech,exporter,version});this.win=document.defaultView;this.store=controller.store;this.mode='idle';this.base='idle';this.activeId=this.store.reading()[0]?.id;this.follow=true;this.nodes=new Map();this.modelState={status:'unavailable',message:'Local model has not been downloaded.'};this.speechState={status:'idle',currentTime:0,duration:null};this.voices=[];this.siteTools=new SiteUtilities(document,{store:this.store});this.mediaPicker=new MediaPicker(document,items=>{this.mediaPool=items;this.open('media');if(items.length===1)this.showMedia(items[0].id);},()=>this.open('media'));this.mediaFilter='all';this.showingAll=false;
     this.host=document.createElement('div');this.host.dataset.masterButton='host';this.host.style.cssText='all:initial!important;font:15px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif!important;color:var(--ink)!important;position:fixed!important;inset:0!important;pointer-events:none!important;z-index:2147483646!important;padding:0!important;border:0!important;margin:0!important;background:transparent!important;overflow:visible!important;';
     // Closed shadow prevents page scripts from reading the speech-key form through DOM traversal.
@@ -287,9 +288,9 @@ export class UtilityUI {
       if(a==='demo'){await this.speech.demo();return;}
       if(a==='use-text'){this.store.setReaderText(this.sheet.querySelector('#reading-draft').value);this.draft=null;this.open('reader');return;}
       if(a==='restore-reading'){this.readingStarted=true;this.store.setReading(null);this.draft=null;this.open('reader');return;}
-      if(a==='export-text'){const artifact=this.exporter.currentArtifact();const text=transcript(this.store.snapshot(),artifact?.timings);await shareFile(new Blob([text],{type:'text/plain'}),'master-button-transcript.txt',this.win.navigator,this.document);return;}
-      if(a==='prepare-export'){const sheet=this.sheet;target.disabled=true;try{await this.exporter.prepare({quality:this.settings.value.speech.quality,onProgress:p=>{if(sheet===this.sheet)sheet.querySelector('.export-progress').textContent=p.stage==='preparing'?`Preparing ${p.completed} / ${p.total} segments…`:`Encoding ${Math.round(p.progress*100)}%…`;}});if(sheet===this.sheet){sheet.querySelector('.export-progress').textContent='Recording prepared locally. Share or save it below.';this.patch();}}finally{target.disabled=false;}return;}
-      if(a==='share-export'){const artifact=this.exporter.currentArtifact();if(!artifact)throw new Error('Prepare a recording for the current selection first.');await shareFile(artifact.blob,'master-button-reading.mp3',this.win.navigator,this.document);return;}
+      if(a==='export-text'){const artifact=this.exporter.currentArtifact();const text=transcript(this.store.snapshot(),artifact?.timings);await shareFile(new Blob([text],{type:'text/plain'}),exportFilename(this.controller.inventory.title,'txt'),this.win.navigator,this.document);return;}
+      if(a==='prepare-export'){const sheet=this.sheet;target.disabled=true;try{await this.exporter.prepare({title:this.controller.inventory.title,quality:this.settings.value.speech.quality,onProgress:p=>{if(sheet===this.sheet)sheet.querySelector('.export-progress').textContent=p.stage==='preparing'?`Preparing ${p.completed} / ${p.total} segments…`:`Encoding ${Math.round(p.progress*100)}%…`;}});if(sheet===this.sheet){sheet.querySelector('.export-progress').textContent='Recording prepared locally. Share or save it below.';this.patch();}}finally{target.disabled=false;}return;}
+      if(a==='share-export'){const artifact=this.exporter.currentArtifact();if(!artifact)throw new Error('Prepare a recording for the current selection first.');await shareFile(artifact.blob,artifact.filename,this.win.navigator,this.document);return;}
       if(a==='cancel-export'){this.exporter.cancel();return;}
       if(a==='pick-rule'){this.open('review');this.notify('Tap an element to inspect its selector. Its link will not activate.');this.picker.start();return;}
       if(a==='new-rule'){this.ruleDraft='';this.editRuleId=null;this.open('rule');return;}
