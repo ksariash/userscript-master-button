@@ -182,6 +182,6 @@ test('Time updates patch transport only and each assessment triggers one full UI
 test('Reading scrubber exposes prepared extent, preserves dragging, and dispatches seek',async()=>{
  const s=await setup();try{s.ui.open('reader');const range=s.ui.reader.querySelector('#reading-seek');assert.equal(range.disabled,true);let sought;s.ui.speech.seek=async value=>{sought=value;};
  const state={status:'paused',currentTime:2,duration:10,readingTime:12,seekDuration:20,totalDuration:null};s.ui.speechUpdate(state);assert.equal(range.disabled,false);assert.equal(range.max,'20');assert.equal(range.value,'12');assert.match(range.getAttribute('aria-valuetext'),/0:12 of 0:20 prepared/);assert.match(s.ui.reader.querySelector('.seek-label').textContent,/total unknown/);
- range.value='17';range.dispatchEvent(new s.dom.window.Event('input'));s.ui.speechUpdate({...state,readingTime:13});assert.equal(range.value,'17');range.dispatchEvent(new s.dom.window.Event('change'));await tick();assert.equal(sought,17);s.ui.speechUpdate({...state,seekDuration:0,readingTime:null});assert.equal(range.disabled,true);
+ range.value='17';range.dispatchEvent(new s.dom.window.Event('input'));s.ui.speechUpdate({...state,readingTime:13});assert.equal(range.value,'17');range.dispatchEvent(new s.dom.window.Event('change'));await tick();assert.equal(sought,17);range.dispatchEvent(new s.dom.window.Event('blur'));assert.equal(range.value,'13');s.ui.speechUpdate({...state,seekDuration:0,readingTime:null});assert.equal(range.disabled,true);
  }finally{s.instance.stop();s.dom.window.close();}
 });
