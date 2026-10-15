@@ -116,3 +116,11 @@ test('Playback and export share one synthesis while cancellation belongs to each
  if(cancelExport){assert.equal((await caught).name,'AbortError');assert.equal(s.audio.plays,1);}else{await waitTick();assert.equal(count,2);release({pcm:pcm(),duration:1});assert.ok((await caught).blob);assert.equal(s.audio.plays,0);}
  }finally{exporter.cancel();s.speech.stop();}}
 });
+test('An unrelated correction during buffering restarts the still-included exact segment',async()=>{
+ const s=setup();s.speech.prefetch=()=>{};const releases=[];s.client.synthesize=()=>new Promise(r=>releases.push(r));
+ try{const first=s.speech.play('a');await waitTick();s.store.correct('b','NUISANCE');await waitTick();assert.equal(releases.length,2);releases[1]({pcm:pcm(),duration:1});await waitTick();assert.equal(s.speech.status,'playing');assert.equal(s.speech.current.passageId,'a');assert.equal(s.audio.plays,1);releases[0]({pcm:pcm(),duration:1});await first;assert.equal(s.audio.plays,1);}finally{s.speech.stop();}
+});
+test('Seeking after the reading ends preserves the chosen offset on resume',async()=>{
+ const s=setup();s.speech.prefetch=()=>{};
+ try{for(const segment of s.speech.segments())s.speech.cache.put(s.speech.cache.key(segment.text,config),{pcm:pcm(),duration:20});await s.speech.play('b');await s.speech.next();assert.equal(s.speech.status,'ended');await s.speech.seek(25);assert.equal(s.speech.status,'paused');await s.speech.toggle();assert.equal(s.audio.currentTime,5);assert.equal(s.speech.current.passageId,'b');}finally{s.speech.stop();}
+});

@@ -82,7 +82,7 @@ export class SpeechSession {
     const time=Math.max(0,Math.min(seconds,seekDuration));
     const row=ranges.find(r=>time<r.end)||ranges.at(-1),offset=time-row.start;
     if(this.current?.id===row.segment.id&&this.audio.src&&this.status!=='buffering') {
-      this.audio.currentTime=offset;this.wantPlay=resume;if(!resume)this.audio.pause();else if(this.audio.paused)await this.toggle();this.emit();return;
+      this.audio.currentTime=offset;this.wantPlay=resume;if(!resume){this.audio.pause();this.status='paused';}else if(this.audio.paused)await this.toggle();this.emit();return;
     }
     return this.playSegment(row.segment,{offset,resume});
   }
@@ -100,7 +100,10 @@ export class SpeechSession {
   sequenceChanged() {
     this.controller.abort(); this.controller = new AbortController(); this.epoch++; this.preparing = false;
     if (this.current && !this.valid(this.current, this.getConfig())) { this.clearMediaSession(); this.audio.pause(); this.releaseAudio(); this.current = null; this.status = 'paused'; this.wantPlay = false; }
-    else if (this.current && this.wantPlay) this.prefetch(this.current);
+    else if (this.current && this.status === 'buffering') {
+      // The shared signal retired the pending load, even when this segment is still included.
+      this.playSegment(this.current,{resume:this.wantPlay}).catch(e=>this.fail(e));
+    } else if (this.current && this.wantPlay) this.prefetch(this.current);
     this.emit();
   }
   fail(error) { if (this.closed || error.name === 'AbortError') return; if(error.name==='NotAllowedError'&&this.current&&this.audio.src){this.status='paused';this.error='Audio is prepared. Tap Play again to start it in Safari.';this.wantPlay=false;this.emit();return;}this.status = 'error'; this.error = error.message; this.wantPlay = false; this.emit(); }

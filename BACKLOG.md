@@ -94,3 +94,11 @@ Desktop Chromium via DevTools works even though earlier dump-DOM attempts timed 
 Remaining work is explicit: P3 conversion worker/peak memory, S2 observer scan costs, F1 actual inference/batching, F2 independent accuracy/recall improvements, L1 lifecycle coalescing, L2 bounded preference storage, and device accessibility/scroll/background playback. Model download is blocked by direct DNS EAI_AGAIN and the configured HTTP proxy refusing the public Hugging Face CONNECT request (403). No approval was denied, no network restriction was bypassed, and no classification policy was broadened.
 
 Final slim-interface checks: 124/124 full Node regression tests and 20/20 Chromium screenshot/layout cases pass. Production and implementation preview rebuilt; generated-bundle integrity tests pass. Authored source whitespace checks pass. Screenshot inspection includes both themes, narrow reader, options, speech, Why and landscape. No publication performed.
+
+## Release review of 3669c31
+
+The exact candidate passed 124 tests and regenerated production, design prototype and implementation preview with no diff. Review then reproduced two uncovered playback defects: an unrelated correction while buffering retired the current load without restarting it; seeking within the final segment after end left status ended, so resume discarded the chosen offset. Two regressions failed before the fix and pass afterward; the corrected candidate passes 126 full-suite tests. These fixes change playback state only; screenshot layout is unchanged.
+
+Fresh diagnostic reruns are stored in `benchmarks/release-review.json`. 100 emissions/200 paragraphs: 0.094 ms; three cold mock syntheses: 82.396 ms/4 requests, warm 61.387 ms/3 requests; synthetic model loading: sequential 83.355 ms versus parallel 41.999 ms. These do not replace historical paired baseline comparisons or establish service/device latency.
+
+Release recommendation: eligible only for an explicitly experimental owner evaluation after the playback fixes, not full acceptance or stable release. F2 recall remains 14.9% versus the 85% target; independent holdout, real-model revalidation, physical Safari and live Azure gates remain unmet. Outstanding S2/P3/F1/F2/L1/L2/D3 tasks and adapter/native-sharing risks remain as recorded above and in PROGRESS.md. No publication performed.

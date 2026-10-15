@@ -1,0 +1,164 @@
+{
+  "reviewedBaseline": "3669c31b6264bab32120af0672f25665c5686c65",
+  "scope": "Synthetic Linux review rerun after two playback regressions were fixed; no real model, Azure or iPhone claims",
+  "runtime": {
+    "environment": {
+      "node": "v24.19.0",
+      "platform": "linux"
+    },
+    "kind": "synthetic CPU median; not iPhone, real inference, or Azure latency",
+    "metrics": {
+      "inventory_scan_50_ms": 22.719,
+      "extract_50_ms": 131.208,
+      "speech_emit_100x_50_ms": 0.126,
+      "inventory_scan_200_ms": 80.664,
+      "extract_200_ms": 229.289,
+      "speech_emit_100x_200_ms": 0.094,
+      "scroll_release_20x_ms": 7.582
+    }
+  },
+  "preparation": {
+    "validation": "Synthetic serial transport, 20 ms/request, dummy key/audio; no Azure or device requests. Warm catalogue only, not PCM cache.",
+    "node": "v24.19.0",
+    "rounds": [
+      {
+        "coldMs": 117.69850900000002,
+        "warmMs": 61.386863000000005,
+        "coldRequests": 4,
+        "warmRequests": 3,
+        "peak": 1
+      },
+      {
+        "coldMs": 82.39634000000001,
+        "warmMs": 61.148641999999995,
+        "coldRequests": 4,
+        "warmRequests": 3,
+        "peak": 1
+      },
+      {
+        "coldMs": 80.63113300000003,
+        "warmMs": 60.546914999999956,
+        "coldRequests": 4,
+        "warmRequests": 3,
+        "peak": 1
+      },
+      {
+        "coldMs": 81.53015899999991,
+        "warmMs": 61.52757200000008,
+        "coldRequests": 4,
+        "warmRequests": 3,
+        "peak": 1
+      },
+      {
+        "coldMs": 83.01528600000006,
+        "warmMs": 61.415119000000004,
+        "coldRequests": 4,
+        "warmRequests": 3,
+        "peak": 1
+      }
+    ],
+    "median": {
+      "coldMs": 82.39634000000001,
+      "warmMs": 61.386863000000005,
+      "coldRequests": 4,
+      "warmRequests": 3,
+      "peak": 1
+    }
+  },
+  "modelLoading": {
+    "validation": "Synthetic four asset responses, 20 ms each, tiny payloads. Not real-model download/inference, memory or Safari performance.",
+    "node": "v24.19.0",
+    "results": [
+      {
+        "mode": "sequential",
+        "round": 0,
+        "coldMs": 191.95878300000004,
+        "warmMs": 4.363973999999985,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 1
+      },
+      {
+        "mode": "sequential",
+        "round": 1,
+        "coldMs": 84.92285399999997,
+        "warmMs": 1.7196440000000166,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 1
+      },
+      {
+        "mode": "sequential",
+        "round": 2,
+        "coldMs": 83.35512699999998,
+        "warmMs": 1.3620240000000194,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 1
+      },
+      {
+        "mode": "sequential",
+        "round": 3,
+        "coldMs": 82.12611800000002,
+        "warmMs": 0.2007859999999937,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 1
+      },
+      {
+        "mode": "sequential",
+        "round": 4,
+        "coldMs": 82.49534199999994,
+        "warmMs": 0.49012599999991835,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 1
+      },
+      {
+        "mode": "bounded-parallel",
+        "round": 0,
+        "coldMs": 43.91118700000004,
+        "warmMs": 0.6504660000000513,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 2
+      },
+      {
+        "mode": "bounded-parallel",
+        "round": 1,
+        "coldMs": 41.999094000000014,
+        "warmMs": 0.23497499999996307,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 2
+      },
+      {
+        "mode": "bounded-parallel",
+        "round": 2,
+        "coldMs": 51.96820200000002,
+        "warmMs": 0.17956099999992148,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 2
+      },
+      {
+        "mode": "bounded-parallel",
+        "round": 3,
+        "coldMs": 41.424661000000015,
+        "warmMs": 0.26796200000001136,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 2
+      },
+      {
+        "mode": "bounded-parallel",
+        "round": 4,
+        "coldMs": 41.027334999999994,
+        "warmMs": 0.6317060000000083,
+        "coldRequests": 4,
+        "warmRequests": 0,
+        "peak": 2
+      }
+    ]
+  }
+}
